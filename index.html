@@ -28,6 +28,14 @@
       --success-dim: rgba(34,212,136,0.12);
       --error: #FF4D6D;
       --error-dim: rgba(255,77,109,0.12);
+      --blue: #3B9EFF;
+      --blue-dim: rgba(59,158,255,0.12);
+      --yellow: #FACC15;
+      --yellow-dim: rgba(250,204,21,0.12);
+      --gray: #8B96A8;
+      --gray-dim: rgba(139,150,168,0.12);
+      --white-grp: #CBD4E1;
+      --white-dim: rgba(203,212,225,0.1);
       --mono: 'JetBrains Mono', ui-monospace, monospace;
       --display: 'Space Grotesk', sans-serif;
       --body: 'Inter', -apple-system, sans-serif;
@@ -49,7 +57,6 @@
       overflow-x: hidden;
     }
 
-    /* subtle scanning grid backdrop */
     body::before {
       content: '';
       position: fixed;
@@ -64,7 +71,7 @@
     }
 
     .container {
-      max-width: 480px;
+      max-width: 960px;
       margin: 1.5rem auto;
       position: relative;
       z-index: 1;
@@ -102,9 +109,10 @@
       border: 1px solid var(--line);
       border-bottom: none;
       border-radius: 1rem 1rem 0 0;
-      padding: 2rem 1.75rem 1.5rem;
+      padding: 0.75rem 2rem 0.75rem;
       position: relative;
       overflow: hidden;
+      text-align: left;
     }
 
     .header::after {
@@ -113,39 +121,6 @@
       top: 0; left: 0; right: 0;
       height: 2px;
       background: linear-gradient(90deg, var(--accent), var(--cyan));
-    }
-
-    .icon-wrap {
-      width: 48px;
-      height: 48px;
-      border-radius: 0.75rem;
-      background: var(--accent-dim);
-      border: 1px solid rgba(255,107,26,0.3);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 1.1rem;
-      position: relative;
-    }
-
-    .icon-wrap::before {
-      content: '';
-      position: absolute;
-      inset: -6px;
-      border-radius: 1rem;
-      border: 1px solid rgba(255,107,26,0.25);
-      animation: radar 2.4s ease-out infinite;
-    }
-
-    @keyframes radar {
-      0% { transform: scale(0.85); opacity: 0.9; }
-      100% { transform: scale(1.6); opacity: 0; }
-    }
-
-    .icon {
-      width: 24px;
-      height: 24px;
-      color: var(--accent);
     }
 
     h1 {
@@ -166,7 +141,15 @@
       border: 1px solid var(--line);
       border-top: none;
       border-bottom: none;
-      padding: 1.75rem;
+      padding: 1.5rem 2rem;
+      display: flex;
+      align-items: flex-end;
+      gap: 1.25rem;
+      flex-wrap: wrap;
+    }
+
+    .field {
+      flex: 1 1 340px;
     }
 
     label {
@@ -188,7 +171,6 @@
       color: var(--text-primary);
       border: 1px solid var(--line-strong);
       border-radius: 0.6rem;
-      margin-bottom: 1.1rem;
       background: rgba(255,255,255,0.02);
       transition: all 0.2s;
     }
@@ -205,6 +187,12 @@
     .buttons {
       display: flex;
       gap: 0.6rem;
+      flex: 0 0 auto;
+    }
+
+    @media (max-width: 640px) {
+      .main { flex-direction: column; align-items: stretch; }
+      .buttons { flex-direction: row; }
     }
 
     button {
@@ -313,53 +301,178 @@
       margin-top: 0.35rem;
     }
 
-    .list {
+    .mahalle-wrap {
+      max-width: 960px;
+      margin: 1.25rem auto 0;
+    }
+
+    .mahalle-section {
       background: var(--bg-panel);
       border: 1px solid var(--line);
       border-radius: 1rem;
-      padding: 1.75rem;
-      margin-top: 1.25rem;
+      padding: 1.75rem 2rem;
     }
 
-    .list-title {
+    .mahalle-section-title {
       font-family: var(--mono);
       font-size: 0.72rem;
       letter-spacing: 0.1em;
       text-transform: uppercase;
       color: var(--text-muted);
-      margin-bottom: 1rem;
+      margin-bottom: 1.25rem;
     }
 
-    .list-item {
+    .mahalle-groups {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 1.1rem 1.4rem;
+    }
+
+    @media (max-width: 760px) {
+      .mahalle-groups { grid-template-columns: 1fr; }
+    }
+
+    .grup-card {
+      border: 1px solid var(--line);
+      border-radius: 0.75rem;
+      padding: 1rem 1.1rem;
+      background: rgba(255,255,255,0.012);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .grup-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: var(--grup-renk, var(--accent));
+      opacity: 0.7;
+    }
+
+    .grup-card-title {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 0.75rem;
+    }
+
+    .grup-card-title .grup-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--grup-renk, var(--accent));
+      box-shadow: 0 0 6px var(--grup-renk, var(--accent));
+      flex-shrink: 0;
+    }
+
+    .mahalle-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .btn-mahalle {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--line-strong);
+      border-radius: 2rem;
+      padding: 0.5rem 1rem;
+      font-family: var(--body);
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-mahalle:not([class*="btn-mahalle-"]):hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .btn-mahalle.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
+    /* Grup renkleri */
+    .btn-mahalle-gri { border-color: rgba(139,150,168,0.4); color: var(--gray); }
+    .btn-mahalle-gri:hover, .btn-mahalle-gri.active { background: var(--gray); border-color: var(--gray); color: #0A0E17; }
+
+    .btn-mahalle-yesil { border-color: rgba(34,212,136,0.4); color: var(--success); }
+    .btn-mahalle-yesil:hover, .btn-mahalle-yesil.active { background: var(--success); border-color: var(--success); color: #0A0E17; }
+
+    .btn-mahalle-kirmizi { border-color: rgba(255,77,109,0.4); color: var(--error); }
+    .btn-mahalle-kirmizi:hover, .btn-mahalle-kirmizi.active { background: var(--error); border-color: var(--error); color: #0A0E17; }
+
+    .btn-mahalle-mavi { border-color: rgba(59,158,255,0.4); color: var(--blue); }
+    .btn-mahalle-mavi:hover, .btn-mahalle-mavi.active { background: var(--blue); border-color: var(--blue); color: #0A0E17; }
+
+    .btn-mahalle-sari { border-color: rgba(250,204,21,0.4); color: var(--yellow); }
+    .btn-mahalle-sari:hover, .btn-mahalle-sari.active { background: var(--yellow); border-color: var(--yellow); color: #0A0E17; }
+
+    .btn-mahalle-beyaz { border-color: rgba(203,212,225,0.35); color: var(--white-grp); background: rgba(255,255,255,0.03); }
+    .btn-mahalle-beyaz:hover, .btn-mahalle-beyaz.active { background: var(--white-grp); border-color: var(--white-grp); color: #0A0E17; }
+
+    /* Grup ayırıcı */
+    .grup-ayirici {
+      width: 100%;
+      height: 1px;
+      background: var(--line);
+      margin: 0.5rem 0;
+    }
+
+    .mahalle-detail {
+      margin-top: 1.5rem;
+      border-top: 1px solid var(--line);
+      padding-top: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .mahalle-detail-title {
+      font-family: var(--display);
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    .btn-geri {
+      background: none;
+      border: none;
+      font-size: 1.1rem;
+      cursor: pointer;
+      color: var(--text-muted);
+      padding: 0;
+    }
+
+    .btn-geri:hover { color: var(--accent); }
+
+    .sokak-item {
       background: rgba(255,255,255,0.02);
       border: 1px solid var(--line);
       border-radius: 0.5rem;
-      padding: 0.9rem 1.1rem;
-      margin-bottom: 0.5rem;
-      transition: all 0.2s;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 1rem;
-    }
-
-    .list-item:hover {
-      border-color: rgba(255,107,26,0.4);
-      background: rgba(255,107,26,0.03);
-    }
-
-    .list-sokak {
+      padding: 0.75rem 1rem;
+      margin-bottom: 0.4rem;
       font-family: var(--mono);
       font-weight: 500;
-      font-size: 0.9rem;
       color: var(--text-primary);
       text-transform: capitalize;
+      transition: all 0.2s;
     }
 
-    .list-mahalle {
-      color: var(--text-muted);
-      font-size: 0.82rem;
-      white-space: nowrap;
+    .sokak-item:hover {
+      border-color: var(--accent);
+      background: rgba(255,107,26,0.04);
+      transform: translateX(4px);
+      color: var(--accent);
     }
 
     .logo-container {
@@ -399,6 +512,103 @@
       margin-top: 2px;
     }
 
+    /* Modal overlay */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(5,7,12,0.72);
+      backdrop-filter: blur(3px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+      padding: 1rem;
+    }
+
+    .modal-overlay.hidden { display: none; }
+
+    .modal-box {
+      background: var(--bg-panel);
+      border: 1px solid var(--line-strong);
+      border-radius: 1rem;
+      width: 100%;
+      max-width: 420px;
+      max-height: 80vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+      overflow: hidden;
+    }
+
+    .modal-header {
+      background: var(--bg-panel-2);
+      border-bottom: 1px solid var(--line);
+      color: var(--text-primary);
+      padding: 1.25rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: relative;
+    }
+
+    .modal-header::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--accent), var(--cyan));
+    }
+
+    .modal-header-title {
+      font-family: var(--display);
+      font-size: 1.15rem;
+      font-weight: 700;
+    }
+
+    .modal-close {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid var(--line-strong);
+      color: var(--text-primary);
+      font-size: 1.1rem;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      line-height: 1;
+    }
+
+    .modal-close:hover { background: rgba(255,107,26,0.15); border-color: var(--accent); }
+
+    .modal-body {
+      overflow-y: auto;
+      padding: 1.25rem;
+    }
+
+    .modal-sokak-item {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--line);
+      border-radius: 0.5rem;
+      padding: 0.7rem 1rem;
+      margin-bottom: 0.4rem;
+      font-family: var(--mono);
+      font-weight: 500;
+      font-size: 0.95rem;
+      color: var(--text-primary);
+      text-transform: capitalize;
+      transition: all 0.2s;
+    }
+
+    .modal-sokak-item:hover {
+      border-color: var(--accent);
+      background: rgba(255,107,26,0.06);
+      color: var(--accent);
+      transform: translateX(4px);
+    }
+
     .hidden { display: none; }
 
     @media (max-width: 480px) {
@@ -412,20 +622,16 @@
 
     <!-- Başlık -->
     <div class="header">
-      <div class="icon-wrap">
-        <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-        </svg>
-      </div>
       <h1>Sokak - Mahalle Bulucu</h1>
       <p class="subtitle">Sokak adını girin, mahallesini öğrenin</p>
     </div>
 
     <!-- Ana Bölüm -->
     <div class="main">
-      <label>Sokak Adı</label>
-      <input type="text" id="sokakInput" placeholder="Örn: Yemeni Sokak">
+      <div class="field">
+        <label>Sokak Adı</label>
+        <input type="text" id="sokakInput" placeholder="Örn: Koç Sokak">
+      </div>
 
       <div class="buttons">
         <button class="btn-search" onclick="ara()">Ara</button>
@@ -436,11 +642,24 @@
 
     <!-- Sonuç -->
     <div id="result" class="result hidden"></div>
+  </div>
 
-    <!-- Kayıtlı Sokaklar -->
-    <div class="list">
-      <div class="list-title">Kayıtlı sokaklar</div>
-      <div id="sokakListesi"></div>
+  <!-- Mahalleler -->
+  <div class="mahalle-wrap">
+    <div class="mahalle-section">
+      <div class="mahalle-section-title">Mahalleler</div>
+      <div class="mahalle-groups" id="mahalleButtons"></div>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal-overlay hidden" id="modalOverlay" onclick="modalKapat(event)">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div class="modal-header-title" id="modalBaslik"></div>
+        <button class="modal-close" onclick="geriDon()">✕</button>
+      </div>
+      <div class="modal-body" id="modalBody"></div>
     </div>
   </div>
 
@@ -456,12 +675,129 @@
   <script>
     // Sokak veritabanı
     const sokaklar = {
-      'yemeni sokak': 'Ertuğrul Gazi Mahallesi',
-      'çayır sokak': 'Dumlupınar Mahallesi',
-      'sekbanlı sokak': 'Ataevler Mahallesi',
-      'göksun sokak': 'İstasyon Mahallesi',
-      'cami sokak': 'Tepecik Mahallesi'
+      'yemeni sokak': 'Ertuğrul Gazi',
+      'çayır sokak': 'Dumlupınar 2',
+      'sekbanlı sokak': 'Ataevler',
+      'göksun sokak': 'İstasyon 1',
+      'cami sokak': 'Tepecik',
+      'hafız binbaşı sokak': 'Karabaş 2',
+      'yüce rıfat sokak': 'Körfez 1',
+      'berk sokak': 'Körfez 2',
+      'koç sokak': 'Uzunçiftlik',
+      'saklı sokak': 'Emekevler 1',
+      'asker sokak': 'Emekevler 2',
+      'aşhane sokak': 'Ataevler 1',
+      'sarvan sokak': 'Ataevler 2',
+      'faruk nafız çamlıbel sokak': 'Ataevler 3',
+      'efsane sokak': 'Eşme',
+      'imar caddesi': 'İbrikdere',
+      'firuze caddesi': 'Uzuntarla',
+      'gökbudak sokak': 'Ertuğrul Gazi',
+      'ozan sokak': 'Dumlupınar 1',
+      'hazer sokak': 'Dumlupınar 2',
+      'süleyman paşa sokak': 'Karabaş 1',
+      'rauf orbay sokak': 'Karabaş 2',
+      'tepecik sokak': 'Tepecik',
+      'uğur sokak': 'İstasyon 1',
+      'çilem sokak': 'İstasyon 3',
+      'erdemli sokak': 'İstasyon 2',
+      'gökmen sokak': 'Köseköy 1',
+      'taşkın sokak': 'FSM',
+      'gülaçtı sokak': 'FSM',
+      'egemen sokak': 'FSM',
+      'yadigar sokak': 'Sarımeşe 1',
+      'mukaddes sokak': 'Sarımeşe 2',
+      'çeltikdüzü sokak': 'Arslanbey 1',
+      'emrah sokak': 'Rahmiye',
+      'ateş sokak': 'Maşukiye',
+      'ovalı sokak': 'Acısu 1',
+      'kır sokak': 'Derbent',
+      'ender sokak': 'Acısu 2',
+      'bahçelievler sokak': 'Suadiye',
+      'habiloğlu sokak': 'Çepni',
+      'gülova sokak': 'Şevkatiye',
+      'keleşli sokak': 'Balaban',
+      'beşiktaş sokak': 'Şirinsulhiye',
+      'atabey sokak': 'Arslanbey 2',
+      'latif bey sokak': 'Ömerağa 1',
+      'neyzen': 'FSM',
+      'rüya': 'FSM',
+      'yasa': 'FSM',
+      'kumluk': 'FSM',
+      'koza': 'FSM',
+      'sadık': 'FSM',
+      '19 mayıs cad.': 'FSM',
+      '17 ağustos cad.': 'FSM',
+      'osmangazi cad.': 'FSM',
+      'suna': 'FSM',
+      'sergen': 'FSM',
+      'yörük': 'FSM',
+      'barış': 'FSM',
+      'fidan': 'FSM',
+      'mevlana': 'FSM',
+      'yavuz': 'FSM',
+      'çamlıbel': 'FSM',
+      'ark': 'FSM',
+      'taşkın': 'FSM',
+      'dumlupınar': 'FSM',
+      'gamzeli': 'FSM',
+      'dinç': 'FSM',
+      "uluışık cad. 1-61'e kadar": 'FSM',
+      'bilgehan': 'FSM',
+      'yurt cad.4-17': 'FSM',
+      'sezgi': 'FSM',
+      'şener': 'FSM',
+      'kelebek': 'FSM',
+      'mavi': 'FSM',
+      'üresin': 'FSM',
+      'darica': 'FSM'
     };
+
+
+    // Mahalle sorumluları
+    const mahalleSorumlulari = {
+      'Acısu 1': 'Enes Durmuş',
+      'Maşukiye': 'Enes Durmuş',
+      'Arslanbey 1': 'Abdülkadir Selvi',
+      'Rahmiye': 'Abdülkadir Selvi',
+      'Balaban': 'Muhammet İbrahimoğlu',
+      'Derbent': 'Selim Yıldız',
+      'Acısu 2': 'Selim Yıldız',
+      'Suadiye': 'Kadir Yıldız',
+      'Çepni': 'Kadir Yıldız',
+      'Şevkatiye': 'Berk Semerci',
+      'Arslanbey 2': 'Berk Semerci',
+      'Ataevler 1': 'Yalçın Akyüz',
+      'Emekevler 2': 'Yalçın Akyüz',
+      'Ataevler 2': 'Furkan Özbay',
+      'Ataevler 3': 'Furkan Kaynak',
+      'Uzunçiftlik': 'Hüseyin Örengül',
+      'Dumlupınar 1': 'Osman Örengül',
+      'Dumlupınar 2': 'Tolga Örengül',
+      'Ertuğrul Gazi': 'Burak Özer',
+      'Eşme': 'Semih Şimşek',
+      'İbrikdere': 'Semih Şimşek',
+      'Uzuntarla': 'Semih Şimşek',
+      'FSM': 'İbrahim Gökırmak',
+      'Sarımeşe 2': 'Arif Emre',
+      'Köseköy 1': 'Burak Güler',
+      'İstasyon 1': 'İdris Maden',
+      'İstasyon 2': 'İbrahim Gökırmak',
+      'İstasyon 3': 'Arif Emre Teper',
+      'Karabaş 1': 'Bilal Uçar',
+      'Karabaş 2': 'Eyüp Kılıç',
+      'Körfez 1': 'Kenan Oruç',
+      'Tepecik': 'Zeki Kanpara',
+      'Körfez 2': 'Mustafa Tayyip',
+      'Emekevler 1': 'Yalçın Akyüz',
+      'Sarımeşe 1': 'Şaban Öz',
+      'Şirinsulhiye': 'Muhammet İbrahimoğlu',
+      'Ömerağa 1': 'Bilal Uçar'
+    };
+
+    function sorumluGetir(mahalle) {
+      return mahalleSorumlulari[mahalle] || mahalle;
+    }
 
     let dinliyor = false;
 
@@ -486,6 +822,7 @@
       if (mahalle) {
         gosterSonuc('success', '✅ Bulundu!', 
           `<div class="sokak-name">${input}</div><div class="mahalle-name">${mahalle}</div>`);
+        sesliSoyle(sorumluGetir(mahalle));
       } else {
         gosterSonuc('warning', '⚠️ Bulunamadı', 'Bu sokak veritabanında bulunamadı.');
       }
@@ -540,8 +877,7 @@
         if (mahalle) {
           gosterSonuc('success', '✅ Bulundu!', 
             `<div class="sokak-name">${sesliBilgi}</div><div class="mahalle-name">${mahalle}</div>`);
-          // Sesli cevap - sadece mahalle adı
-          sesliSoyle(mahalle);
+          sesliSoyle(sorumluGetir(mahalle));
         } else {
           gosterSonuc('warning', '⚠️ Bulunamadı', 'Bu sokak veritabanında bulunamadı.');
           sesliSoyle('Bulunamadı');
@@ -583,22 +919,126 @@
       resultDiv.classList.remove('hidden');
     }
 
-    // Sokak listesini oluştur
-    function sokakListesiOlustur() {
-      const liste = document.getElementById('sokakListesi');
+    // Mahalleleri grupla
+    function mahalleSokakMap() {
+      const map = {};
       Object.entries(sokaklar).forEach(([sokak, mahalle]) => {
-        const item = document.createElement('div');
-        item.className = 'list-item';
-        item.innerHTML = `
-          <div class="list-sokak">${sokak}</div>
-          <div class="list-mahalle">${mahalle}</div>
-        `;
-        liste.appendChild(item);
+        if (!map[mahalle]) map[mahalle] = [];
+        map[mahalle].push(sokak);
+      });
+      return map;
+    }
+
+    // Mahalle grupları
+    const mahalleGruplari = [
+      {
+        renk: 'mavi',
+        mahalleler: ['FSM', 'Köseköy 1', 'Sarımeşe 1', 'Sarımeşe 2', 'İstasyon 1', 'İstasyon 2', 'İstasyon 3']
+      },
+      {
+        renk: 'gri',
+        mahalleler: ['Acısu 1', 'Acısu 2', 'Arslanbey 1', 'Arslanbey 2', 'Balaban', 'Derbent', 'Maşukiye', 'Rahmiye', 'Suadiye', 'Çepni', 'Şevkatiye', 'Şirinsulhiye']
+      },
+      {
+        renk: 'yesil',
+        mahalleler: ['Ataevler 1', 'Ataevler 2', 'Ataevler 3', 'Emekevler 1', 'Emekevler 2', 'Uzunçiftlik']
+      },
+      {
+        renk: 'kirmizi',
+        mahalleler: ['Dumlupınar 1', 'Dumlupınar 2', 'Ertuğrul Gazi', 'Eşme', 'İbrikdere', 'Uzuntarla']
+      },
+      {
+        renk: 'sari',
+        mahalleler: ['Karabaş 1', 'Tepecik', 'Ömerağa 1']
+      },
+      {
+        renk: 'beyaz',
+        mahalleler: ['Körfez 1', 'Körfez 2', 'Karabaş 2']
+      }
+    ];
+
+    // Grup renklerinin CSS değişken karşılıkları
+    const grupRenkDegiskeni = {
+      gri: 'var(--gray)',
+      yesil: 'var(--success)',
+      kirmizi: 'var(--error)',
+      mavi: 'var(--blue)',
+      sari: 'var(--yellow)',
+      beyaz: 'var(--white-grp)'
+    };
+
+    // Mahalle butonlarını gruplu, kart bazlı oluştur (3 üstte / 3 altta ızgara)
+    function mahalleButonlariOlustur() {
+      const map = mahalleSokakMap();
+      const container = document.getElementById('mahalleButtons');
+
+      mahalleGruplari.forEach((grup, idx) => {
+        const card = document.createElement('div');
+        card.className = 'grup-card';
+        card.style.setProperty('--grup-renk', grupRenkDegiskeni[grup.renk] || 'var(--accent)');
+
+        const title = document.createElement('div');
+        title.className = 'grup-card-title';
+        title.innerHTML = `<span class="grup-dot"></span>Bölge ${idx + 1}`;
+        card.appendChild(title);
+
+        const btnWrap = document.createElement('div');
+        btnWrap.className = 'mahalle-buttons';
+
+        grup.mahalleler.forEach(mahalle => {
+          if (!map[mahalle]) return;
+          const btn = document.createElement('button');
+          btn.className = 'btn-mahalle btn-mahalle-' + grup.renk;
+          btn.textContent = mahalle;
+          btn.onclick = () => mahalleAc(mahalle, btn);
+          btnWrap.appendChild(btn);
+        });
+
+        card.appendChild(btnWrap);
+        container.appendChild(card);
       });
     }
 
-    // Sayfa yüklendiğinde listeyi oluştur
-    sokakListesiOlustur();
+    // Mahalle detayını modal olarak aç
+    function mahalleAc(mahalle, btnEl) {
+      document.querySelectorAll('.btn-mahalle').forEach(b => b.classList.remove('active'));
+      btnEl.classList.add('active');
+
+      const map = mahalleSokakMap();
+      const sokakListesi = map[mahalle] || [];
+
+      const sorumlu = mahalleSorumlulari[mahalle];
+      const baslik = sorumlu ? mahalle + ' - ' + sorumlu : mahalle;
+      document.getElementById('modalBaslik').textContent = '📍 ' + baslik;
+      const body = document.getElementById('modalBody');
+      body.innerHTML = '';
+      sokakListesi.forEach(sokak => {
+        const div = document.createElement('div');
+        div.className = 'modal-sokak-item';
+        div.textContent = sokak;
+        body.appendChild(div);
+      });
+
+      document.getElementById('modalOverlay').classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    }
+
+    // Modalı kapat
+    function geriDon() {
+      document.getElementById('modalOverlay').classList.add('hidden');
+      document.body.style.overflow = '';
+      document.querySelectorAll('.btn-mahalle').forEach(b => b.classList.remove('active'));
+    }
+
+    // Overlay dışına tıklayınca kapat
+    function modalKapat(event) {
+      if (event.target === document.getElementById('modalOverlay')) {
+        geriDon();
+      }
+    }
+
+    // Sayfa yüklendiğinde butonları oluştur
+    mahalleButonlariOlustur();
   </script>
 </body>
 </html>
