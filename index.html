@@ -420,6 +420,9 @@
     .btn-mahalle-beyaz { border-color: rgba(203,212,225,0.35); color: var(--white-grp); background: rgba(255,255,255,0.03); }
     .btn-mahalle-beyaz:hover, .btn-mahalle-beyaz.active { background: var(--white-grp); border-color: var(--white-grp); color: #0A0E17; }
 
+    .btn-mahalle-turuncu { border-color: rgba(255,107,26,0.4); color: var(--accent); }
+    .btn-mahalle-turuncu:hover, .btn-mahalle-turuncu.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
     /* Grup ayırıcı */
     .grup-ayirici {
       width: 100%;
@@ -609,6 +612,78 @@
       transform: translateX(4px);
     }
 
+    .modal-alt-baslik {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-weight: 600;
+      color: var(--accent);
+      margin: 1.1rem 0 0.6rem;
+      padding-bottom: 0.4rem;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .modal-alt-baslik:first-child {
+      margin-top: 0;
+    }
+
+    .modal-kisi-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.75rem;
+    }
+
+    @media (max-width: 480px) {
+      .modal-kisi-grid { grid-template-columns: 1fr; }
+    }
+
+    .modal-kisi-kart {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--line-strong);
+      border-radius: 0.75rem;
+      padding: 1rem 0.75rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .modal-kisi-kart:hover {
+      border-color: var(--accent);
+      background: rgba(255,107,26,0.06);
+      transform: translateY(-2px);
+    }
+
+    .modal-kisi-ad {
+      font-family: var(--display);
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: var(--text-primary);
+      margin-bottom: 0.35rem;
+    }
+
+    .modal-kisi-sayi {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .modal-geri-satir {
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      cursor: pointer;
+      margin-bottom: 1rem;
+      display: inline-block;
+      transition: color 0.2s;
+    }
+
+    .modal-geri-satir:hover {
+      color: var(--accent);
+    }
+
     .hidden { display: none; }
 
     @media (max-width: 480px) {
@@ -744,13 +819,41 @@
       'dinç': 'FSM',
       "uluışık cad. 1-61'e kadar": 'FSM',
       'bilgehan': 'FSM',
-      'yurt cad.4-17': 'FSM',
+      'yurt cad.1-17': 'FSM',
       'sezgi': 'FSM',
       'şener': 'FSM',
       'kelebek': 'FSM',
       'mavi': 'FSM',
       'üresin': 'FSM',
-      'darica': 'FSM'
+      'darica': 'FSM',
+
+      // İdris Maden bölgesi
+      'gazi caddesi 42-61': 'İdris Maden',
+      'meliha sokak': 'İdris Maden',
+      'kent meydanı sokak': 'İdris Maden',
+      'karanlar sokak': 'İdris Maden',
+      'eren sokak': 'İdris Maden',
+      'ballıca sokak 1-10': 'İdris Maden',
+      'akşemsettin cad. 2-4-6': 'İdris Maden',
+      'altunhisar cad. 47-94': 'İdris Maden',
+
+      // Ali Durmuş bölgesi
+      'adalet sokak': 'Ali Durmuş',
+      'akyol sokak': 'Ali Durmuş',
+      'asiller caddesi': 'Ali Durmuş',
+      'egemen sokak': 'Ali Durmuş',
+      'bilgehan sokak': 'Ali Durmuş',
+      'çamlık caddesi': 'Ali Durmuş',
+      'duygu sokak': 'Ali Durmuş',
+      'hanımağa sokak': 'Ali Durmuş',
+      'plevne sokak': 'Ali Durmuş',
+      'selimiye caddesi': 'Ali Durmuş',
+      'sürmeli sokak': 'Ali Durmuş',
+      'demokrasi cad. 81': 'Ali Durmuş',
+      'uluışık cad. 91-93': 'Ali Durmuş',
+      'altunhisar cad. 94\'ten sonrası': 'Ali Durmuş',
+      'ballıca sokak 11\'den sonrası': 'Ali Durmuş',
+      'yurt caddesi 53-55': 'Ali Durmuş'
     };
 
 
@@ -985,12 +1088,14 @@
         const btnWrap = document.createElement('div');
         btnWrap.className = 'mahalle-buttons';
 
-        grup.mahalleler.forEach(mahalle => {
-          if (!map[mahalle]) return;
+        grup.mahalleler.forEach(item => {
+          const key = typeof item === 'string' ? item : item.key;
+          const label = typeof item === 'string' ? item : item.label;
+          if (!map[key]) return;
           const btn = document.createElement('button');
           btn.className = 'btn-mahalle btn-mahalle-' + grup.renk;
-          btn.textContent = mahalle;
-          btn.onclick = () => mahalleAc(mahalle, btn);
+          btn.textContent = label;
+          btn.onclick = () => mahalleAc(key, btn);
           btnWrap.appendChild(btn);
         });
 
@@ -999,25 +1104,91 @@
       });
     }
 
-    // Mahalle detayını modal olarak aç
-    function mahalleAc(mahalle, btnEl) {
-      document.querySelectorAll('.btn-mahalle').forEach(b => b.classList.remove('active'));
-      btnEl.classList.add('active');
+    // Bazı mahalleler birden fazla sorumlu kişiye bölünmüş durumda.
+    // Bu mahallenin butonuna tıklanınca, her kişi için ayrı bir alt başlık altında sokaklar gösterilir.
+    const bolgeAltGruplari = {
+      'FSM': [
+        { label: 'İbrahim Gökırmak', key: 'FSM' },
+        { label: 'İdris Maden', key: 'İdris Maden' },
+        { label: 'Ali Durmuş', key: 'Ali Durmuş' }
+      ]
+    };
 
+    // Kişi kutucuklarını göster (alt gruplu mahallenin ana ekranı)
+    function altGrupKartlariGoster(altGruplar) {
       const map = mahalleSokakMap();
-      const sokakListesi = map[mahalle] || [];
-
-      const sorumlu = mahalleSorumlulari[mahalle];
-      const baslik = sorumlu ? mahalle + ' - ' + sorumlu : mahalle;
-      document.getElementById('modalBaslik').textContent = '📍 ' + baslik;
       const body = document.getElementById('modalBody');
       body.innerHTML = '';
-      sokakListesi.forEach(sokak => {
+
+      const grid = document.createElement('div');
+      grid.className = 'modal-kisi-grid';
+
+      altGruplar.forEach(grup => {
+        const sayi = (map[grup.key] || []).length;
+        const kart = document.createElement('div');
+        kart.className = 'modal-kisi-kart';
+        kart.innerHTML = `
+          <div class="modal-kisi-ad">${grup.label}</div>
+          <div class="modal-kisi-sayi">${sayi} sokak</div>
+        `;
+        kart.onclick = () => altGrupSokaklariGoster(altGruplar, grup);
+        grid.appendChild(kart);
+      });
+
+      body.appendChild(grid);
+    }
+
+    // Bir kişinin sokak listesini göster (geri dön seçenekli)
+    function altGrupSokaklariGoster(altGruplar, grup) {
+      const map = mahalleSokakMap();
+      const body = document.getElementById('modalBody');
+      body.innerHTML = '';
+
+      const geri = document.createElement('div');
+      geri.className = 'modal-geri-satir';
+      geri.textContent = '← Kişilere dön';
+      geri.onclick = () => altGrupKartlariGoster(altGruplar);
+      body.appendChild(geri);
+
+      const baslik = document.createElement('div');
+      baslik.className = 'modal-alt-baslik';
+      baslik.textContent = grup.label;
+      body.appendChild(baslik);
+
+      (map[grup.key] || []).forEach(sokak => {
         const div = document.createElement('div');
         div.className = 'modal-sokak-item';
         div.textContent = sokak;
         body.appendChild(div);
       });
+    }
+
+    // Mahalle detayını modal olarak aç
+    function mahalleAc(mahalle, btnEl) {
+      document.querySelectorAll('.btn-mahalle').forEach(b => b.classList.remove('active'));
+      btnEl.classList.add('active');
+
+      const altGruplar = bolgeAltGruplari[mahalle];
+
+      if (altGruplar) {
+        // Birden fazla sorumlu kişiye bölünmüş mahalle: önce kişi kutucuklarını göster
+        document.getElementById('modalBaslik').textContent = '📍 ' + mahalle;
+        altGrupKartlariGoster(altGruplar);
+      } else {
+        const map = mahalleSokakMap();
+        const body = document.getElementById('modalBody');
+        body.innerHTML = '';
+        const sokakListesi = map[mahalle] || [];
+        const sorumlu = mahalleSorumlulari[mahalle];
+        const baslik = sorumlu ? mahalle + ' - ' + sorumlu : mahalle;
+        document.getElementById('modalBaslik').textContent = '📍 ' + baslik;
+        sokakListesi.forEach(sokak => {
+          const div = document.createElement('div');
+          div.className = 'modal-sokak-item';
+          div.textContent = sokak;
+          body.appendChild(div);
+        });
+      }
 
       document.getElementById('modalOverlay').classList.remove('hidden');
       document.body.style.overflow = 'hidden';
