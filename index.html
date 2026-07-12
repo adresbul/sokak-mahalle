@@ -192,6 +192,7 @@
 
     @media (max-width: 640px) {
       .main { flex-direction: column; align-items: stretch; }
+      .field { flex: 1 1 auto; }
       .buttons { flex-direction: row; }
     }
 
@@ -856,6 +857,39 @@
       'yurt caddesi 53-55': 'Ali Durmuş'
     };
 
+    // --- Esnek sokak eşleştirme ---
+    // "Suna" da yazılsa "Suna Sokak" da yazılsa, veritabanında hangisi varsa onu bulur.
+    function normalizeSokakAdi(str) {
+      return str
+        .toLocaleLowerCase('tr')
+        .replace(/[.,]/g, '')
+        .replace(/\b(sokak|sokağı|sk|caddesi|cadde|cad|bulvarı|bulvari|meydanı|meydani)\b/g, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+    }
+
+    // Normalize edilmiş isimden gerçek anahtara ulaşmak için ön hesaplanmış tablo
+    const sokaklarNormalize = {};
+    Object.keys(sokaklar).forEach(key => {
+      const norm = normalizeSokakAdi(key);
+      if (!(norm in sokaklarNormalize)) {
+        sokaklarNormalize[norm] = key;
+      }
+    });
+
+    // Girilen/söylenen sokak adına göre mahalleyi bulur (önce tam eşleşme, sonra esnek eşleşme)
+    function sokakBul(girilenAd) {
+      const aranan = girilenAd.toLocaleLowerCase('tr').trim();
+
+      if (sokaklar[aranan]) return sokaklar[aranan];
+
+      const normAranan = normalizeSokakAdi(girilenAd);
+      const eslesenKey = sokaklarNormalize[normAranan];
+      if (eslesenKey) return sokaklar[eslesenKey];
+
+      return null;
+    }
+
 
     // Mahalle sorumluları
     const mahalleSorumlulari = {
@@ -920,7 +954,7 @@
         return;
       }
 
-      const mahalle = sokaklar[aranan];
+      const mahalle = sokakBul(input);
 
       if (mahalle) {
         gosterSonuc('success', '✅ Bulundu!', 
@@ -938,7 +972,7 @@
       
       const utterance = new SpeechSynthesisUtterance(metin);
       utterance.lang = 'tr-TR';
-      utterance.rate = 1.1; // Konuşma hızını artırdık
+      utterance.rate = 1.2; // Konuşma hızını artırdık
       utterance.pitch = 1;
       utterance.volume = 1;
       
@@ -974,8 +1008,7 @@
         const sesliBilgi = event.results[0][0].transcript;
         document.getElementById('sokakInput').value = sesliBilgi;
         
-        const aranan = sesliBilgi.toLowerCase().trim();
-        const mahalle = sokaklar[aranan];
+        const mahalle = sokakBul(sesliBilgi);
 
         if (mahalle) {
           gosterSonuc('success', '✅ Bulundu!', 
@@ -1155,6 +1188,8 @@
       baslik.textContent = grup.label;
       body.appendChild(baslik);
 
+      sesliSoyle(grup.label);
+
       (map[grup.key] || []).forEach(sokak => {
         const div = document.createElement('div');
         div.className = 'modal-sokak-item';
@@ -1182,6 +1217,7 @@
         const sorumlu = mahalleSorumlulari[mahalle];
         const baslik = sorumlu ? mahalle + ' - ' + sorumlu : mahalle;
         document.getElementById('modalBaslik').textContent = '📍 ' + baslik;
+        sesliSoyle(sorumluGetir(mahalle));
         sokakListesi.forEach(sokak => {
           const div = document.createElement('div');
           div.className = 'modal-sokak-item';
