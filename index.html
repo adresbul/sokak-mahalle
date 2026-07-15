@@ -302,6 +302,81 @@
       margin-top: 0.35rem;
     }
 
+    .sonaramalar-wrap {
+      max-width: 960px;
+      margin: 1.25rem auto 0;
+    }
+
+    .sonaramalar-section {
+      background: var(--bg-panel);
+      border: 1px solid var(--line);
+      border-radius: 1rem;
+      padding: 1.25rem 1.5rem;
+    }
+
+    .sonaramalar-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+
+    .sonaramalar-title {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--cyan);
+    }
+
+    .btn-sonaramalar-temizle {
+      background: transparent;
+      border: 1px solid var(--line-strong);
+      color: var(--text-muted);
+      padding: 0.35rem 0.75rem;
+      font-size: 0.75rem;
+      border-radius: 2rem;
+    }
+
+    .btn-sonaramalar-temizle:hover {
+      border-color: var(--error);
+      color: var(--error);
+    }
+
+    .sonaramalar-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .chip-sonarama {
+      background: rgba(0,229,199,0.06);
+      border: 1px solid rgba(0,229,199,0.3);
+      border-radius: 2rem;
+      padding: 0.5rem 1rem;
+      font-family: var(--body);
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--cyan);
+      cursor: pointer;
+      transition: all 0.2s;
+      text-transform: capitalize;
+    }
+
+    .chip-sonarama:hover {
+      background: var(--cyan);
+      border-color: var(--cyan);
+      color: var(--bg-deep);
+    }
+
+    .chip-sonarama .chip-mahalle {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      opacity: 0.75;
+      margin-left: 0.35rem;
+      text-transform: none;
+    }
+
     .mahalle-wrap {
       max-width: 960px;
       margin: 1.25rem auto 0;
@@ -592,17 +667,33 @@
       padding: 1.25rem;
     }
 
+    .modal-sokak-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 0.5rem;
+    }
+
+    @media (max-width: 560px) {
+      .modal-sokak-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 380px) {
+      .modal-sokak-grid { grid-template-columns: 1fr; }
+    }
+
     .modal-sokak-item {
       background: rgba(255,255,255,0.02);
       border: 1px solid var(--line);
       border-radius: 0.5rem;
-      padding: 0.7rem 1rem;
-      margin-bottom: 0.4rem;
+      padding: 0.55rem 0.4rem;
       font-family: var(--mono);
       font-weight: 500;
-      font-size: 0.95rem;
+      font-size: 0.72rem;
+      line-height: 1.25;
       color: var(--text-primary);
       text-transform: capitalize;
+      text-align: center;
+      word-break: break-word;
       transition: all 0.2s;
     }
 
@@ -610,7 +701,7 @@
       border-color: var(--accent);
       background: rgba(255,107,26,0.06);
       color: var(--accent);
-      transform: translateX(4px);
+      transform: translateY(-2px);
     }
 
     .modal-alt-baslik {
@@ -718,6 +809,17 @@
 
     <!-- Sonuç -->
     <div id="result" class="result hidden"></div>
+
+    <!-- Son Aranananlar -->
+    <div id="sonAramalarWrap" class="sonaramalar-wrap hidden">
+      <div class="sonaramalar-section">
+        <div class="sonaramalar-header">
+          <div class="sonaramalar-title">🕑 Son Aranananlar</div>
+          <button class="btn-sonaramalar-temizle" onclick="sonAramalariTemizle()">Temizle</button>
+        </div>
+        <div class="sonaramalar-chips" id="sonAramalarChips"></div>
+      </div>
+    </div>
   </div>
 
   <!-- Mahalleler -->
@@ -761,6 +863,74 @@
       'berk sokak': 'Körfez 2',
       'koç sokak': 'Uzunçiftlik',
       'saklı sokak': 'Emekevler 1',
+
+      // Emekevler 1 bölgesi - Eyüp Gençtürk (ek liste)
+      'ada sokak': 'Emekevler 1',
+      'adaletli sokak': 'Emekevler 1',
+      'ahu sokak': 'Emekevler 1',
+      'akhisar sokak': 'Emekevler 1',
+      'altun sokak': 'Emekevler 1',
+      'arzu sokak': 'Emekevler 1',
+      'asarcıklı sokak': 'Emekevler 1',
+      'asilzade sokak': 'Emekevler 1',
+      'ataman sokak': 'Emekevler 1',
+      'atayurt sokak': 'Emekevler 1',
+      'avrupa sokak': 'Emekevler 1',
+      'aydınlar sokak': 'Emekevler 1',
+      'azra sokak': 'Emekevler 1',
+      'balözü sokak': 'Emekevler 1',
+      'banu sokak': 'Emekevler 1',
+      'başak caddesi': 'Emekevler 1',
+      'bilge caddesi': 'Emekevler 1',
+      'burcu sokak': 'Emekevler 1',
+      'cemal kura caddesi': 'Emekevler 1',
+      'cengiz topel caddesi': 'Emekevler 1',
+      'cumhur sokak': 'Emekevler 1',
+      'çilli sokak': 'Emekevler 1',
+      'd-100 karayolu caddesi 52-110': 'Emekevler 1',
+      'didem sokak': 'Emekevler 1',
+      'emniyet sokak': 'Emekevler 1',
+      'emek caddesi': 'Emekevler 1',
+      'esnaf sokak': 'Emekevler 1',
+      'fesleğen sokak': 'Emekevler 1',
+      'fırat sokak': 'Emekevler 1',
+      'filiz sokak': 'Emekevler 1',
+      'fişek sokak': 'Emekevler 1',
+      'fuzuli sokak': 'Emekevler 1',
+      'gelin sokak': 'Emekevler 1',
+      'güldemet sokak': 'Emekevler 1',
+      'güldibi sokak': 'Emekevler 1',
+      'gülnaz sokak': 'Emekevler 1',
+      'handan sokak': 'Emekevler 1',
+      'hande sokak': 'Emekevler 1',
+      'hisar sokak': 'Emekevler 1',
+      'i̇bni sina caddesi': 'Emekevler 1',
+      'inebolu sokak': 'Emekevler 1',
+      'kadırga sokak': 'Emekevler 1',
+      'kerem sokak': 'Emekevler 1',
+      'kınalı sokak': 'Emekevler 1',
+      'kocatepe caddesi': 'Emekevler 1',
+      'kuzuluk sokak': 'Emekevler 1',
+      'nazlıcan sokak': 'Emekevler 1',
+      'neşe sokak': 'Emekevler 1',
+      'öztemizler sokak': 'Emekevler 1',
+      'paşadağ caddesi 1-59': 'Emekevler 1',
+      'rençber sokak': 'Emekevler 1',
+      'safir sokak': 'Emekevler 1',
+      'sapanca yolu caddesi 39-59': 'Emekevler 1',
+      'selamet sokak': 'Emekevler 1',
+      'sevinç sokak': 'Emekevler 1',
+      'sultan orhan sokak': 'Emekevler 1',
+      'tablo sokak': 'Emekevler 1',
+      'utku sokak': 'Emekevler 1',
+      'üretken sokak': 'Emekevler 1',
+      'yankı sokak': 'Emekevler 1',
+      'yeni emek caddesi': 'Emekevler 1',
+      'yeşilbahar sokak': 'Emekevler 1',
+      'yeter sokak': 'Emekevler 1',
+      'yıldırımlar sokak': 'Emekevler 1',
+      'zerre sokak': 'Emekevler 1',
+      '100.yıl cad.': 'Emekevler 1',
       'asker sokak': 'Emekevler 2',
       'aşhane sokak': 'Ataevler 1',
       'sarvan sokak': 'Ataevler 2',
@@ -768,9 +938,209 @@
       'efsane sokak': 'Eşme',
       'imar caddesi': 'İbrikdere',
       'firuze caddesi': 'Uzuntarla',
+
+      // İbrikdere bölgesi - Semih Şimşek (ek liste)
+      '1-150 sokağa kadar': 'İbrikdere',
+
+      // Uzuntarla bölgesi - Semih Şimşek (ek liste)
+      '201-349 sokağa kadar': 'Uzuntarla',
+      'sultan beyazıt caddesi': 'Uzuntarla',
+
+      // Eşme bölgesi - Semih Şimşek (ek liste)
+      'alaplı sokak': 'Eşme',
+      'göl yolu sokak': 'Eşme',
+      'hanlı sokak': 'Eşme',
+      'özbek sokak': 'Eşme',
+      'sahil sokak': 'Eşme',
+      'iskele sokak': 'Eşme',
+      'erel sokak': 'Eşme',
+      'detay sokak': 'Eşme',
+      'doğanay sokak': 'Eşme',
+      'necati kocaağa sokak': 'Eşme',
+      'gökdağ sokak': 'Eşme',
+      'bozdemir sokak': 'Eşme',
+      'konak sokak': 'Eşme',
+      'yeniay sokak': 'Eşme',
+      'gönen sokak': 'Eşme',
+      'uhut sokak': 'Eşme',
+      'gülce sokak': 'Eşme',
+      'mustafa karacaoğlu sokak': 'Eşme',
+      'endamlı sokak': 'Eşme',
+      'bingül sokak': 'Eşme',
+      'limandere sokak': 'Eşme',
+      'timuçin atılgan sokak': 'Eşme',
+      'sırtlaryolu sokak': 'Eşme',
+      'gürgenyatak yolu sokak': 'Eşme',
+      'ahmediye caddesi': 'Eşme',
+      'çağatay sokak': 'Eşme',
+      'köse sokak': 'Eşme',
+      'beyşehir sokak': 'Eşme',
+      'orman sokak': 'Eşme',
+      'karabayır sokak': 'Eşme',
+      'güzelce sokak': 'Eşme',
+      'gülbağı sokak': 'Eşme',
+      'bağdat caddesi': 'Eşme',
+      'd100 kara yolu caddesi': 'Eşme',
+      'yıldır sokak': 'Eşme',
+      'nazende sokak': 'Eşme',
+      'yankese sokak': 'Eşme',
+      'karanlıkdere sokak': 'Eşme',
+      'davalı kırma sokak': 'Eşme',
+      'rüzgar tepesi sokak': 'Eşme',
       'gökbudak sokak': 'Ertuğrul Gazi',
-      'ozan sokak': 'Dumlupınar 1',
+
+      // Ertuğrul Gazi bölgesi - Burak Özer (ek liste)
+      'akıncı sokak': 'Ertuğrul Gazi',
+      'akıntürk sokak': 'Ertuğrul Gazi',
+      'akmeşe yolu cadde': 'Ertuğrul Gazi',
+      'akyıldız sokak': 'Ertuğrul Gazi',
+      'altındağ cadde': 'Ertuğrul Gazi',
+      'altıner sokak': 'Ertuğrul Gazi',
+      'altıntaş sokak': 'Ertuğrul Gazi',
+      'alyıldız sokak': 'Ertuğrul Gazi',
+      'asyalı sokak': 'Ertuğrul Gazi',
+      'aybahar sokak': 'Ertuğrul Gazi',
+      'ayçiçeği sokak': 'Ertuğrul Gazi',
+      'aydemir sokak': 'Ertuğrul Gazi',
+      'aydın sokak': 'Ertuğrul Gazi',
+      'aydoğan sokak': 'Ertuğrul Gazi',
+      'aydoğdu sokak': 'Ertuğrul Gazi',
+      'ayışığı sokak': 'Ertuğrul Gazi',
+      'ayşin sokak': 'Ertuğrul Gazi',
+      'ayyıldız sokak': 'Ertuğrul Gazi',
+      'barışçı sokak': 'Ertuğrul Gazi',
+      'belemir sokak': 'Ertuğrul Gazi',
+      'bilgi sokak': 'Ertuğrul Gazi',
+      'canan sokak': 'Ertuğrul Gazi',
+      'cennet sokak': 'Ertuğrul Gazi',
+      'cumhuriyet cadde': 'Ertuğrul Gazi',
+      'çantı sokak': 'Ertuğrul Gazi',
+      'çeşmeli sokak': 'Ertuğrul Gazi',
+      'damlar sokak': 'Ertuğrul Gazi',
+      'dergah sokak': 'Ertuğrul Gazi',
+      'divan sokak': 'Ertuğrul Gazi',
+      'divitli sokak': 'Ertuğrul Gazi',
+      'doğanlar sokak': 'Ertuğrul Gazi',
+      'ece sokak': 'Ertuğrul Gazi',
+      'ergin sokak': 'Ertuğrul Gazi',
+      'erkan sokak': 'Ertuğrul Gazi',
+      'festival sokak': 'Ertuğrul Gazi',
+      'fidancık sokak': 'Ertuğrul Gazi',
+      'fidanlık sokak': 'Ertuğrul Gazi',
+      'gebeşler sokak': 'Ertuğrul Gazi',
+      'genç sokak': 'Ertuğrul Gazi',
+      'gezer sokak': 'Ertuğrul Gazi',
+      'hazar sokak': 'Ertuğrul Gazi',
+      'hazeran sokak': 'Ertuğrul Gazi',
+      'hızır reis sokak': 'Ertuğrul Gazi',
+      'hira sokak': 'Ertuğrul Gazi',
+      'ışılay sokak': 'Ertuğrul Gazi',
+      'inegöl cadde': 'Ertuğrul Gazi',
+      'kalemli sokak': 'Ertuğrul Gazi',
+      'kalkandere sokak': 'Ertuğrul Gazi',
+      'kanuni sokak': 'Ertuğrul Gazi',
+      'kaplan sokak': 'Ertuğrul Gazi',
+      'karakiraz sokak': 'Ertuğrul Gazi',
+      'kardeş sokak': 'Ertuğrul Gazi',
+      'kaygusuz sokak': 'Ertuğrul Gazi',
+      'kayhan sokak': 'Ertuğrul Gazi',
+      'kemal reis sokak': 'Ertuğrul Gazi',
+      'kızılkaya sokak': 'Ertuğrul Gazi',
+      'maral sokak': 'Ertuğrul Gazi',
+      'mareşal fevzi çakmak cad. 1-60': 'Ertuğrul Gazi',
+      'meram sokak': 'Ertuğrul Gazi',
+      'neşem sokak': 'Ertuğrul Gazi',
+      'nişancı sokak': 'Ertuğrul Gazi',
+      'oğuz sokak': 'Ertuğrul Gazi',
+      'okumuş sokak': 'Ertuğrul Gazi',
+      'oruç reis sokak': 'Ertuğrul Gazi',
+      'piri reis sokak': 'Ertuğrul Gazi',
+      'reyhanlı sokak': 'Ertuğrul Gazi',
+      'salih reis sokak': 'Ertuğrul Gazi',
+      'saraç sokak': 'Ertuğrul Gazi',
+      'seheryıldızı sokak': 'Ertuğrul Gazi',
+      'selvili sokak': 'Ertuğrul Gazi',
+      'söğütler sokak': 'Ertuğrul Gazi',
+      'şehitler cadde': 'Ertuğrul Gazi',
+      'şengül sokak': 'Ertuğrul Gazi',
+      'şenol sokak': 'Ertuğrul Gazi',
+      'şeref sokak': 'Ertuğrul Gazi',
+      'şeyma sokak': 'Ertuğrul Gazi',
+      'taçyaprak sokak': 'Ertuğrul Gazi',
+      'timur sokak': 'Ertuğrul Gazi',
+      'tutkun sokak': 'Ertuğrul Gazi',
+      'ulusoy sokak': 'Ertuğrul Gazi',
+      'vefalı sokak': 'Ertuğrul Gazi',
+      'yavuz selim sokak': 'Ertuğrul Gazi',
+      'yenigün sokak': 'Ertuğrul Gazi',
+      'yıldız cadde': 'Ertuğrul Gazi',
+      'yıldızlar sokak': 'Ertuğrul Gazi',
+      'yücehan sokak': 'Ertuğrul Gazi',
+      'ziya paşa sokak': 'Ertuğrul Gazi',
       'hazer sokak': 'Dumlupınar 2',
+
+      // Dumlupınar 1 bölgesi - Tolga Örengül (ek liste)
+      'değirmenli': 'Dumlupınar 1',
+      'şakir dede': 'Dumlupınar 1',
+      'gülümser': 'Dumlupınar 1',
+      "sakıp sabancı cad. 124-130 - 149 - 151": 'Dumlupınar 1',
+      "fındıklı cad. 20'ye kadar": 'Dumlupınar 1',
+      'hemşire sokak': 'Dumlupınar 1',
+      'gülderen': 'Dumlupınar 1',
+      'gökyüzü': 'Dumlupınar 1',
+      'ersin': 'Dumlupınar 1',
+      'hazer': 'Dumlupınar 1',
+      'çayır': 'Dumlupınar 1',
+
+      // Dumlupınar 2 bölgesi - Osman Örengül (ek liste)
+      'anka cad. 1-56': 'Dumlupınar 2',
+      'ozan sokak': 'Dumlupınar 2',
+      'demiröz cad. (habaş)': 'Dumlupınar 2',
+      'gökçe sokak 5-37': 'Dumlupınar 2',
+      'ankara (2-120)': 'Dumlupınar 2',
+      'ulus cad.': 'Dumlupınar 2',
+      'zafer': 'Dumlupınar 2',
+      'şema': 'Dumlupınar 2',
+      'şehit necmi semerci': 'Dumlupınar 2',
+      'güngör': 'Dumlupınar 2',
+      'ipek': 'Dumlupınar 2',
+      'arılar': 'Dumlupınar 2',
+      'mumcu': 'Dumlupınar 2',
+      'bedir': 'Dumlupınar 2',
+      'özbey': 'Dumlupınar 2',
+      'sakıp sabancı (1-131-120)': 'Dumlupınar 2',
+      'şamdan': 'Dumlupınar 2',
+      'ceyhan': 'Dumlupınar 2',
+      'seyhan': 'Dumlupınar 2',
+      'yeni cami': 'Dumlupınar 2',
+      'mert': 'Dumlupınar 2',
+      'tuğra': 'Dumlupınar 2',
+      'yalı': 'Dumlupınar 2',
+      'nur': 'Dumlupınar 2',
+      'şehit turgut çiçek cad. (2-4)': 'Dumlupınar 2',
+      'taşkent': 'Dumlupınar 2',
+      'özlem': 'Dumlupınar 2',
+      'yiğit': 'Dumlupınar 2',
+      'acar': 'Dumlupınar 2',
+      'çiçekli': 'Dumlupınar 2',
+      'özsoy': 'Dumlupınar 2',
+      'bizim': 'Dumlupınar 2',
+      'baki': 'Dumlupınar 2',
+      'arnavut': 'Dumlupınar 2',
+      'poyraz': 'Dumlupınar 2',
+      'volkan': 'Dumlupınar 2',
+      'nakkaş': 'Dumlupınar 2',
+      'tufan': 'Dumlupınar 2',
+      'askeriye sapağı': 'Dumlupınar 2',
+      'onurlu': 'Dumlupınar 2',
+      'umut': 'Dumlupınar 2',
+      'cihan': 'Dumlupınar 2',
+      'esen': 'Dumlupınar 2',
+      'oyalı': 'Dumlupınar 2',
+      'şehit mecit': 'Dumlupınar 2',
+      'ışıklı': 'Dumlupınar 2',
+      'güzide': 'Dumlupınar 2',
+      'mareşal fevzi çakmak (94)': 'Dumlupınar 2',
       'süleyman paşa sokak': 'Karabaş 1',
       'rauf orbay sokak': 'Karabaş 2',
       'tepecik sokak': 'Tepecik',
@@ -780,7 +1150,6 @@
       'gökmen sokak': 'Köseköy 1',
       'taşkın sokak': 'FSM',
       'gülaçtı sokak': 'FSM',
-      'egemen sokak': 'FSM',
       'yadigar sokak': 'Sarımeşe 1',
       'mukaddes sokak': 'Sarımeşe 2',
       'çeltikdüzü sokak': 'Arslanbey 1',
@@ -837,6 +1206,31 @@
       'ballıca sokak 1-10': 'İdris Maden',
       'akşemsettin cad. 2-4-6': 'İdris Maden',
       'altunhisar cad. 47-94': 'İdris Maden',
+      'gazi caddesi': 'İdris Maden',
+      'özbilen sokak': 'İdris Maden',
+      'taş. sokak': 'İdris Maden',
+      'gaziyener taşkın': 'İdris Maden',
+      'hızır': 'İdris Maden',
+      'çalıkuşu': 'İdris Maden',
+      'enginar': 'İdris Maden',
+      'akdemir': 'İdris Maden',
+      'altunhisar cad. 40 - 68': 'İdris Maden',
+      'dinamik': 'İdris Maden',
+      'enes': 'İdris Maden',
+      'emirgan': 'İdris Maden',
+      'hasret': 'İdris Maden',
+      'hasgül': 'İdris Maden',
+      'danış': 'İdris Maden',
+      'eşrefbitlis sokak': 'İdris Maden',
+      'serdivan': 'İdris Maden',
+      'keser 93 den 68 kadar': 'İdris Maden',
+      'metin sokak': 'İdris Maden',
+      'selimiye 45': 'İdris Maden',
+      'zemin': 'İdris Maden',
+      'kahramanlar 35': 'İdris Maden',
+      'sakin sokak 42': 'İdris Maden',
+      'ceren sokak': 'İdris Maden',
+      'güllü': 'İdris Maden',
 
       // Ali Durmuş bölgesi
       'adalet sokak': 'Ali Durmuş',
@@ -909,8 +1303,8 @@
       'Ataevler 2': 'Furkan Özbay',
       'Ataevler 3': 'Furkan Kaynak',
       'Uzunçiftlik': 'Hüseyin Örengül',
-      'Dumlupınar 1': 'Osman Örengül',
-      'Dumlupınar 2': 'Tolga Örengül',
+      'Dumlupınar 1': 'Tolga Örengül',
+      'Dumlupınar 2': 'Osman Örengül',
       'Ertuğrul Gazi': 'Burak Özer',
       'Eşme': 'Semih Şimşek',
       'İbrikdere': 'Semih Şimşek',
@@ -926,7 +1320,7 @@
       'Körfez 1': 'Kenan Oruç',
       'Tepecik': 'Zeki Kanpara',
       'Körfez 2': 'Mustafa Tayyip',
-      'Emekevler 1': 'Yalçın Akyüz',
+      'Emekevler 1': 'Eyüp Gençtürk',
       'Sarımeşe 1': 'Şaban Öz',
       'Şirinsulhiye': 'Muhammet İbrahimoğlu',
       'Ömerağa 1': 'Bilal Uçar'
@@ -934,6 +1328,68 @@
 
     function sorumluGetir(mahalle) {
       return mahalleSorumlulari[mahalle] || mahalle;
+    }
+
+    // Sokak listesini Türkçe alfabetik sıraya göre diz
+    function sokaklariSirala(liste) {
+      return [...liste].sort((a, b) => a.localeCompare(b, 'tr'));
+    }
+
+    // --- Son Aranananlar ---
+    const SON_ARAMALAR_ANAHTAR = 'sokakBulucu_sonAramalar';
+    const SON_ARAMALAR_MAKS = 10;
+
+    function sonAramalariGetir() {
+      try {
+        const veri = localStorage.getItem(SON_ARAMALAR_ANAHTAR);
+        return veri ? JSON.parse(veri) : [];
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function sonAramaEkle(sokakAdi, mahalle) {
+      let liste = sonAramalariGetir();
+      // Aynı sokak zaten listede varsa çıkar, en başa tekrar eklenecek
+      liste = liste.filter(item => item.sokak.toLocaleLowerCase('tr') !== sokakAdi.toLocaleLowerCase('tr'));
+      liste.unshift({ sokak: sokakAdi, mahalle: mahalle });
+      liste = liste.slice(0, SON_ARAMALAR_MAKS);
+      try {
+        localStorage.setItem(SON_ARAMALAR_ANAHTAR, JSON.stringify(liste));
+      } catch (e) { /* depolama kullanılamıyorsa sessizce geç */ }
+      sonAramalariGoster();
+    }
+
+    function sonAramalariTemizle() {
+      try {
+        localStorage.removeItem(SON_ARAMALAR_ANAHTAR);
+      } catch (e) { /* yoksay */ }
+      sonAramalariGoster();
+    }
+
+    function sonAramalariGoster() {
+      const liste = sonAramalariGetir();
+      const wrap = document.getElementById('sonAramalarWrap');
+      const chipsDiv = document.getElementById('sonAramalarChips');
+
+      if (!liste.length) {
+        wrap.classList.add('hidden');
+        return;
+      }
+
+      wrap.classList.remove('hidden');
+      chipsDiv.innerHTML = '';
+
+      liste.forEach(item => {
+        const chip = document.createElement('button');
+        chip.className = 'chip-sonarama';
+        chip.innerHTML = `${item.sokak}<span class="chip-mahalle">${item.mahalle}</span>`;
+        chip.onclick = () => {
+          document.getElementById('sokakInput').value = item.sokak;
+          ara();
+        };
+        chipsDiv.appendChild(chip);
+      });
     }
 
     let dinliyor = false;
@@ -960,6 +1416,7 @@
         gosterSonuc('success', '✅ Bulundu!', 
           `<div class="sokak-name">${input}</div><div class="mahalle-name">${mahalle}</div>`);
         sesliSoyle(sorumluGetir(mahalle));
+        sonAramaEkle(input, mahalle);
       } else {
         gosterSonuc('warning', '⚠️ Bulunamadı', 'Bu sokak veritabanında bulunamadı.');
       }
@@ -972,7 +1429,8 @@
       
       const utterance = new SpeechSynthesisUtterance(metin);
       utterance.lang = 'tr-TR';
-      utterance.rate = 1.2; // Konuşma hızını artırdık
+      // "Ali Durmuş" ismi daha net anlaşılsın diye biraz daha yavaş okunur
+      utterance.rate = (metin.trim() === 'Ali Durmuş') ? 0.8 : 1.2;
       utterance.pitch = 1;
       utterance.volume = 1;
       
@@ -1014,6 +1472,7 @@
           gosterSonuc('success', '✅ Bulundu!', 
             `<div class="sokak-name">${sesliBilgi}</div><div class="mahalle-name">${mahalle}</div>`);
           sesliSoyle(sorumluGetir(mahalle));
+          sonAramaEkle(sesliBilgi, mahalle);
         } else {
           gosterSonuc('warning', '⚠️ Bulunamadı', 'Bu sokak veritabanında bulunamadı.');
           sesliSoyle('Bulunamadı');
@@ -1190,12 +1649,15 @@
 
       sesliSoyle(grup.label);
 
-      (map[grup.key] || []).forEach(sokak => {
+      const grid = document.createElement('div');
+      grid.className = 'modal-sokak-grid';
+      sokaklariSirala(map[grup.key] || []).forEach(sokak => {
         const div = document.createElement('div');
         div.className = 'modal-sokak-item';
         div.textContent = sokak;
-        body.appendChild(div);
+        grid.appendChild(div);
       });
+      body.appendChild(grid);
     }
 
     // Mahalle detayını modal olarak aç
@@ -1218,12 +1680,15 @@
         const baslik = sorumlu ? mahalle + ' - ' + sorumlu : mahalle;
         document.getElementById('modalBaslik').textContent = '📍 ' + baslik;
         sesliSoyle(sorumluGetir(mahalle));
-        sokakListesi.forEach(sokak => {
+        const grid = document.createElement('div');
+        grid.className = 'modal-sokak-grid';
+        sokaklariSirala(sokakListesi).forEach(sokak => {
           const div = document.createElement('div');
           div.className = 'modal-sokak-item';
           div.textContent = sokak;
-          body.appendChild(div);
+          grid.appendChild(div);
         });
+        body.appendChild(grid);
       }
 
       document.getElementById('modalOverlay').classList.remove('hidden');
@@ -1244,8 +1709,9 @@
       }
     }
 
-    // Sayfa yüklendiğinde butonları oluştur
+    // Sayfa yüklendiğinde butonları ve son aramaları oluştur
     mahalleButonlariOlustur();
+    sonAramalariGoster();
   </script>
 </body>
 </html>
