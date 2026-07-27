@@ -542,12 +542,19 @@
     }
 
     .grup-card {
-      border: 1px solid var(--line);
+      border: 3px solid var(--line-strong);
       border-radius: 0.75rem;
       padding: 1rem 1.1rem;
       background: rgba(var(--tint-rgb),0.012);
+      box-shadow: 0 1px 2px rgba(0,0,0,0.03), 0 4px 12px rgba(0,0,0,0.03);
       position: relative;
       overflow: hidden;
+    }
+
+    /* Açık temada kart çizgisi ve gölgesi biraz daha belirgin olsun */
+    :root[data-theme="light"] .grup-card {
+      border-color: rgba(15,23,35,0.22);
+      box-shadow: 0 1px 3px rgba(15,23,35,0.06), 0 6px 16px rgba(15,23,35,0.05);
     }
 
     .grup-card::before {
@@ -588,7 +595,7 @@
 
     .btn-mahalle {
       background: rgba(var(--tint-rgb),0.02);
-      border: 1px solid var(--line-strong);
+      border: 2px solid var(--line-strong);
       border-radius: 2rem;
       padding: 0.5rem 1rem;
       font-family: var(--body);
@@ -631,6 +638,9 @@
 
     .btn-mahalle-turuncu { border-color: rgba(255,107,26,0.4); color: var(--accent); }
     .btn-mahalle-turuncu:hover, .btn-mahalle-turuncu.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+    .btn-mahalle-camgobegi { border-color: rgba(0,229,199,0.4); color: var(--cyan); }
+    .btn-mahalle-camgobegi:hover, .btn-mahalle-camgobegi.active { background: var(--cyan); border-color: var(--cyan); color: #06231a; }
 
     /* Grup ayırıcı */
     .grup-ayirici {
@@ -802,7 +812,7 @@
 
     .modal-sokak-grid {
       display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
+      grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 0.5rem;
     }
 
@@ -816,18 +826,25 @@
 
     .modal-sokak-item {
       background: rgba(var(--tint-rgb),0.02);
-      border: 1px solid var(--line);
+      border: 1px solid var(--line-strong);
       border-radius: 0.5rem;
-      padding: 0.55rem 0.4rem;
+      padding: 0.65rem 0.5rem;
       font-family: var(--mono);
       font-weight: 500;
-      font-size: 0.72rem;
-      line-height: 1.25;
+      font-size: 0.7rem;
+      line-height: 1.7;
       color: var(--text-primary);
       text-transform: capitalize;
       text-align: center;
       word-break: break-word;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.03), 0 3px 8px rgba(0,0,0,0.03);
       transition: all 0.2s;
+    }
+
+    /* Açık temada sokak kartlarının çizgisi ve gölgesi daha belirgin olsun */
+    :root[data-theme="light"] .modal-sokak-item {
+      border-color: rgba(15,23,35,0.16);
+      box-shadow: 0 1px 3px rgba(15,23,35,0.06), 0 4px 10px rgba(15,23,35,0.05);
     }
 
     .modal-sokak-item:hover {
@@ -865,12 +882,13 @@
 
     .modal-kisi-kart {
       background: rgba(var(--tint-rgb),0.02);
-      border: 1px solid var(--line-strong);
+      border: 2px solid var(--line-strong);
       border-radius: 0.75rem;
       padding: 1rem 0.75rem;
       text-align: center;
       cursor: pointer;
       transition: all 0.2s;
+      position: relative;
     }
 
     .modal-kisi-kart:hover {
@@ -878,6 +896,29 @@
       background: rgba(255,107,26,0.06);
       transform: translateY(-2px);
     }
+
+    .modal-kisi-kart-silinebilir { padding-top: 1.35rem; }
+
+    .modal-kisi-sil {
+      position: absolute;
+      top: 0.35rem;
+      right: 0.35rem;
+      background: var(--error-dim);
+      color: var(--error);
+      border: 1px solid rgba(255,77,109,0.3);
+      border-radius: 0.25rem;
+      width: 10px;
+      height: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 0.4rem;
+      line-height: 1;
+      transition: all 0.2s;
+    }
+
+    .modal-kisi-sil:hover { background: var(--error); color: #fff; }
 
     .modal-kisi-ad {
       font-family: var(--display);
@@ -1014,6 +1055,25 @@
       font-family: var(--mono);
     }
 
+    .yonetim-uyari {
+      background: var(--error-dim);
+      color: var(--error);
+      border: 1px solid rgba(255,77,109,0.35);
+      border-radius: 0.5rem;
+      padding: 0.55rem 0.8rem;
+      font-family: var(--body);
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin: -0.1rem 0 0.9rem;
+    }
+
+    .mahalle-section-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+    }
+
     @media (max-width: 480px) {
       .logo-container { display: none; }
     }
@@ -1070,7 +1130,10 @@
     <div class="mahalle-section">
       <div class="mahalle-section-title">
         <span>Mahalleler</span>
-        <button class="btn-yonetim-ac" onclick="yonetimAc()">🛠️ Sokak Ekle / Kaldır</button>
+        <div class="mahalle-section-actions">
+          <button class="btn-yonetim-ac" onclick="yonetimAc()">🛠️ Sokak Ekle / Kaldır</button>
+          <button class="btn-yonetim-ac" onclick="bolgeYonetimAc()">🗺️ Bölge Ekle / Kaldır</button>
+        </div>
       </div>
       <div class="mahalle-groups" id="mahalleButtons"></div>
     </div>
@@ -1914,8 +1977,8 @@
       return map;
     }
 
-    // Mahalle grupları
-    const mahalleGruplari = [
+    // Mahalle grupları (temel/sabit veri — kullanıcı eklemeleri buna dokunmaz)
+    const mahalleGruplariTemel = [
       {
         renk: 'mavi',
         mahalleler: [
@@ -1952,8 +2015,202 @@
       kirmizi: 'var(--error)',
       mavi: 'var(--blue)',
       sari: 'var(--yellow)',
-      beyaz: 'var(--white-grp)'
+      beyaz: 'var(--white-grp)',
+      turuncu: 'var(--accent)',
+      camgobegi: 'var(--cyan)'
     };
+
+    // Yeni eklenen bölgelere sırayla atanacak renkler
+    const BOLGE_RENK_DONGUSU = ['turuncu', 'camgobegi', 'mavi', 'yesil', 'kirmizi', 'sari', 'gri', 'beyaz'];
+
+    // ================= Bölge / Mahalle Ekle-Kaldır Depolama =================
+    const BOLGE_EKLENEN_ANAHTAR = 'sokakBulucu_eklenenBolgeler';
+    const BOLGE_SILINEN_ANAHTAR = 'sokakBulucu_silinenBolgeler';
+    const MAHALLE_EKLENEN_ANAHTAR = 'sokakBulucu_eklenenMahalleler';
+    const MAHALLE_SILINEN_ANAHTAR = 'sokakBulucu_silinenMahalleler';
+
+    function eklenenBolgeleriGetir() {
+      try {
+        const veri = localStorage.getItem(BOLGE_EKLENEN_ANAHTAR);
+        return veri ? JSON.parse(veri) : [];
+      } catch (e) { return []; }
+    }
+
+    function eklenenBolgeleriKaydet(liste) {
+      try { localStorage.setItem(BOLGE_EKLENEN_ANAHTAR, JSON.stringify(liste)); }
+      catch (e) { /* depolama kullanılamıyorsa sessizce geç */ }
+    }
+
+    // Kullanıcının kaldırdığı temel (sabit) bölgelerin id listesi
+    function silinenBolgeleriGetir() {
+      try {
+        const veri = localStorage.getItem(BOLGE_SILINEN_ANAHTAR);
+        return veri ? JSON.parse(veri) : [];
+      } catch (e) { return []; }
+    }
+
+    function silinenBolgeleriKaydet(liste) {
+      try { localStorage.setItem(BOLGE_SILINEN_ANAHTAR, JSON.stringify(liste)); }
+      catch (e) { /* depolama kullanılamıyorsa sessizce geç */ }
+    }
+
+    function eklenenMahalleleriGetir() {
+      try {
+        const veri = localStorage.getItem(MAHALLE_EKLENEN_ANAHTAR);
+        return veri ? JSON.parse(veri) : {};
+      } catch (e) { return {}; }
+    }
+
+    function eklenenMahalleleriKaydet(obj) {
+      try { localStorage.setItem(MAHALLE_EKLENEN_ANAHTAR, JSON.stringify(obj)); }
+      catch (e) { /* depolama kullanılamıyorsa sessizce geç */ }
+    }
+
+    // Kullanıcının kaldırdığı temel (sabit) mahallelerin key listesi
+    function silinenMahalleleriGetir() {
+      try {
+        const veri = localStorage.getItem(MAHALLE_SILINEN_ANAHTAR);
+        return veri ? JSON.parse(veri) : [];
+      } catch (e) { return []; }
+    }
+
+    function silinenMahalleleriKaydet(liste) {
+      try { localStorage.setItem(MAHALLE_SILINEN_ANAHTAR, JSON.stringify(liste)); }
+      catch (e) { /* depolama kullanılamıyorsa sessizce geç */ }
+    }
+
+    function yeniBolgeIdUret() {
+      return 'ozel-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 7);
+    }
+
+    // Etkin bölge/mahalle listesi: temel veri + kullanıcı eklemeleri/kaldırmaları birleştirilerek oluşturulur
+    let mahalleGruplari = [];
+
+    function mahalleGruplariYenidenOlustur() {
+      const eklenenMahalleler = eklenenMahalleleriGetir();
+      const eklenenBolgeler = eklenenBolgeleriGetir();
+      const silinenBolgeler = silinenBolgeleriGetir();
+      const silinenMahalleler = silinenMahalleleriGetir();
+      const yeniListe = [];
+
+      mahalleGruplariTemel.forEach((grup, idx) => {
+        const id = 'temel-' + idx;
+        if (silinenBolgeler.includes(id)) return;
+
+        const temelMahalleler = grup.mahalleler
+          .map(item => {
+            const key = typeof item === 'string' ? item : item.key;
+            const label = typeof item === 'string' ? item : item.label;
+            return { key, label, ozel: false };
+          })
+          .filter(m => !silinenMahalleler.includes(m.key));
+        const ekMahalleler = (eklenenMahalleler[id] || []).map(m => ({ key: m.key, label: m.label, ozel: true }));
+        yeniListe.push({
+          id,
+          ad: null,
+          renk: grup.renk,
+          ozel: false,
+          mahalleler: temelMahalleler.concat(ekMahalleler)
+        });
+      });
+
+      eklenenBolgeler.forEach(bolge => {
+        const ekMahalleler = (eklenenMahalleler[bolge.id] || []).map(m => ({ key: m.key, label: m.label, ozel: true }));
+        yeniListe.push({
+          id: bolge.id,
+          ad: bolge.ad,
+          renk: bolge.renk,
+          ozel: true,
+          mahalleler: ekMahalleler
+        });
+      });
+
+      mahalleGruplari.length = 0;
+      yeniListe.forEach(g => mahalleGruplari.push(g));
+    }
+
+    mahalleGruplariYenidenOlustur();
+
+    // Belirtilen isimde (büyük/küçük harf duyarsız) bir mahalle zaten var mı?
+    function mahalleVarMi(adayAd) {
+      const norm = adayAd.toLocaleLowerCase('tr').trim();
+      return mahalleGruplari.some(g => g.mahalleler.some(m => m.key.toLocaleLowerCase('tr').trim() === norm));
+    }
+
+    // Yeni bölge ekler (isteğe bağlı bir renk döngüsüyle) ve kalıcı hale getirir
+    function bolgeEkleVeriye(ad) {
+      const temizAd = ad.trim();
+      if (!temizAd) return false;
+
+      const eklenen = eklenenBolgeleriGetir();
+      const renk = BOLGE_RENK_DONGUSU[eklenen.length % BOLGE_RENK_DONGUSU.length];
+      eklenen.push({ id: yeniBolgeIdUret(), ad: temizAd, renk });
+      eklenenBolgeleriKaydet(eklenen);
+
+      mahalleGruplariYenidenOlustur();
+      return true;
+    }
+
+    // Bir bölgeyi kaldırır: özel (kullanıcı eklemiş) bölgeyse listeden çıkarır,
+    // temel (sabit) bölgeyse "silinen" listesine ekleyerek gizler. Her iki durumda
+    // da o bölgeye eklenmiş mahalleler de birlikte temizlenir.
+    function bolgeKaldirVeriden(bolgeId) {
+      if (bolgeId.startsWith('ozel-')) {
+        let eklenen = eklenenBolgeleriGetir();
+        eklenen = eklenen.filter(b => b.id !== bolgeId);
+        eklenenBolgeleriKaydet(eklenen);
+      } else {
+        const silinen = silinenBolgeleriGetir();
+        if (!silinen.includes(bolgeId)) {
+          silinen.push(bolgeId);
+          silinenBolgeleriKaydet(silinen);
+        }
+      }
+
+      const eklenenMahalleler = eklenenMahalleleriGetir();
+      if (eklenenMahalleler[bolgeId]) {
+        delete eklenenMahalleler[bolgeId];
+        eklenenMahalleleriKaydet(eklenenMahalleler);
+      }
+
+      mahalleGruplariYenidenOlustur();
+    }
+
+    // Belirtilen bölgeye yeni bir mahalle ekler; isim boşsa veya zaten varsa hata döner
+    function bolgeyeMahalleEkle(bolgeId, label) {
+      const temizLabel = label.trim();
+      if (!temizLabel) return { basarili: false, mesaj: 'Mahalle adı boş olamaz.' };
+      if (mahalleVarMi(temizLabel)) return { basarili: false, mesaj: 'Bu isimde bir mahalle zaten var.' };
+
+      const eklenenMahalleler = eklenenMahalleleriGetir();
+      if (!eklenenMahalleler[bolgeId]) eklenenMahalleler[bolgeId] = [];
+      eklenenMahalleler[bolgeId].push({ key: temizLabel, label: temizLabel });
+      eklenenMahalleleriKaydet(eklenenMahalleler);
+
+      mahalleGruplariYenidenOlustur();
+      return { basarili: true };
+    }
+
+    // Bir bölgeden, kullanıcı tarafından eklenmiş bir mahalleyi kaldırır
+    // Bir bölgeden bir mahalleyi kaldırır: özel (kullanıcı eklemiş) mahalleyse
+    // listeden tamamen çıkarır, temel (sabit) mahalleyse "silinen" listesine
+    // ekleyerek gizler.
+    function bolgedenMahalleKaldir(bolgeId, key, ozelMi) {
+      if (ozelMi) {
+        const eklenenMahalleler = eklenenMahalleleriGetir();
+        if (eklenenMahalleler[bolgeId]) {
+          eklenenMahalleler[bolgeId] = eklenenMahalleler[bolgeId].filter(m => m.key !== key);
+          eklenenMahalleleriKaydet(eklenenMahalleler);
+        }
+      } else {
+        const silinen = silinenMahalleleriGetir();
+        if (!silinen.includes(key)) {
+          silinen.push(key);
+          silinenMahalleleriKaydet(silinen);
+        }
+      }
+      mahalleGruplariYenidenOlustur();
+    }
 
     // Mahalle butonlarını gruplu, kart bazlı oluştur (3 üstte / 3 altta ızgara)
     function mahalleButonlariOlustur() {
@@ -1968,7 +2225,7 @@
 
         const title = document.createElement('div');
         title.className = 'grup-card-title';
-        title.innerHTML = `<span class="grup-dot"></span>Bölge ${idx + 1}`;
+        title.innerHTML = `<span class="grup-dot"></span>${grup.ad || 'Bölge ' + (idx + 1)}`;
         card.appendChild(title);
 
         const btnWrap = document.createElement('div');
@@ -2060,7 +2317,7 @@
         const kart = document.createElement('div');
         kart.className = 'modal-kisi-kart';
         kart.innerHTML = `
-          <div class="modal-kisi-ad">Bölge ${idx + 1}</div>
+          <div class="modal-kisi-ad">${grup.ad || 'Bölge ' + (idx + 1)}</div>
           <div class="modal-kisi-sayi">${grup.mahalleler.length} mahalle</div>
         `;
         kart.onclick = () => yonetimBolgeSec(idx);
@@ -2089,7 +2346,7 @@
 
       const baslik = document.createElement('div');
       baslik.className = 'modal-alt-baslik';
-      baslik.textContent = `Bölge ${idx + 1} — mahalle seçin`;
+      baslik.textContent = `${grup.ad || 'Bölge ' + (idx + 1)} — mahalle seçin`;
       body.appendChild(baslik);
 
       const grid = document.createElement('div');
@@ -2222,14 +2479,232 @@
       yonetimEkleKaldirEkraniCiz();
     }
 
+    // ================= Bölge Ekle / Kaldır Yönetimi =================
+    let bolgeYonetimAktif = false;
+    let bolgeYonetimSeciliId = null;
+
+    // Bölge yönetim panelini aç: bölge listesiyle başlar
+    function bolgeYonetimAc() {
+      bolgeYonetimAktif = true;
+      bolgeYonetimSeciliId = null;
+
+      document.getElementById('modalBaslik').textContent = '🗺️ Bölge Ekle / Kaldır';
+      bolgeYonetimListeEkraniCiz();
+
+      document.getElementById('modalOverlay').classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    }
+
+    // 1. Adım: Bölge listesi + yeni bölge ekleme
+    function bolgeYonetimListeEkraniCiz() {
+      bolgeYonetimSeciliId = null;
+
+      const body = document.getElementById('modalBody');
+      body.innerHTML = '';
+
+      const baslikEkle = document.createElement('div');
+      baslikEkle.className = 'modal-alt-baslik';
+      baslikEkle.textContent = 'Yeni Bölge Ekle';
+      body.appendChild(baslikEkle);
+
+      const inputRow = document.createElement('div');
+      inputRow.className = 'yonetim-input-row';
+
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.className = 'yonetim-input';
+      input.id = 'bolgeAdInput';
+      input.placeholder = 'Örn: Yeni Bölge';
+      input.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') bolgeEkleTikla();
+      });
+      inputRow.appendChild(input);
+
+      const ekleBtn = document.createElement('button');
+      ekleBtn.className = 'yonetim-ekle-btn';
+      ekleBtn.textContent = '+ Ekle';
+      ekleBtn.onclick = () => bolgeEkleTikla();
+      inputRow.appendChild(ekleBtn);
+
+      body.appendChild(inputRow);
+
+      const not = document.createElement('div');
+      not.className = 'yonetim-not';
+      not.textContent = 'Bölgeyi ekledikten sonra üzerine tıklayıp mahalle ekleyebilirsiniz. Bir bölgeyi ✕ ile kaldırdığınızda, o bölge ve içindeki mahalleler listeden gizlenir.';
+      body.appendChild(not);
+
+      const baslikListe = document.createElement('div');
+      baslikListe.className = 'modal-alt-baslik';
+      baslikListe.textContent = `Bölgeler (${mahalleGruplari.length})`;
+      body.appendChild(baslikListe);
+
+      const grid = document.createElement('div');
+      grid.className = 'modal-kisi-grid';
+
+      mahalleGruplari.forEach((grup, idx) => {
+        const kart = document.createElement('div');
+        kart.className = 'modal-kisi-kart modal-kisi-kart-silinebilir';
+        kart.innerHTML = `
+          <div class="modal-kisi-ad">${grup.ad || 'Bölge ' + (idx + 1)}</div>
+          <div class="modal-kisi-sayi">${grup.mahalleler.length} mahalle</div>
+        `;
+        kart.onclick = () => bolgeYonetimMahalleEkraniCiz(grup.id);
+
+        const silBtn = document.createElement('button');
+        silBtn.className = 'modal-kisi-sil';
+        silBtn.textContent = '✕';
+        silBtn.title = 'Bölgeyi kaldır';
+        silBtn.onclick = (e) => {
+          e.stopPropagation();
+          bolgeKaldirVeriden(grup.id);
+          bolgeYonetimListeEkraniCiz();
+        };
+        kart.appendChild(silBtn);
+
+        grid.appendChild(kart);
+      });
+
+      body.appendChild(grid);
+    }
+
+    // Bölge Ekle butonuna tıklanınca çalışır
+    function bolgeEkleTikla() {
+      const input = document.getElementById('bolgeAdInput');
+      const deger = input.value.trim();
+      if (!deger) return;
+
+      bolgeEkleVeriye(deger);
+      bolgeYonetimListeEkraniCiz();
+
+      const yeniInput = document.getElementById('bolgeAdInput');
+      if (yeniInput) yeniInput.focus();
+    }
+
+    // 2. Adım: Seçilen bölgede mahalle ekle / kaldır ekranı
+    function bolgeYonetimMahalleEkraniCiz(bolgeId) {
+      bolgeYonetimSeciliId = bolgeId;
+      const grup = mahalleGruplari.find(g => g.id === bolgeId);
+      if (!grup) { bolgeYonetimListeEkraniCiz(); return; }
+      const idx = mahalleGruplari.indexOf(grup);
+      const bolgeAdi = grup.ad || 'Bölge ' + (idx + 1);
+
+      const body = document.getElementById('modalBody');
+      body.innerHTML = '';
+
+      const geri = document.createElement('div');
+      geri.className = 'modal-geri-satir';
+      geri.textContent = '← Bölgelere dön';
+      geri.onclick = () => bolgeYonetimListeEkraniCiz();
+      body.appendChild(geri);
+
+      const baslikEkle = document.createElement('div');
+      baslikEkle.className = 'modal-alt-baslik';
+      baslikEkle.textContent = `${bolgeAdi} — Mahalle Ekle`;
+      body.appendChild(baslikEkle);
+
+      const inputRow = document.createElement('div');
+      inputRow.className = 'yonetim-input-row';
+
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.className = 'yonetim-input';
+      input.id = 'bolgeMahalleInput';
+      input.placeholder = 'Örn: Yeni Mahalle';
+      input.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') bolgeyeMahalleEkleTikla();
+      });
+      inputRow.appendChild(input);
+
+      const ekleBtn = document.createElement('button');
+      ekleBtn.className = 'yonetim-ekle-btn';
+      ekleBtn.textContent = '+ Ekle';
+      ekleBtn.onclick = () => bolgeyeMahalleEkleTikla();
+      inputRow.appendChild(ekleBtn);
+
+      body.appendChild(inputRow);
+
+      const uyariYeri = document.createElement('div');
+      uyariYeri.id = 'bolgeMahalleUyari';
+      body.appendChild(uyariYeri);
+
+      const not = document.createElement('div');
+      not.className = 'yonetim-not';
+      not.textContent = `Eklenen mahalle "${bolgeAdi}" bölgesine kaydedilir.`;
+      body.appendChild(not);
+
+      const baslikListe = document.createElement('div');
+      baslikListe.className = 'modal-alt-baslik';
+      baslikListe.textContent = `Mahalleler (${grup.mahalleler.length})`;
+      body.appendChild(baslikListe);
+
+      if (grup.mahalleler.length === 0) {
+        const bos = document.createElement('div');
+        bos.className = 'yonetim-bos';
+        bos.textContent = 'Bu bölgede henüz mahalle yok.';
+        body.appendChild(bos);
+      } else {
+        const liste = document.createElement('div');
+        liste.className = 'yonetim-sokak-liste';
+
+        grup.mahalleler.forEach(m => {
+          const satir = document.createElement('div');
+          satir.className = 'yonetim-sokak-satir';
+
+          const ad = document.createElement('div');
+          ad.className = 'yonetim-sokak-ad';
+          ad.textContent = m.label;
+          satir.appendChild(ad);
+
+          const silBtn = document.createElement('button');
+          silBtn.className = 'yonetim-sil-btn';
+          silBtn.textContent = '✕';
+          silBtn.title = 'Mahalleyi kaldır';
+          silBtn.onclick = () => {
+            bolgedenMahalleKaldir(bolgeId, m.key, m.ozel);
+            bolgeYonetimMahalleEkraniCiz(bolgeId);
+          };
+          satir.appendChild(silBtn);
+
+          liste.appendChild(satir);
+        });
+
+        body.appendChild(liste);
+      }
+    }
+
+    // Mahalle Ekle butonuna tıklanınca çalışır
+    function bolgeyeMahalleEkleTikla() {
+      const input = document.getElementById('bolgeMahalleInput');
+      const deger = input.value.trim();
+      const uyariYeri = document.getElementById('bolgeMahalleUyari');
+      if (uyariYeri) uyariYeri.innerHTML = '';
+      if (!deger) return;
+
+      const sonuc = bolgeyeMahalleEkle(bolgeYonetimSeciliId, deger);
+      if (!sonuc.basarili) {
+        if (uyariYeri) {
+          const uyari = document.createElement('div');
+          uyari.className = 'yonetim-uyari';
+          uyari.textContent = sonuc.mesaj;
+          uyariYeri.appendChild(uyari);
+        }
+        return;
+      }
+
+      bolgeYonetimMahalleEkraniCiz(bolgeYonetimSeciliId);
+      const yeniInput = document.getElementById('bolgeMahalleInput');
+      if (yeniInput) yeniInput.focus();
+    }
+
     // Modalı kapat
     function geriDon() {
       document.getElementById('modalOverlay').classList.add('hidden');
       document.body.style.overflow = '';
       document.querySelectorAll('.btn-mahalle').forEach(b => b.classList.remove('active'));
 
-      if (yonetimAktif) {
+      if (yonetimAktif || bolgeYonetimAktif) {
         yonetimAktif = false;
+        bolgeYonetimAktif = false;
         mahalleButonlariYenile();
       }
     }
