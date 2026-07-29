@@ -1,3081 +1,588 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Sokak adını söyleyin veya yazın, mahallesini öğrenin">
-  <meta name="theme-color" content="#0A0E17">
-  <title>Sokak Mahalle Bulucu</title>
-
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-
-  <style>
-    :root {
-      --bg-deep: #0A0E17;
-      --bg-panel: #0F1523;
-      --bg-panel-2: #131B2C;
-      --tint-rgb: 255,255,255;
-      --line: rgba(var(--tint-rgb),0.08);
-      --line-strong: rgba(var(--tint-rgb),0.14);
-      --text-primary: #E7ECF5;
-      --text-muted: #7C8797;
-      --accent: #FF6B1A;
-      --accent-dim: rgba(255,107,26,0.14);
-      --cyan: #00E5C7;
-      --cyan-dim: rgba(0,229,199,0.14);
-      --success: #22D488;
-      --success-dim: rgba(34,212,136,0.12);
-      --error: #FF4D6D;
-      --error-dim: rgba(255,77,109,0.12);
-      --blue: #3B9EFF;
-      --blue-dim: rgba(59,158,255,0.12);
-      --yellow: #FACC15;
-      --yellow-dim: rgba(250,204,21,0.12);
-      --gray: #8B96A8;
-      --gray-dim: rgba(139,150,168,0.12);
-      --white-grp: #CBD4E1;
-      --white-dim: rgba(203,212,225,0.1);
-      --btn-primary-hover: #ffffff;
-      --mono: 'JetBrains Mono', ui-monospace, monospace;
-      --display: 'Space Grotesk', sans-serif;
-      --body: 'Inter', -apple-system, sans-serif;
-    }
-
-    /* ================= Açık Tema ================= */
-    :root[data-theme="light"] {
-      --bg-deep: #F2F4F9;
-      --bg-panel: #FFFFFF;
-      --bg-panel-2: #FAFBFD;
-      --tint-rgb: 15,23,35;
-      --text-primary: #16202E;
-      --text-muted: #5B6577;
-      --accent: #FF6B1A;
-      --accent-dim: rgba(255,107,26,0.10);
-      --cyan: #0891B2;
-      --cyan-dim: rgba(8,145,178,0.10);
-      --success: #16A34A;
-      --success-dim: rgba(22,163,74,0.10);
-      --error: #DC2626;
-      --error-dim: rgba(220,38,38,0.10);
-      --blue: #2563EB;
-      --blue-dim: rgba(37,99,235,0.10);
-      --yellow: #B45309;
-      --yellow-dim: rgba(180,83,9,0.10);
-      --gray: #64748B;
-      --gray-dim: rgba(100,116,139,0.10);
-      --white-grp: #334155;
-      --white-dim: rgba(51,65,85,0.06);
-      --btn-primary-hover: #101826;
-    }
-
-    /* ================= Tema Değiştirme Butonu ================= */
-    .theme-toggle {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-      background: rgba(var(--tint-rgb),0.05);
-      border: 1px solid var(--line-strong);
-      border-radius: 2rem;
-      padding: 0.4rem 0.9rem;
-      font-family: var(--body);
-      font-size: 0.78rem;
-      font-weight: 600;
-      color: var(--text-muted);
-      cursor: pointer;
-      transition: all 0.2s;
-      margin-left: auto;
-    }
-
-    .theme-toggle:hover {
-      border-color: var(--accent);
-      color: var(--accent);
-    }
-
-    .theme-toggle .theme-icon {
-      font-size: 0.9rem;
-      line-height: 1;
-    }
-
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-
-    body {
-      font-family: var(--body);
-      background:
-        radial-gradient(circle at 15% 0%, rgba(255,107,26,0.08) 0%, transparent 45%),
-        radial-gradient(circle at 85% 100%, rgba(0,229,199,0.06) 0%, transparent 45%),
-        var(--bg-deep);
-      background-attachment: fixed;
-      color: var(--text-primary);
-      min-height: 100vh;
-      padding: 1rem;
-      position: relative;
-      overflow-x: hidden;
-    }
-
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background-image:
-        linear-gradient(rgba(var(--tint-rgb),0.025) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(var(--tint-rgb),0.025) 1px, transparent 1px);
-      background-size: 36px 36px;
-      pointer-events: none;
-      z-index: 0;
-      mask-image: radial-gradient(ellipse 70% 60% at 50% 20%, black 40%, transparent 100%);
-    }
-
-    .container {
-      max-width: 960px;
-      margin: 1.5rem auto;
-      position: relative;
-      z-index: 1;
-    }
-
-    .eyebrow {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      font-family: var(--mono);
-      font-size: 0.7rem;
-      letter-spacing: 0.12em;
-      color: var(--cyan);
-      text-transform: uppercase;
-      margin-bottom: 0.75rem;
-      padding-left: 0.15rem;
-    }
-
-    .eyebrow .dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: var(--cyan);
-      box-shadow: 0 0 8px var(--cyan);
-      animation: blink 2s infinite;
-    }
-
-    @keyframes blink {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.35; }
-    }
-
-    .header {
-      background: linear-gradient(180deg, var(--bg-panel-2), var(--bg-panel));
-      border: 1px solid var(--line);
-      border-bottom: none;
-      border-radius: 1rem 1rem 0 0;
-      padding: 0.75rem 2rem 0.75rem;
-      position: relative;
-      overflow: hidden;
-      text-align: left;
-    }
-
-    .header::after {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 2px;
-      background: linear-gradient(90deg, var(--accent), var(--cyan));
-    }
-
-    h1 {
-      font-family: var(--display);
-      font-size: 1.4rem;
-      font-weight: 700;
-      letter-spacing: -0.01em;
-      margin-bottom: 0.4rem;
-    }
-
-    .subtitle {
-      color: var(--text-muted);
-      font-size: 0.92rem;
-    }
-
-    .main {
-      background: var(--bg-panel);
-      border: 1px solid var(--line);
-      border-top: none;
-      border-bottom: none;
-      padding: 1.5rem 2rem;
-      display: flex;
-      align-items: flex-end;
-      gap: 1.25rem;
-      flex-wrap: wrap;
-    }
-
-    .field {
-      flex: 1 1 340px;
-      position: relative;
-    }
-
-    .autocomplete-dropdown {
-      position: absolute;
-      top: calc(100% + 0.4rem);
-      left: 0;
-      right: 0;
-      background: var(--bg-panel-2);
-      border: 1px solid var(--line-strong);
-      border-radius: 0.6rem;
-      max-height: 280px;
-      overflow-y: auto;
-      z-index: 50;
-      box-shadow: 0 12px 28px rgba(0,0,0,0.35);
-    }
-
-    .autocomplete-item {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 0.75rem;
-      padding: 0.65rem 1rem;
-      font-family: var(--body);
-      font-size: 0.9rem;
-      color: var(--text-primary);
-      cursor: pointer;
-      border-bottom: 1px solid var(--line);
-      transition: background 0.12s;
-    }
-
-    .autocomplete-item:last-child { border-bottom: none; }
-
-    .autocomplete-item:hover,
-    .autocomplete-item.active {
-      background: var(--accent-dim);
-    }
-
-    .autocomplete-ad mark {
-      background: transparent;
-      color: var(--accent);
-      font-weight: 700;
-    }
-
-    .autocomplete-mahalle {
-      font-family: var(--mono);
-      font-size: 0.7rem;
-      letter-spacing: 0.04em;
-      color: var(--text-muted);
-      white-space: nowrap;
-      flex-shrink: 0;
-    }
-
-    label {
-      display: block;
-      font-family: var(--mono);
-      font-size: 0.72rem;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      font-weight: 500;
-      color: var(--text-muted);
-      margin-bottom: 0.6rem;
-    }
-
-    input {
-      width: 100%;
-      padding: 0.85rem 1rem;
-      font-family: var(--mono);
-      font-size: 1rem;
-      color: var(--text-primary);
-      border: 1px solid var(--line-strong);
-      border-radius: 0.6rem;
-      background: rgba(var(--tint-rgb),0.02);
-      transition: all 0.2s;
-    }
-
-    input::placeholder { color: #4A5468; }
-
-    input:focus {
-      outline: none;
-      border-color: var(--accent);
-      background: rgba(255,107,26,0.04);
-      box-shadow: 0 0 0 3px rgba(255,107,26,0.12);
-    }
-
-    .buttons {
-      display: flex;
-      gap: 0.6rem;
-      flex: 0 0 auto;
-    }
-
-    @media (max-width: 640px) {
-      .main { flex-direction: column; align-items: stretch; }
-      .field { flex: 1 1 auto; }
-      .buttons { flex-direction: row; }
-    }
-
-    button {
-      padding: 0.8rem 1.4rem;
-      border: 1px solid transparent;
-      border-radius: 0.6rem;
-      font-family: var(--body);
-      font-weight: 600;
-      font-size: 0.92rem;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .btn-search {
-      flex: 1;
-      background: var(--text-primary);
-      color: var(--bg-deep);
-    }
-
-    .btn-search:hover {
-      background: #fff;
-      transform: translateY(-1px);
-      box-shadow: 0 4px 14px rgba(var(--tint-rgb),0.15);
-    }
-
-    .btn-voice {
-      background: var(--accent);
-      color: #fff;
-      padding: 0.8rem 1.1rem;
-    }
-
-    .btn-voice:hover {
-      background: #FF7A33;
-      transform: translateY(-1px);
-      box-shadow: 0 4px 14px rgba(255,107,26,0.35);
-    }
-
-    .btn-voice.listening {
-      animation: pulse 1.3s infinite;
-    }
-
-    @keyframes pulse {
-      0%, 100% { box-shadow: 0 0 0 0 rgba(255,107,26,0.5); }
-      50% { box-shadow: 0 0 0 8px rgba(255,107,26,0); }
-    }
-
-    .btn-clear {
-      background: transparent;
-      color: var(--text-muted);
-      border: 1px solid var(--line-strong);
-      padding: 0.8rem 1.1rem;
-    }
-
-    .btn-clear:hover {
-      border-color: var(--text-muted);
-      color: var(--text-primary);
-    }
-
-    .result {
-      background: var(--bg-panel);
-      border: 1px solid var(--line);
-      border-radius: 0 0 1rem 1rem;
-      padding: 1.75rem;
-      border-top: none;
-    }
-
-    .result-box {
-      border-radius: 0.6rem;
-      padding: 1.25rem 1.4rem;
-      border: 1px solid;
-      background: rgba(var(--tint-rgb),0.015);
-    }
-
-    .result-success { border-color: rgba(34,212,136,0.35); background: var(--success-dim); }
-    .result-error { border-color: rgba(255,77,109,0.35); background: var(--error-dim); }
-    .result-warning { border-color: rgba(255,107,26,0.35); background: var(--accent-dim); }
-    .result-listening { border-color: rgba(0,229,199,0.35); background: var(--cyan-dim); }
-
-    .result-title {
-      font-family: var(--mono);
-      font-size: 0.85rem;
-      letter-spacing: 0.03em;
-      font-weight: 600;
-      margin-bottom: 0.6rem;
-      text-transform: uppercase;
-    }
-
-    .success-title { color: var(--success); }
-    .error-title { color: var(--error); }
-    .warning-title { color: var(--accent); }
-    .listening-title { color: var(--cyan); }
-
-    .sokak-name {
-      font-family: var(--mono);
-      color: var(--text-muted);
-      font-size: 0.85rem;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-    }
-
-    .mahalle-name {
-      font-family: var(--display);
-      font-size: 1.6rem;
-      font-weight: 700;
-      color: var(--text-primary);
-      margin-top: 0.35rem;
-    }
-
-    .sonaramalar-wrap {
-      max-width: 960px;
-      margin: 1.25rem auto 0;
-    }
-
-    .sonaramalar-section {
-      background: var(--bg-panel);
-      border: 1px solid var(--line);
-      border-radius: 1rem;
-      padding: 1.25rem 1.5rem;
-    }
-
-    .sonaramalar-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 1rem;
-    }
-
-    .sonaramalar-title {
-      font-family: var(--mono);
-      font-size: 0.72rem;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--cyan);
-    }
-
-    .btn-sonaramalar-temizle {
-      background: transparent;
-      border: 1px solid var(--line-strong);
-      color: var(--text-muted);
-      padding: 0.35rem 0.75rem;
-      font-size: 0.75rem;
-      border-radius: 2rem;
-    }
-
-    .btn-sonaramalar-temizle:hover {
-      border-color: var(--error);
-      color: var(--error);
-    }
-
-    .sonaramalar-chips {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-    }
-
-    .chip-sonarama {
-      background: rgba(0,229,199,0.06);
-      border: 1px solid rgba(0,229,199,0.3);
-      border-radius: 2rem;
-      padding: 0.5rem 1rem;
-      font-family: var(--body);
-      font-size: 0.85rem;
-      font-weight: 600;
-      color: var(--cyan);
-      cursor: pointer;
-      transition: all 0.2s;
-      text-transform: capitalize;
-    }
-
-    .chip-sonarama:hover {
-      background: var(--cyan);
-      border-color: var(--cyan);
-      color: var(--bg-deep);
-    }
-
-    .chip-sonarama .chip-mahalle {
-      font-family: var(--mono);
-      font-size: 0.7rem;
-      opacity: 0.75;
-      margin-left: 0.35rem;
-      text-transform: none;
-    }
-
-    .mahalle-wrap {
-      max-width: 960px;
-      margin: 1.25rem auto 0;
-    }
-
-    .mahalle-section {
-      background: var(--bg-panel);
-      border: 1px solid var(--line);
-      border-radius: 1rem;
-      padding: 1.75rem 2rem;
-    }
-
-    .mahalle-section-title {
-      font-family: var(--mono);
-      font-size: 0.72rem;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--text-muted);
-      margin-bottom: 1.25rem;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 0.75rem;
-    }
-
-    .btn-yonetim-ac {
-      font-family: var(--body);
-      font-size: 0.8rem;
-      font-weight: 600;
-      letter-spacing: normal;
-      text-transform: none;
-      color: var(--cyan);
-      background: var(--cyan-dim);
-      border: 1px solid rgba(0,229,199,0.35);
-      border-radius: 2rem;
-      padding: 0.45rem 0.9rem;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .btn-yonetim-ac:hover {
-      background: var(--cyan);
-      color: #06231a;
-      border-color: var(--cyan);
-    }
-
-    .mahalle-groups {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 1.1rem 1.4rem;
-    }
-
-    @media (max-width: 760px) {
-      .mahalle-groups { grid-template-columns: 1fr; }
-    }
-
-    .grup-card {
-      border: 3px solid var(--line-strong);
-      border-radius: 0.75rem;
-      padding: 1rem 1.1rem;
-      background: rgba(var(--tint-rgb),0.012);
-      box-shadow: 0 1px 2px rgba(0,0,0,0.03), 0 4px 12px rgba(0,0,0,0.03);
-      position: relative;
-      overflow: hidden;
-    }
-
-    /* Açık temada kart çizgisi ve gölgesi biraz daha belirgin olsun */
-    :root[data-theme="light"] .grup-card {
-      border-color: rgba(15,23,35,0.22);
-      box-shadow: 0 1px 3px rgba(15,23,35,0.06), 0 6px 16px rgba(15,23,35,0.05);
-    }
-
-    .grup-card::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 2px;
-      background: var(--grup-renk, var(--accent));
-      opacity: 0.7;
-    }
-
-    .grup-card-title {
-      display: flex;
-      align-items: center;
-      gap: 0.45rem;
-      font-family: var(--mono);
-      font-size: 0.68rem;
-      letter-spacing: 0.09em;
-      text-transform: uppercase;
-      color: var(--text-muted);
-      margin-bottom: 0.75rem;
-    }
-
-    .grup-card-title .grup-dot {
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      background: var(--grup-renk, var(--accent));
-      box-shadow: 0 0 6px var(--grup-renk, var(--accent));
-      flex-shrink: 0;
-    }
-
-    .mahalle-buttons {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-    }
-
-    .btn-mahalle {
-      background: rgba(var(--tint-rgb),0.02);
-      border: 2px solid var(--line-strong);
-      border-radius: 2rem;
-      padding: 0.5rem 1rem;
-      font-family: var(--body);
-      font-size: 0.88rem;
-      font-weight: 600;
-      color: var(--text-muted);
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .btn-mahalle:not([class*="btn-mahalle-"]):hover {
-      border-color: var(--accent);
-      color: var(--accent);
-    }
-
-    .btn-mahalle.active {
-      background: var(--accent);
-      border-color: var(--accent);
-      color: #fff;
-    }
-
-    /* Grup renkleri */
-    .btn-mahalle-gri { border-color: rgba(139,150,168,0.4); color: var(--gray); }
-    .btn-mahalle-gri:hover, .btn-mahalle-gri.active { background: var(--gray); border-color: var(--gray); color: #0A0E17; }
-
-    .btn-mahalle-yesil { border-color: rgba(34,212,136,0.4); color: var(--success); }
-    .btn-mahalle-yesil:hover, .btn-mahalle-yesil.active { background: var(--success); border-color: var(--success); color: #0A0E17; }
-
-    .btn-mahalle-kirmizi { border-color: rgba(255,77,109,0.4); color: var(--error); }
-    .btn-mahalle-kirmizi:hover, .btn-mahalle-kirmizi.active { background: var(--error); border-color: var(--error); color: #0A0E17; }
-
-    .btn-mahalle-mavi { border-color: rgba(59,158,255,0.4); color: var(--blue); }
-    .btn-mahalle-mavi:hover, .btn-mahalle-mavi.active { background: var(--blue); border-color: var(--blue); color: #0A0E17; }
-
-    .btn-mahalle-sari { border-color: rgba(250,204,21,0.4); color: var(--yellow); }
-    .btn-mahalle-sari:hover, .btn-mahalle-sari.active { background: var(--yellow); border-color: var(--yellow); color: #0A0E17; }
-
-    .btn-mahalle-beyaz { border-color: rgba(203,212,225,0.35); color: var(--white-grp); background: rgba(var(--tint-rgb),0.03); }
-    .btn-mahalle-beyaz:hover, .btn-mahalle-beyaz.active { background: var(--white-grp); border-color: var(--white-grp); color: #0A0E17; }
-
-    .btn-mahalle-turuncu { border-color: rgba(255,107,26,0.4); color: var(--accent); }
-    .btn-mahalle-turuncu:hover, .btn-mahalle-turuncu.active { background: var(--accent); border-color: var(--accent); color: #fff; }
-
-    .btn-mahalle-camgobegi { border-color: rgba(0,229,199,0.4); color: var(--cyan); }
-    .btn-mahalle-camgobegi:hover, .btn-mahalle-camgobegi.active { background: var(--cyan); border-color: var(--cyan); color: #06231a; }
-
-    /* Grup ayırıcı */
-    .grup-ayirici {
-      width: 100%;
-      height: 1px;
-      background: var(--line);
-      margin: 0.5rem 0;
-    }
-
-    .mahalle-detail {
-      margin-top: 1.5rem;
-      border-top: 1px solid var(--line);
-      padding-top: 1.5rem;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .mahalle-detail-title {
-      font-family: var(--display);
-      font-size: 1.2rem;
-      font-weight: 700;
-      color: var(--accent);
-    }
-
-    .btn-geri {
-      background: none;
-      border: none;
-      font-size: 1.1rem;
-      cursor: pointer;
-      color: var(--text-muted);
-      padding: 0;
-    }
-
-    .btn-geri:hover { color: var(--accent); }
-
-    .sokak-item {
-      background: rgba(var(--tint-rgb),0.02);
-      border: 1px solid var(--line);
-      border-radius: 0.5rem;
-      padding: 0.75rem 1rem;
-      margin-bottom: 0.4rem;
-      font-family: var(--mono);
-      font-weight: 500;
-      color: var(--text-primary);
-      text-transform: capitalize;
-      transition: all 0.2s;
-    }
-
-    .sokak-item:hover {
-      border-color: var(--accent);
-      background: rgba(255,107,26,0.04);
-      transform: translateX(4px);
-      color: var(--accent);
-    }
-
-    .logo-container {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      text-align: right;
-      z-index: 1000;
-      opacity: 0.9;
-    }
-
-    .logo-trendyol {
-      font-family: var(--display);
-      font-weight: 700;
-      line-height: 1.2;
-      margin-bottom: 4px;
-    }
-
-    .logo-trendyol-main {
-      color: var(--text-primary);
-      font-size: 24px;
-      letter-spacing: -0.5px;
-    }
-
-    .logo-trendyol-express {
-      color: var(--accent);
-      font-size: 20px;
-      letter-spacing: -0.3px;
-    }
-
-    .logo-subtitle {
-      color: var(--text-muted);
-      font-family: var(--mono);
-      font-size: 10px;
-      font-weight: 500;
-      letter-spacing: 0.06em;
-      margin-top: 2px;
-    }
-
-    /* Modal overlay */
-    .modal-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(5,7,12,0.72);
-      backdrop-filter: blur(3px);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 999;
-      padding: 1rem;
-    }
-
-    .modal-overlay.hidden { display: none; }
-
-    .modal-box {
-      background: var(--bg-panel);
-      border: 1px solid var(--line-strong);
-      border-radius: 1rem;
-      width: 100%;
-      max-width: 420px;
-      max-height: 80vh;
-      display: flex;
-      flex-direction: column;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-      overflow: hidden;
-    }
-
-    .modal-header {
-      background: var(--bg-panel-2);
-      border-bottom: 1px solid var(--line);
-      color: var(--text-primary);
-      padding: 1.25rem 1.5rem;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      position: relative;
-    }
-
-    .modal-header::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 2px;
-      background: linear-gradient(90deg, var(--accent), var(--cyan));
-    }
-
-    .modal-header-title {
-      font-family: var(--display);
-      font-size: 1.15rem;
-      font-weight: 700;
-    }
-
-    .modal-close {
-      background: rgba(var(--tint-rgb),0.06);
-      border: 1px solid var(--line-strong);
-      color: var(--text-primary);
-      font-size: 1.1rem;
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 0;
-      line-height: 1;
-    }
-
-    .modal-close:hover { background: rgba(255,107,26,0.15); border-color: var(--accent); }
-
-    .modal-body {
-      overflow-y: auto;
-      padding: 1.25rem;
-    }
-
-    .modal-sokak-grid {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 0.5rem;
-    }
-
-    @media (max-width: 560px) {
-      .modal-sokak-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    }
-
-    @media (max-width: 380px) {
-      .modal-sokak-grid { grid-template-columns: 1fr; }
-    }
-
-    .modal-sokak-item {
-      background: rgba(var(--tint-rgb),0.02);
-      border: 1px solid var(--line-strong);
-      border-radius: 0.5rem;
-      padding: 0.65rem 0.5rem;
-      font-family: var(--mono);
-      font-weight: 500;
-      font-size: 0.7rem;
-      line-height: 1.7;
-      color: var(--text-primary);
-      text-transform: capitalize;
-      text-align: center;
-      word-break: break-word;
-      box-shadow: 0 1px 2px rgba(0,0,0,0.03), 0 3px 8px rgba(0,0,0,0.03);
-      transition: all 0.2s;
-    }
-
-    /* Açık temada sokak kartlarının çizgisi ve gölgesi daha belirgin olsun */
-    :root[data-theme="light"] .modal-sokak-item {
-      border-color: rgba(15,23,35,0.16);
-      box-shadow: 0 1px 3px rgba(15,23,35,0.06), 0 4px 10px rgba(15,23,35,0.05);
-    }
-
-    .modal-sokak-item:hover {
-      border-color: var(--accent);
-      background: rgba(255,107,26,0.06);
-      color: var(--accent);
-      transform: translateY(-2px);
-    }
-
-    .modal-alt-baslik {
-      font-family: var(--mono);
-      font-size: 0.72rem;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      font-weight: 600;
-      color: var(--accent);
-      margin: 1.1rem 0 0.6rem;
-      padding-bottom: 0.4rem;
-      border-bottom: 1px solid var(--line);
-    }
-
-    .modal-alt-baslik:first-child {
-      margin-top: 0;
-    }
-
-    .modal-kisi-grid {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 0.75rem;
-    }
-
-    @media (max-width: 480px) {
-      .modal-kisi-grid { grid-template-columns: 1fr; }
-    }
-
-    .modal-kisi-kart {
-      background: rgba(var(--tint-rgb),0.02);
-      border: 2px solid var(--line-strong);
-      border-radius: 0.75rem;
-      padding: 1rem 0.75rem;
-      text-align: center;
-      cursor: pointer;
-      transition: all 0.2s;
-      position: relative;
-    }
-
-    .modal-kisi-kart:hover {
-      border-color: var(--accent);
-      background: rgba(255,107,26,0.06);
-      transform: translateY(-2px);
-    }
-
-    .modal-kisi-kart-silinebilir { padding-top: 1.35rem; }
-
-    .modal-kisi-sil {
-      position: absolute;
-      top: 0.35rem;
-      right: 0.35rem;
-      background: var(--error-dim);
-      color: var(--error);
-      border: 1px solid rgba(255,77,109,0.3);
-      border-radius: 0.25rem;
-      width: 10px;
-      height: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      font-size: 0.4rem;
-      line-height: 1;
-      transition: all 0.2s;
-    }
-
-    .modal-kisi-sil:hover { background: var(--error); color: #fff; }
-
-    .modal-kisi-ad {
-      font-family: var(--display);
-      font-weight: 700;
-      font-size: 0.95rem;
-      color: var(--text-primary);
-      margin-bottom: 0.35rem;
-    }
-
-    .modal-kisi-sayi {
-      font-family: var(--mono);
-      font-size: 0.72rem;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-
-    .modal-geri-satir {
-      font-family: var(--mono);
-      font-size: 0.78rem;
-      color: var(--text-muted);
-      cursor: pointer;
-      margin-bottom: 1rem;
-      display: inline-block;
-      transition: color 0.2s;
-    }
-
-    .modal-geri-satir:hover {
-      color: var(--accent);
-    }
-
-    .hidden { display: none; }
-
-    .yonetim-input-row {
-      display: flex;
-      gap: 0.5rem;
-      margin-bottom: 0.5rem;
-    }
-
-    .yonetim-input {
-      flex: 1;
-      padding: 0.7rem 0.9rem;
-      font-family: var(--mono);
-      font-size: 0.88rem;
-      color: var(--text-primary);
-      border: 1px solid var(--line-strong);
-      border-radius: 0.5rem;
-      background: rgba(var(--tint-rgb),0.02);
-      min-width: 0;
-    }
-
-    .yonetim-input::placeholder { color: #4A5468; }
-
-    .yonetim-input:focus {
-      outline: none;
-      border-color: var(--cyan);
-      box-shadow: 0 0 0 3px rgba(0,229,199,0.12);
-    }
-
-    .yonetim-ekle-btn {
-      background: var(--success);
-      color: #06231a;
-      border: none;
-      border-radius: 0.5rem;
-      padding: 0 1.1rem;
-      font-family: var(--body);
-      font-weight: 700;
-      font-size: 0.85rem;
-      cursor: pointer;
-      white-space: nowrap;
-      transition: all 0.2s;
-    }
-
-    .yonetim-ekle-btn:hover { background: #3EE79E; }
-
-    .yonetim-not {
-      font-family: var(--mono);
-      font-size: 0.68rem;
-      color: var(--text-muted);
-      margin-bottom: 1.1rem;
-    }
-
-    .yonetim-sokak-liste {
-      display: flex;
-      flex-direction: column;
-      gap: 0.4rem;
-      max-height: 280px;
-      overflow-y: auto;
-    }
-
-    .yonetim-sokak-satir {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 0.6rem;
-      background: rgba(var(--tint-rgb),0.02);
-      border: 1px solid var(--line);
-      border-radius: 0.5rem;
-      padding: 0.55rem 0.5rem 0.55rem 0.8rem;
-    }
-
-    .yonetim-sokak-ad {
-      font-family: var(--mono);
-      font-size: 0.78rem;
-      color: var(--text-primary);
-      text-transform: capitalize;
-      word-break: break-word;
-    }
-
-    .yonetim-sil-btn {
-      background: var(--error-dim);
-      color: var(--error);
-      border: 1px solid rgba(255,77,109,0.35);
-      border-radius: 0.4rem;
-      width: 28px;
-      height: 28px;
-      flex-shrink: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      font-size: 0.85rem;
-      line-height: 1;
-      transition: all 0.2s;
-    }
-
-    .yonetim-sil-btn:hover { background: var(--error); color: #fff; }
-
-    .yonetim-bos {
-      color: var(--text-muted);
-      font-size: 0.82rem;
-      text-align: center;
-      padding: 1.25rem 0;
-      font-family: var(--mono);
-    }
-
-    .yonetim-uyari {
-      background: var(--error-dim);
-      color: var(--error);
-      border: 1px solid rgba(255,77,109,0.35);
-      border-radius: 0.5rem;
-      padding: 0.55rem 0.8rem;
-      font-family: var(--body);
-      font-size: 0.8rem;
-      font-weight: 600;
-      margin: -0.1rem 0 0.9rem;
-    }
-
-    .mahalle-section-actions {
-      display: flex;
-      align-items: center;
-      gap: 0.6rem;
-      flex-wrap: wrap;
-    }
-
-    @media (max-width: 480px) {
-      .logo-container { display: none; }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sokak ve Bölge Rehberi</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #f4f6f9;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --border-color: #e0e0e0;
+            --primary-color: #2563eb;
+            --primary-hover: #1d4ed8;
+            --accent-color: #10b981;
+            --danger-color: #ef4444;
+            --modal-bg: rgba(0, 0, 0, 0.5);
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-color: #f8fafc;
+            --border-color: #334155;
+            --primary-color: #3b82f6;
+            --primary-hover: #60a5fa;
+            --accent-color: #34d399;
+            --danger-color: #f87171;
+            --modal-bg: rgba(0, 0, 0, 0.75);
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            color: var(--primary-color);
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            cursor: pointer;
+            padding: 10px 16px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .btn-theme {
+            background-color: var(--card-bg);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+        }
+
+        .search-box {
+            position: relative;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .search-input-wrapper {
+            position: relative;
+            flex: 1;
+        }
+
+        .search-input-wrapper i {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #888;
+        }
+
+        input[type="text"], select {
+            width: 100%;
+            padding: 12px 16px 12px 42px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background-color: var(--card-bg);
+            color: var(--text-color);
+            font-size: 1rem;
+            outline: none;
+        }
+
+        select {
+            padding-left: 16px;
+            width: auto;
+            min-width: 180px;
+        }
+
+        input[type="text"]:focus, select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+        }
+
+        .btn-mic {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            padding: 0 16px;
+        }
+
+        .btn-mic.listening {
+            background-color: var(--danger-color);
+            color: white;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.6; }
+            100% { opacity: 1; }
+        }
+
+        .stats-bar {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 16px;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .street-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 12px;
+        }
+
+        .street-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 14px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow);
+        }
+
+        .street-info .street-name {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .street-info .region-badge {
+            display: inline-block;
+            font-size: 0.75rem;
+            padding: 2px 8px;
+            border-radius: 12px;
+            background-color: rgba(37, 99, 235, 0.1);
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .btn-delete {
+            background: none;
+            border: none;
+            color: var(--danger-color);
+            padding: 6px;
+            opacity: 0.6;
+        }
+
+        .btn-delete:hover {
+            opacity: 1;
+            background: rgba(239, 68, 68, 0.1);
+            border-radius: 4px;
+        }
+
+        /* Modal Structure */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--modal-bg);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background-color: var(--card-bg);
+            padding: 24px;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 450px;
+            box-shadow: var(--shadow);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .modal-body {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .modal-body label {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .modal-body input, .modal-body select {
+            padding-left: 12px;
+        }
+
+        .modal-footer {
+            margin-top: 20px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+        }
+
+        .no-result {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 40px;
+            opacity: 0.6;
+        }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <div class="eyebrow">
-      <span class="dot"></span>Konum sorgu sistemi çevrimiçi
-      <button type="button" class="theme-toggle" onclick="temaDegistir()">
-        <span class="theme-icon" id="themeIcon">☀️</span>
-        <span id="themeLabel">Açık Tema</span>
-      </button>
-    </div>
 
-    <!-- Başlık -->
-    <div class="header">
-      <h1>Sokak - Mahalle Bulucu</h1>
-      <p class="subtitle">Sokak adını girin, mahallesini öğrenin</p>
-    </div>
+    <div class="container">
+        <header>
+            <h1><i class="fa-solid fa-map-location-dot"></i> Sokak & Bölge Rehberi</h1>
+            <div class="header-actions">
+                <button class="btn-primary" onclick="openModal()"><i class="fa-solid fa-plus"></i> Yeni Ekle</button>
+                <button class="btn-theme" onclick="toggleTheme()" id="themeBtn"><i class="fa-solid fa-moon"></i></button>
+            </div>
+        </header>
 
-    <!-- Ana Bölüm -->
-    <div class="main">
-      <div class="field">
-        <label>Sokak Adı</label>
-        <input type="text" id="sokakInput" placeholder="Örn: Koç Sokak" autocomplete="off">
-        <div id="autocompleteDropdown" class="autocomplete-dropdown hidden"></div>
-      </div>
-
-      <div class="buttons">
-        <button class="btn-search" onclick="ara()">Ara</button>
-        <button class="btn-voice" id="voiceBtn" onclick="sesliAra()">🎤</button>
-        <button class="btn-clear" onclick="temizle()">Temizle</button>
-      </div>
-    </div>
-
-    <!-- Sonuç -->
-    <div id="result" class="result hidden"></div>
-
-    <!-- Son Aranananlar -->
-    <div id="sonAramalarWrap" class="sonaramalar-wrap hidden">
-      <div class="sonaramalar-section">
-        <div class="sonaramalar-header">
-          <div class="sonaramalar-title">🕑 Son Aranananlar</div>
-          <button class="btn-sonaramalar-temizle" onclick="sonAramalariTemizle()">Temizle</button>
+        <div class="search-box">
+            <div class="search-input-wrapper">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" id="searchInput" placeholder="Sokak veya cadde ara..." oninput="filterStreets()">
+            </div>
+            <button class="btn-mic" id="micBtn" onclick="sesliAra()" title="Sesle Ara">
+                <i class="fa-solid fa-microphone"></i>
+            </button>
+            <select id="regionFilter" onchange="filterStreets()">
+                <option value="ALL">Tüm Bölgeler</option>
+            </select>
         </div>
-        <div class="sonaramalar-chips" id="sonAramalarChips"></div>
-      </div>
-    </div>
-  </div>
 
-  <!-- Mahalleler -->
-  <div class="mahalle-wrap">
-    <div class="mahalle-section">
-      <div class="mahalle-section-title">
-        <span>Mahalleler</span>
-        <div class="mahalle-section-actions">
-          <button class="btn-yonetim-ac" onclick="yonetimAc()">🛠️ Sokak Ekle / Kaldır</button>
-          <button class="btn-yonetim-ac" onclick="bolgeYonetimAc()">🗺️ Bölge Ekle / Kaldır</button>
+        <div class="stats-bar">
+            <span id="totalCount">Toplam: 0 sokak</span>
+            <span id="activeFilterText">Filtre: Tümü</span>
         </div>
-      </div>
-      <div class="mahalle-groups" id="mahalleButtons"></div>
-    </div>
-  </div>
 
-  <!-- Modal -->
-  <div class="modal-overlay hidden" id="modalOverlay" onclick="modalKapat(event)">
-    <div class="modal-box">
-      <div class="modal-header">
-        <div class="modal-header-title" id="modalBaslik"></div>
-        <button class="modal-close" onclick="geriDon()">✕</button>
-      </div>
-      <div class="modal-body" id="modalBody"></div>
-    </div>
-  </div>
-
-  <!-- Logo - Sağ Alt -->
-  <div class="logo-container">
-    <div class="logo-trendyol">
-      <div class="logo-trendyol-main">trendyol</div>
-      <div class="logo-trendyol-express">express</div>
-    </div>
-    <div class="logo-subtitle">UZUN ŞUBE AI</div>
-  </div>
-
-  <script>
-    // Sokak veritabanı
-    const sokaklarTemel = {
-      'yemeni sokak': 'Ertuğrul 1',
-      'çayır sokak': 'Dumlupınar 2',
-      'sekbanlı sokak': 'Ataevler',
-      'göksun sokak': 'İstasyon 1',
-      'cami sokak': 'Tepecik 1',
-      'yüce rıfat sokak': 'Körfez 1',
-      'berk sokak': 'Körfez 2',
-      'koç sokak': 'Uzunçiftlik 1',
-      'saklı sokak': 'Emekevler 1',
-
-      // Emekevler 1 bölgesi - Eyüp Gençtürk (ek liste)
-      'ada sokak': 'Emekevler 1',
-      'adaletli sokak': 'Emekevler 1',
-      'ahu sokak': 'Emekevler 1',
-      'akhisar sokak': 'Emekevler 1',
-      'altun sokak': 'Emekevler 1',
-      'arzu sokak': 'Emekevler 1',
-      'asarcıklı sokak': 'Emekevler 1',
-      'asilzade sokak': 'Emekevler 1',
-      'ataman sokak': 'Emekevler 1',
-      'atayurt sokak': 'Emekevler 1',
-      'avrupa sokak': 'Emekevler 1',
-      'aydınlar sokak': 'Emekevler 1',
-      'azra sokak': 'Emekevler 1',
-      'balözü sokak': 'Emekevler 1',
-      'banu sokak': 'Emekevler 1',
-      'başak caddesi': 'Emekevler 1',
-      'bilge caddesi': 'Emekevler 1',
-      'burcu sokak': 'Emekevler 1',
-      'cemal kura caddesi': 'Emekevler 1',
-      'cengiz topel caddesi': 'Emekevler 1',
-      'cumhur sokak': 'Emekevler 1',
-      'çilli sokak': 'Emekevler 1',
-      'd-100 karayolu caddesi 52-110': 'Emekevler 1',
-      'didem sokak': 'Emekevler 1',
-      'emniyet sokak': 'Emekevler 1',
-      'emek caddesi': 'Emekevler 1',
-      'esnaf sokak': 'Emekevler 1',
-      'fesleğen sokak': 'Emekevler 1',
-      'fırat sokak': 'Emekevler 1',
-      'filiz sokak': 'Emekevler 1',
-      'fişek sokak': 'Emekevler 1',
-      'fuzuli sokak': 'Emekevler 1',
-      'gelin sokak': 'Emekevler 1',
-      'güldemet sokak': 'Emekevler 1',
-      'güldibi sokak': 'Emekevler 1',
-      'gülnaz sokak': 'Emekevler 1',
-      'handan sokak': 'Emekevler 1',
-      'hande sokak': 'Emekevler 1',
-      'hisar sokak': 'Emekevler 1',
-      'i̇bni sina caddesi': 'Emekevler 1',
-      'inebolu sokak': 'Emekevler 1',
-      'kadırga sokak': 'Emekevler 1',
-      'kerem sokak': 'Emekevler 1',
-      'kınalı sokak': 'Emekevler 1',
-      'kocatepe caddesi': 'Emekevler 1',
-      'kuzuluk sokak': 'Emekevler 1',
-      'nazlıcan sokak': 'Emekevler 1',
-      'neşe sokak': 'Emekevler 1',
-      'öztemizler sokak': 'Emekevler 1',
-      'paşadağ caddesi 1-59': 'Emekevler 1',
-      'rençber sokak': 'Emekevler 1',
-      'safir sokak': 'Emekevler 1',
-      'sapanca yolu caddesi 39-59': 'Emekevler 1',
-      'selamet sokak': 'Emekevler 1',
-      'sevinç sokak': 'Emekevler 1',
-      'sultan orhan sokak': 'Emekevler 1',
-      'tablo sokak': 'Emekevler 1',
-      'utku sokak': 'Emekevler 1',
-      'üretken sokak': 'Emekevler 1',
-      'yankı sokak': 'Emekevler 1',
-      'yeni emek caddesi': 'Emekevler 1',
-      'yeşilbahar sokak': 'Emekevler 1',
-      'yeter sokak': 'Emekevler 1',
-      'yıldırımlar sokak': 'Emekevler 1',
-      'zerre sokak': 'Emekevler 1',
-      '100.yıl cad.': 'Emekevler 1',
-      'aşhane sokak': 'Ataevler 1',
-      'sarvan sokak': 'Ataevler 2',
-      'faruk nafız çamlıbel sokak': 'Ataevler 3',
-      'efsane sokak': 'Eşme 1',
-
-      // Eşme bölgesi - Semih Şimşek (ek liste)
-      'alaplı sokak': 'Eşme 1',
-      'göl yolu sokak': 'Eşme 1',
-      'hanlı sokak': 'Eşme 1',
-      'özbek sokak': 'Eşme 1',
-      'sahil sokak': 'Eşme 1',
-      'iskele sokak': 'Eşme 1',
-      'erel sokak': 'Eşme 1',
-      'detay sokak': 'Eşme 1',
-      'doğanay sokak': 'Eşme 1',
-      'necati kocaağa sokak': 'Eşme 1',
-      'gökdağ sokak': 'Eşme 1',
-      'bozdemir sokak': 'Eşme 1',
-      'konak sokak': 'Eşme 1',
-      'yeniay sokak': 'Eşme 1',
-      'gönen sokak': 'Eşme 1',
-      'uhut sokak': 'Eşme 1',
-      'gülce sokak': 'Eşme 1',
-      'mustafa karacaoğlu sokak': 'Eşme 1',
-      'endamlı sokak': 'Eşme 1',
-      'bingül sokak': 'Eşme 1',
-      'limandere sokak': 'Eşme 1',
-      'timuçin atılgan sokak': 'Eşme 1',
-      'sırtlaryolu sokak': 'Eşme 1',
-      'gürgenyatak yolu sokak': 'Eşme 1',
-      'ahmediye caddesi': 'Eşme 1',
-      'çağatay sokak': 'Eşme 1',
-      'köse sokak': 'Eşme 1',
-      'beyşehir sokak': 'Eşme 1',
-      'orman sokak': 'Eşme 1',
-      'karabayır sokak': 'Eşme 1',
-      'güzelce sokak': 'Eşme 1',
-      'gülbağı sokak': 'Eşme 1',
-      'bağdat caddesi': 'Eşme 1',
-      'd100 kara yolu caddesi': 'Eşme 1',
-      'yıldır sokak': 'Eşme 1',
-      'nazende sokak': 'Eşme 1',
-      'yankese sokak': 'Eşme 1',
-      'karanlıkdere sokak': 'Eşme 1',
-      'davalı kırma sokak': 'Eşme 1',
-      'rüzgar tepesi sokak': 'Eşme 1',
-      'gökbudak sokak': 'Ertuğrul 1',
-
-      // Ertuğrul Gazi bölgesi - Burak Özer (ek liste)
-      'akıncı sokak': 'Ertuğrul 1',
-      'akıntürk sokak': 'Ertuğrul 1',
-      'akmeşe yolu cadde': 'Ertuğrul 1',
-      'akyıldız sokak': 'Ertuğrul 1',
-      'altındağ cadde': 'Ertuğrul 1',
-      'altıner sokak': 'Ertuğrul 1',
-      'altıntaş sokak': 'Ertuğrul 1',
-      'alyıldız sokak': 'Ertuğrul 1',
-      'asyalı sokak': 'Ertuğrul 1',
-      'aybahar sokak': 'Ertuğrul 1',
-      'ayçiçeği sokak': 'Ertuğrul 1',
-      'aydemir sokak': 'Ertuğrul 1',
-      'aydın sokak': 'Ertuğrul 1',
-      'aydoğan sokak': 'Ertuğrul 1',
-      'aydoğdu sokak': 'Ertuğrul 1',
-      'ayışığı sokak': 'Ertuğrul 1',
-      'ayşin sokak': 'Ertuğrul 1',
-      'ayyıldız sokak': 'Ertuğrul 1',
-      'barışçı sokak': 'Ertuğrul 1',
-      'belemir sokak': 'Ertuğrul 1',
-      'bilgi sokak': 'Ertuğrul 1',
-      'canan sokak': 'Ertuğrul 1',
-      'cennet sokak': 'Ertuğrul 1',
-      'cumhuriyet cadde': 'Ertuğrul 1',
-      'çantı sokak': 'Ertuğrul 1',
-      'çeşmeli sokak': 'Ertuğrul 1',
-      'damlar sokak': 'Ertuğrul 1',
-      'dergah sokak': 'Ertuğrul 1',
-      'divan sokak': 'Ertuğrul 1',
-      'divitli sokak': 'Ertuğrul 1',
-      'doğanlar sokak': 'Ertuğrul 1',
-      'ece sokak': 'Ertuğrul 1',
-      'ergin sokak': 'Ertuğrul 1',
-      'erkan sokak': 'Ertuğrul 1',
-      'festival sokak': 'Ertuğrul 1',
-      'fidancık sokak': 'Ertuğrul 1',
-      'fidanlık sokak': 'Ertuğrul 1',
-      'gebeşler sokak': 'Ertuğrul 1',
-      'genç sokak': 'Ertuğrul 1',
-      'gezer sokak': 'Ertuğrul 1',
-      'hazar sokak': 'Ertuğrul 1',
-      'hazeran sokak': 'Ertuğrul 1',
-      'hızır reis sokak': 'Ertuğrul 1',
-      'hira sokak': 'Ertuğrul 1',
-      'ışılay sokak': 'Ertuğrul 1',
-      'inegöl cadde': 'Ertuğrul 1',
-      'kalemli sokak': 'Ertuğrul 1',
-      'kalkandere sokak': 'Ertuğrul 1',
-      'kanuni sokak': 'Ertuğrul 1',
-      'kaplan sokak': 'Ertuğrul 1',
-      'karakiraz sokak': 'Ertuğrul 1',
-      'kardeş sokak': 'Ertuğrul 1',
-      'kaygusuz sokak': 'Ertuğrul 1',
-      'kayhan sokak': 'Ertuğrul 1',
-      'kemal reis sokak': 'Ertuğrul 1',
-      'kızılkaya sokak': 'Ertuğrul 1',
-      'maral sokak': 'Ertuğrul 1',
-      'mareşal fevzi çakmak cad. 1-60': 'Ertuğrul 1',
-      'meram sokak': 'Ertuğrul 1',
-      'neşem sokak': 'Ertuğrul 1',
-      'nişancı sokak': 'Ertuğrul 1',
-      'oğuz sokak': 'Ertuğrul 1',
-      'okumuş sokak': 'Ertuğrul 1',
-      'oruç reis sokak': 'Ertuğrul 1',
-      'piri reis sokak': 'Ertuğrul 1',
-      'reyhanlı sokak': 'Ertuğrul 1',
-      'salih reis sokak': 'Ertuğrul 1',
-      'saraç sokak': 'Ertuğrul 1',
-      'seheryıldızı sokak': 'Ertuğrul 1',
-      'selvili sokak': 'Ertuğrul 1',
-      'söğütler sokak': 'Ertuğrul 1',
-      'şehitler cadde': 'Ertuğrul 1',
-      'şengül sokak': 'Ertuğrul 1',
-      'şenol sokak': 'Ertuğrul 1',
-      'şeref sokak': 'Ertuğrul 1',
-      'şeyma sokak': 'Ertuğrul 1',
-      'taçyaprak sokak': 'Ertuğrul 1',
-      'timur sokak': 'Ertuğrul 1',
-      'tutkun sokak': 'Ertuğrul 1',
-      'ulusoy sokak': 'Ertuğrul 1',
-      'vefalı sokak': 'Ertuğrul 1',
-      'yavuz selim sokak': 'Ertuğrul 1',
-      'yenigün sokak': 'Ertuğrul 1',
-      'yıldız cadde': 'Ertuğrul 1',
-      'yıldızlar sokak': 'Ertuğrul 1',
-      'yücehan sokak': 'Ertuğrul 1',
-      'ziya paşa sokak': 'Ertuğrul 1',
-      'hazer sokak': 'Dumlupınar 2',
-
-      // Dumlupınar 1 bölgesi - Tolga Örengül (ek liste)
-      'değirmenli': 'Dumlupınar 1',
-      'şakir dede': 'Dumlupınar 1',
-      'gülümser': 'Dumlupınar 1',
-      "sakıp sabancı cad. 124-130 - 149 - 151": 'Dumlupınar 1',
-      "fındıklı cad. 20'ye kadar": 'Dumlupınar 1',
-      'hemşire sokak': 'Dumlupınar 1',
-      'gülderen': 'Dumlupınar 1',
-      'gökyüzü': 'Dumlupınar 1',
-      'ersin': 'Dumlupınar 1',
-      'hazer': 'Dumlupınar 1',
-      'çayır': 'Dumlupınar 1',
-
-      // Dumlupınar 2 bölgesi - Osman Örengül (ek liste)
-      'anka cad. 1-56': 'Dumlupınar 2',
-      'ozan sokak': 'Dumlupınar 2',
-      'demiröz cad. (habaş)': 'Dumlupınar 2',
-      'gökçe sokak 5-37': 'Dumlupınar 2',
-      'ankara (2-120)': 'Dumlupınar 2',
-      'ulus cad.': 'Dumlupınar 2',
-      'zafer': 'Dumlupınar 2',
-      'şema': 'Dumlupınar 2',
-      'şehit necmi semerci': 'Dumlupınar 2',
-      'güngör': 'Dumlupınar 2',
-      'ipek': 'Dumlupınar 2',
-      'arılar': 'Dumlupınar 2',
-      'mumcu': 'Dumlupınar 2',
-      'bedir': 'Dumlupınar 2',
-      'özbey': 'Dumlupınar 2',
-      'sakıp sabancı (1-131-120)': 'Dumlupınar 2',
-      'şamdan': 'Dumlupınar 2',
-      'ceyhan': 'Dumlupınar 2',
-      'seyhan': 'Dumlupınar 2',
-      'yeni cami': 'Dumlupınar 2',
-      'mert': 'Dumlupınar 2',
-      'tuğra': 'Dumlupınar 2',
-      'yalı': 'Dumlupınar 2',
-      'nur': 'Dumlupınar 2',
-      'şehit turgut çiçek cad. (2-4)': 'Dumlupınar 2',
-      'taşkent': 'Dumlupınar 2',
-      'özlem': 'Dumlupınar 2',
-      'yiğit': 'Dumlupınar 2',
-      'acar': 'Dumlupınar 2',
-      'çiçekli': 'Dumlupınar 2',
-      'özsoy': 'Dumlupınar 2',
-      'bizim': 'Dumlupınar 2',
-      'baki': 'Dumlupınar 2',
-      'arnavut': 'Dumlupınar 2',
-      'poyraz': 'Dumlupınar 2',
-      'volkan': 'Dumlupınar 2',
-      'nakkaş': 'Dumlupınar 2',
-      'tufan': 'Dumlupınar 2',
-      'askeriye sapağı': 'Dumlupınar 2',
-      'onurlu': 'Dumlupınar 2',
-      'umut': 'Dumlupınar 2',
-      'cihan': 'Dumlupınar 2',
-      'esen': 'Dumlupınar 2',
-      'oyalı': 'Dumlupınar 2',
-      'şehit mecit': 'Dumlupınar 2',
-      'ışıklı': 'Dumlupınar 2',
-      'güzide': 'Dumlupınar 2',
-      'mareşal fevzi çakmak (94)': 'Dumlupınar 2',
-      'süleyman paşa sokak': 'Karabaş 1',
-      'tepecik sokak': 'Tepecik 1',
-      'uğur sokak': 'İstasyon 1',
-      'gökmen sokak': 'Köseköy 1',
-      'taşkın sokak': 'FSM 1',
-      'gülaçtı sokak': 'FSM 1',
-      'yadigar sokak': 'Sarımeşe 1',
-      'çeltikdüzü sokak': 'Arslanbey 1',
-      'ateş sokak': 'Maşukiye 1',
-      'kır sokak': 'Derbent 1',
-      'bahçelievler sokak': 'Suadiye 1',
-      'keleşli sokak': 'Balaban 1',
-      'atabey sokak': 'Arslanbey 2',
-      'latif bey sokak': 'Ömerağa 1',
-      'neyzen': 'FSM 1',
-      'rüya': 'FSM 1',
-      'yasa': 'FSM 1',
-      'kumluk': 'FSM 1',
-      'koza': 'FSM 1',
-      'sadık': 'FSM 1',
-      '19 mayıs cad.': 'FSM 1',
-      '17 ağustos cad.': 'FSM 1',
-      'osmangazi cad.': 'FSM 1',
-      'suna': 'FSM 1',
-      'sergen': 'FSM 1',
-      'yörük': 'FSM 1',
-      'barış': 'FSM 1',
-      'fidan': 'FSM 1',
-      'mevlana': 'FSM 1',
-      'yavuz': 'FSM 1',
-      'çamlıbel': 'FSM 1',
-      'ark': 'FSM 1',
-      'taşkın': 'FSM 1',
-      'dumlupınar': 'FSM 1',
-      'gamzeli': 'FSM 1',
-      'dinç': 'FSM 1',
-      "uluışık cad. 1-61'e kadar": 'FSM 1',
-      'bilgehan': 'FSM 1',
-      'yurt cad.1-17': 'FSM 1',
-      'sezgi': 'FSM 1',
-      'şener': 'FSM 1',
-      'kelebek': 'FSM 1',
-      'mavi': 'FSM 1',
-      'üresin': 'FSM 1',
-      'darıca': 'FSM 1',
-      'melodi': 'FSM 1',
-      'dicle caddesi': 'FSM 1',
-      'polat': 'FSM 1',
-      'begeç': 'FSM 1',
-      'namlı': 'FSM 1',
-
-      // FSM2 bölgesi
-      'cem sultan': 'FSM 2',
-      'i̇rem': 'FSM 2',
-      'gökmen': 'FSM 2',
-      'kordon': 'FSM 2',
-      'serdar': 'FSM 2',
-      'sertaç': 'FSM 2',
-      'serincan 2-20': 'FSM 2',
-      'karşıyaka': 'FSM 2',
-      'çelik': 'FSM 2',
-      'abdülhamit': 'FSM 2',
-      'abide': 'FSM 2',
-      'akkışla': 'FSM 2',
-      'aksen': 'FSM 2',
-      'aladağ': 'FSM 2',
-      'araklı': 'FSM 2',
-      'arpalık': 'FSM 2',
-      'arzu': 'FSM 2',
-      'aşikar': 'FSM 2',
-      'ayaz': 'FSM 2',
-      'bağdat cad. 14-168': 'FSM 2',
-      'bağdat cad. 25-119': 'FSM 2',
-      'bağdat cad. 360-400': 'FSM 2',
-      'balaban sokak': 'FSM 2',
-      'başar': 'FSM 2',
-      'battal 9-11': 'FSM 2',
-      'beyaz gül 102-112': 'FSM 2',
-      'beyazıt': 'FSM 2',
-      'bingazi': 'FSM 2',
-      'bosna': 'FSM 2',
-      'bozkurt sokak': 'FSM 2',
-      'cemre': 'FSM 2',
-      'ceviz': 'FSM 2',
-      'cevizli': 'FSM 2',
-      'çakır': 'FSM 2',
-      'çaldıran': 'FSM 2',
-      'çalıkuşu 4': 'FSM 2',
-      'çamlı': 'FSM 2',
-      'çeşme': 'FSM 2',
-      'çiçek': 'FSM 2',
-      'çiğden': 'FSM 2',
-      'dadaş': 'FSM 2',
-      'demokrasi cad. 7-65': 'FSM 2',
-      'demokrasi cad. 6-78': 'FSM 2',
-      'dere': 'FSM 2',
-      'dermanlı': 'FSM 2',
-      'duru': 'FSM 2',
-      'eken': 'FSM 2',
-      'emrah': 'FSM 2',
-      'erkoçak': 'FSM 2',
-      'fedakar': 'FSM 2',
-      'fener': 'FSM 2',
-      'ferah sokak 1-15': 'FSM 2',
-      'ferah sokak 2-10': 'FSM 2',
-      'gençlik': 'FSM 2',
-      'gökalp': 'FSM 2',
-      'gözde': 'FSM 2',
-      'gülaçtı': 'FSM 2',
-      'güldeste': 'FSM 2',
-      'gülveren': 'FSM 2',
-      'günaydın': 'FSM 2',
-      'gürsel': 'FSM 2',
-      'gürün sokak': 'FSM 2',
-      'güvercin': 'FSM 2',
-      'hale': 'FSM 2',
-      'harman': 'FSM 2',
-      'hizal': 'FSM 2',
-      'hurmalı': 'FSM 2',
-      'hüner': 'FSM 2',
-      'ibrişim': 'FSM 2',
-      'icadiye': 'FSM 2',
-      'ilim caddesi 58-60-62': 'FSM 2',
-      'ilkbahar': 'FSM 2',
-      'inci sokak': 'FSM 2',
-      'ishak': 'FSM 2',
-      'selimıye 2 - 18': 'FSM 2',
-      'kahramanlar cad. 62-86': 'FSM 2',
-      'kahramanlar cad. no: 55': 'FSM 2',
-      'kaleli': 'FSM 2',
-      'kanarya': 'FSM 2',
-      'karabaş': 'FSM 2',
-      'karatay': 'FSM 2',
-      'kasırga': 'FSM 2',
-      'kavaklı': 'FSM 2',
-      'kerime': 'FSM 2',
-      'keten 37-51': 'FSM 2',
-      'kırlalesi': 'FSM 2',
-      'kırlangıç': 'FSM 2',
-      'köknar': 'FSM 2',
-      'kumluca': 'FSM 2',
-      'kütük': 'FSM 2',
-      'laçin': 'FSM 2',
-      'leylek': 'FSM 2',
-      'martı': 'FSM 2',
-      'meftun': 'FSM 2',
-      'melek 35-41': 'FSM 2',
-      'mevsim': 'FSM 2',
-      'mine': 'FSM 2',
-      'muhabbet': 'FSM 2',
-      'mukaddes': 'FSM 2',
-      'mutlu': 'FSM 2',
-      'nadir sokak': 'FSM 2',
-      'nazım demirci 2-400': 'FSM 2',
-      'nesil': 'FSM 2',
-      'nida': 'FSM 2',
-      'nizam': 'FSM 2',
-      'organize san. yolu ca': 'FSM 2',
-      'orhan': 'FSM 2',
-      'ortanca': 'FSM 2',
-      'öz yaprak': 'FSM 2',
-      'özden': 'FSM 2',
-      'özenç': 'FSM 2',
-      'petekli': 'FSM 2',
-      'saraybahçe': 'FSM 2',
-      'sarı gonca': 'FSM 2',
-      'sedir sokak': 'FSM 2',
-      'serçe': 'FSM 2',
-      'sevilmiş': 'FSM 2',
-      'seymen': 'FSM 2',
-      'sözlü': 'FSM 2',
-      'suadiye cad. 5-19': 'FSM 2',
-      'suadiye cad. 6-36': 'FSM 2',
-      'subaşı sokak no:46': 'FSM 2',
-      'sunarlar': 'FSM 2',
-      'şaşmaz sokak': 'FSM 2',
-      'şükür': 'FSM 2',
-      'taç': 'FSM 2',
-      'telaltı sokak': 'FSM 2',
-      'terim': 'FSM 2',
-      'topallar 3-31': 'FSM 2',
-      'topbaş': 'FSM 2',
-      'tuna': 'FSM 2',
-      'tunalı': 'FSM 2',
-      'turna': 'FSM 2',
-      'uysal': 'FSM 2',
-      'üstün': 'FSM 2',
-      'yağcılar': 'FSM 2',
-      'yeniçeri': 'FSM 2',
-      'yeşilkent': 'FSM 2',
-      'yurt 8 den 24 e': 'FSM 2',
-      'yurt cad. 19-35 e kadar': 'FSM 2',
-      'zerafet': 'FSM 2',
-      'zümrüt sokak': 'FSM 2',
-      'gül': 'FSM 2',
-
-      // Köseköy 1 bölgesi (devamı)
-      'dilek': 'Köseköy 1',
-      'onur': 'Köseköy 1',
-      'sezer': 'Köseköy 1',
-      'nazar': 'Köseköy 1',
-      'kaval': 'Köseköy 1',
-      'yatağan': 'Köseköy 1',
-      'fevzi çakmak cd.': 'Köseköy 1',
-      'istiklal cd.': 'Köseköy 1',
-      'köroğlu': 'Köseköy 1',
-      'yayla': 'Köseköy 1',
-      'murat': 'Köseköy 1',
-      'saray': 'Köseköy 1',
-      'aynur': 'Köseköy 1',
-      'gazi yasin cd.': 'Köseköy 1',
-      'özekli': 'Köseköy 1',
-      'olcay': 'Köseköy 1',
-      'karaca': 'Köseköy 1',
-      'gülüm': 'Köseköy 1',
-      'bilin': 'Köseköy 1',
-      'özcan': 'Köseköy 1',
-      'yaşa': 'Köseköy 1',
-      'atmaca': 'Köseköy 1',
-      'yamaç': 'Köseköy 1',
-      'terzi gölü cd.': 'Köseköy 1',
-      'barbaros hayrettin cd.': 'Köseköy 1',
-      'nehir': 'Köseköy 1',
-      'ırmak': 'Köseköy 1',
-      'belde': 'Köseköy 1',
-      'kudret': 'Köseköy 1',
-      'mecnun': 'Köseköy 1',
-      'ikiz': 'Köseköy 1',
-      'atik': 'Köseköy 1',
-      'akın': 'Köseköy 1',
-      'hakan': 'Köseköy 1',
-      'elmas': 'Köseköy 1',
-      'hünkar': 'Köseköy 1',
-      'gülistan': 'Köseköy 1',
-      'kartal': 'Köseköy 1',
-      'gümrük': 'Köseköy 1',
-      'kazım karabekir cd.': 'Köseköy 1',
-      'şahin': 'Köseköy 1',
-      'akçadağ': 'Köseköy 1',
-      'gelincik': 'Köseköy 1',
-      'miralay': 'Köseköy 1',
-      'atatürk cd.': 'Köseköy 1',
-      'aşkın': 'Köseköy 1',
-      'kılıç': 'Köseköy 1',
-      'ak': 'Köseköy 1',
-      'rauf orbay': 'Köseköy 1',
-      'han': 'Köseköy 1',
-      'şehit mahmut': 'Köseköy 1',
-      'sarıcalar': 'Köseköy 1',
-      'bağdat cd. (25 numaraya kadar)': 'Köseköy 1',
-      'göktuğ': 'Köseköy 1',
-      'hazal': 'Köseköy 1',
-      'ulusal': 'Köseköy 1',
-      'çakar': 'Köseköy 1',
-      'dural': 'Köseköy 1',
-      'sümer': 'Köseköy 1',
-      'hak': 'Köseköy 1',
-      'gazi osmanpaşa cd.': 'Köseköy 1',
-      'zebra': 'Köseköy 1',
-      'ince': 'Köseköy 1',
-      'özkan': 'Köseköy 1',
-      'güçlü': 'Köseköy 1',
-      'dalgıç': 'Köseköy 1',
-      'aktop': 'Köseköy 1',
-      'pırlanta': 'Köseköy 1',
-      'anıt': 'Köseköy 1',
-      'akarca': 'Köseköy 1',
-      'deniz': 'Köseköy 1',
-      'çuhane cd.': 'Köseköy 1',
-      "topallar cd. (49'dan yukarısı)": 'Köseköy 1',
-      "beyazgül (15'e kadar)": 'Köseköy 1',
-      'yılmaz': 'Köseköy 1',
-      'alper': 'Köseköy 1',
-      'kervan': 'Köseköy 1',
-      'yelken': 'Köseköy 1',
-      'atar': 'Köseköy 1',
-      'busem': 'Köseköy 1',
-      'helal': 'Köseköy 1',
-      'narenciye': 'Köseköy 1',
-      'taşova': 'Köseköy 1',
-      'ecem': 'Köseköy 1',
-      'kandil': 'Köseköy 1',
-      'köşk': 'Köseköy 1',
-      'akdağ cd.': 'Köseköy 1',
-
-      // FSM3 bölgesi
-      'meliha sokak': 'FSM 3',
-      'kent meydanı sokak': 'FSM 3',
-      'karanlar sokak': 'FSM 3',
-      'eren sokak': 'FSM 3',
-      'ballıca sokak 1-10': 'FSM 3',
-      'akşemsettin cad. 2-4-6': 'FSM 3',
-      'altunhisar cad. 47-94': 'FSM 3',
-      'gazi caddesi': 'FSM 3',
-      'özbilen sokak': 'FSM 3',
-      'taş. sokak': 'FSM 3',
-      'gaziyener taşkın': 'FSM 3',
-      'hızır': 'FSM 3',
-      'çalıkuşu': 'FSM 3',
-      'enginar': 'FSM 3',
-      'akdemir': 'FSM 3',
-      'altunhisar cad. 40 - 68': 'FSM 3',
-      'dinamik': 'FSM 3',
-      'enes': 'FSM 3',
-      'emirgan': 'FSM 3',
-      'hasret': 'FSM 3',
-      'hasgül': 'FSM 3',
-      'danış': 'FSM 3',
-      'eşrefbitlis sokak': 'FSM 3',
-      'serdivan': 'FSM 3',
-      'keser 93 den 68 kadar': 'FSM 3',
-      'metin sokak': 'FSM 3',
-      'selimiye 45': 'FSM 3',
-      'zemin': 'FSM 3',
-      'kahramanlar 35': 'FSM 3',
-      'sakin sokak 42': 'FSM 3',
-      'ceren sokak': 'FSM 3',
-      'güllü': 'FSM 3',
-      'çilem': 'FSM 3',
-      'akan': 'FSM 3',
-      'yazmalı': 'FSM 3',
-      'gündüz': 'FSM 3',
-      'alazlı': 'FSM 3',
-      'güngörmüş': 'FSM 3',
-      'ankara cad. 1-53': 'FSM 3',
-      'kahraman': 'FSM 3',
-      'sanayi cad.': 'FSM 3',
-      'mesnevi': 'FSM 3',
-      'darı': 'FSM 3',
-      'menderes bulvarı': 'FSM 3',
-
-      // İstasyon 1 bölgesi (devamı)
-      'adem yavuz caddesi': 'İstasyon 1',
-      'ankara caddesi 55-265': 'İstasyon 1',
-      'efe sadık caddesi': 'İstasyon 1',
-      'gaziemir caddesi': 'İstasyon 1',
-      'hürriyet caddesi': 'İstasyon 1',
-      'hüsnü efe caddesi': 'İstasyon 1',
-      'leyla atakan caddesi': 'İstasyon 1',
-      'mithatpaşa caddesi': 'İstasyon 1',
-      'yaşar doğu caddesi': 'İstasyon 1',
-      'yunus emre caddesi': 'İstasyon 1',
-      'ceylan sokak': 'İstasyon 1',
-      'çiğdemci sokak': 'İstasyon 1',
-      'fırın sokak': 'İstasyon 1',
-      'hanımeli sokak': 'İstasyon 1',
-      'ıhlamur sokak': 'İstasyon 1',
-      'lale sokak': 'İstasyon 1',
-      'leylak sokak': 'İstasyon 1',
-      'manolya sokak': 'İstasyon 1',
-      'menekşe sokak': 'İstasyon 1',
-      'meşelik sokak': 'İstasyon 1',
-      'mis sokak': 'İstasyon 1',
-      'nilifer sokak': 'İstasyon 1',
-      'sardunya sokak': 'İstasyon 1',
-      'sümbül sokak': 'İstasyon 1',
-      'yaprak sokak': 'İstasyon 1',
-      'zambak sokak': 'İstasyon 1',
-
-      // Sarımeşe 1 bölgesi (devamı)
-      'akseki sokak': 'Sarımeşe 1',
-      'altunhisar caddesi': 'Sarımeşe 1',
-      'aruz sokak': 'Sarımeşe 1',
-      'arzum sokak': 'Sarımeşe 1',
-      'baskı sokak': 'Sarımeşe 1',
-      'bağyolu sokak': 'Sarımeşe 1',
-      'besteli sokak': 'Sarımeşe 1',
-      'burgaz sokak': 'Sarımeşe 1',
-      'cebeci sokak': 'Sarımeşe 1',
-      'dede korkut caddesi': 'Sarımeşe 1',
-      'deliorman sokak': 'Sarımeşe 1',
-      'demirkıran çıkmazı': 'Sarımeşe 1',
-      'depo sokak': 'Sarımeşe 1',
-      'donanma sokak': 'Sarımeşe 1',
-      'doyuran sokak': 'Sarımeşe 1',
-      'elçibey sokak': 'Sarımeşe 1',
-      'gönül sokak': 'Sarımeşe 1',
-      'hisarcık sokak': 'Sarımeşe 1',
-      'kasımpatı sokak': 'Sarımeşe 1',
-      'keleş sokak': 'Sarımeşe 1',
-      'keser caddesi 1-50': 'Sarımeşe 1',
-      'latife sokak': 'Sarımeşe 1',
-      'melek sokak 1-25': 'Sarımeşe 1',
-      'miraç sokak': 'Sarımeşe 1',
-      'nizam-ı cedit caddesi': 'Sarımeşe 1',
-      'sade sokak': 'Sarımeşe 1',
-      'salkım sokak': 'Sarımeşe 1',
-      'sümbüle sokak': 'Sarımeşe 1',
-      'sezenler caddesi': 'Sarımeşe 1',
-      'silifke sokak': 'Sarımeşe 1',
-      'solmaz sokak': 'Sarımeşe 1',
-      'yağız sokak': 'Sarımeşe 1',
-      'şirince sokak': 'Sarımeşe 1',
-
-      // FSM4 bölgesi
-      'adalet sokak': 'FSM 4',
-      'akyol sokak': 'FSM 4',
-      'asiller caddesi': 'FSM 4',
-      'egemen sokak': 'FSM 4',
-      'bilgehan sokak': 'FSM 4',
-      'çamlık caddesi': 'FSM 4',
-      'duygu sokak': 'FSM 4',
-      'hanımağa sokak': 'FSM 4',
-      'plevne sokak': 'FSM 4',
-      'selimiye caddesi': 'FSM 4',
-      'sürmeli sokak': 'FSM 4',
-      'demokrasi cad. 81': 'FSM 4',
-      'uluışık cad. 91-93': 'FSM 4',
-      'altunhisar cad. 94\'ten sonrası': 'FSM 4',
-      'ballıca sokak 11\'den sonrası': 'FSM 4',
-      'yurt caddesi 53-55': 'FSM 4',
-      'orhan gazi cd.': 'FSM 4',
-      'akdeniz': 'FSM 4',
-      'avşar': 'FSM 4',
-      'saraykent': 'FSM 4'
-    
-      // NEW
-      'arslan caddesi': 'Balaban 1',
-};
-
-    // --- Esnek sokak eşleştirme ---
-    // "Suna" da yazılsa "Suna Sokak" da yazılsa, veritabanında hangisi varsa onu bulur.
-    function normalizeSokakAdi(str) {
-      return str
-        .toLocaleLowerCase('tr')
-        .replace(/[.,]/g, '')
-        .replace(/\b(sokak|sokağı|sk|caddesi|cadde|cad|bulvarı|bulvari|meydanı|meydani)\b/g, '')
-        .replace(/\s+/g, ' ')
-        .trim();
-    }
-
-    // --- Kullanıcı tarafından eklenen/kaldırılan sokaklar (localStorage) ---
-    const SOKAK_EKLENEN_ANAHTAR = 'sokakBulucu_eklenenSokaklar';
-    const SOKAK_SILINEN_ANAHTAR = 'sokakBulucu_silinenSokaklar';
-
-    function eklenenSokaklariGetir() {
-      try {
-        const veri = localStorage.getItem(SOKAK_EKLENEN_ANAHTAR);
-        return veri ? JSON.parse(veri) : {};
-      } catch (e) { return {}; }
-    }
-
-    function eklenenSokaklariKaydet(obj) {
-      try { localStorage.setItem(SOKAK_EKLENEN_ANAHTAR, JSON.stringify(obj)); }
-      catch (e) { /* depolama kullanılamıyorsa sessizce geç */ }
-    }
-
-    function silinenSokaklariGetir() {
-      try {
-        const veri = localStorage.getItem(SOKAK_SILINEN_ANAHTAR);
-        return veri ? JSON.parse(veri) : [];
-      } catch (e) { return []; }
-    }
-
-    function silinenSokaklariKaydet(liste) {
-      try { localStorage.setItem(SOKAK_SILINEN_ANAHTAR, JSON.stringify(liste)); }
-      catch (e) { /* depolama kullanılamıyorsa sessizce geç */ }
-    }
-
-    // Etkin sokak listesi: temel veri + kullanıcı eklemeleri - kullanıcı silmeleri
-    let sokaklar = {};
-    let sokaklarNormalize = {};
-
-    function sokaklariYenidenOlustur() {
-      Object.keys(sokaklar).forEach(k => delete sokaklar[k]);
-      Object.assign(sokaklar, sokaklarTemel);
-
-      const silinen = silinenSokaklariGetir();
-      silinen.forEach(k => delete sokaklar[k]);
-
-      const eklenen = eklenenSokaklariGetir();
-      Object.assign(sokaklar, eklenen);
-
-      Object.keys(sokaklarNormalize).forEach(k => delete sokaklarNormalize[k]);
-      Object.keys(sokaklar).forEach(key => {
-        const norm = normalizeSokakAdi(key);
-        if (!(norm in sokaklarNormalize)) {
-          sokaklarNormalize[norm] = key;
-        }
-      });
-    }
-
-    sokaklariYenidenOlustur();
-
-    // Yeni bir sokak ekler (varsa üzerine yazar) ve verileri kalıcı hale getirir
-    function sokakEkleVeriye(sokakAdiHam, mahalleKey) {
-      const sokakAdi = sokakAdiHam.toLocaleLowerCase('tr').trim();
-      if (!sokakAdi) return false;
-
-      const silinen = silinenSokaklariGetir().filter(k => k !== sokakAdi);
-      silinenSokaklariKaydet(silinen);
-
-      const eklenen = eklenenSokaklariGetir();
-      eklenen[sokakAdi] = mahalleKey;
-      eklenenSokaklariKaydet(eklenen);
-
-      sokaklariYenidenOlustur();
-      return true;
-    }
-
-    // Bir sokağı veriden kaldırır ve kalıcı hale getirir
-    function sokakKaldirVeriden(sokakAdi) {
-      const eklenen = eklenenSokaklariGetir();
-      if (sokakAdi in eklenen) {
-        delete eklenen[sokakAdi];
-        eklenenSokaklariKaydet(eklenen);
-      } else {
-        const silinen = silinenSokaklariGetir();
-        if (!silinen.includes(sokakAdi)) {
-          silinen.push(sokakAdi);
-          silinenSokaklariKaydet(silinen);
-        }
-      }
-      sokaklariYenidenOlustur();
-    }
-
-    // Girilen/söylenen sokak adına göre mahalleyi bulur (önce tam eşleşme, sonra esnek eşleşme)
-    function sokakBul(girilenAd) {
-      const aranan = girilenAd.toLocaleLowerCase('tr').trim();
-
-      if (sokaklar[aranan]) return sokaklar[aranan];
-
-      const normAranan = normalizeSokakAdi(girilenAd);
-      const eslesenKey = sokaklarNormalize[normAranan];
-      if (eslesenKey) return sokaklar[eslesenKey];
-
-      return null;
-    }
-
-
-    // Sokak listesini Türkçe alfabetik sıraya göre diz
-    function sokaklariSirala(liste) {
-      return [...liste].sort((a, b) => a.localeCompare(b, 'tr'));
-    }
-
-    // --- Son Aranananlar ---
-    const SON_ARAMALAR_ANAHTAR = 'sokakBulucu_sonAramalar';
-    const SON_ARAMALAR_MAKS = 10;
-
-    function sonAramalariGetir() {
-      try {
-        const veri = localStorage.getItem(SON_ARAMALAR_ANAHTAR);
-        return veri ? JSON.parse(veri) : [];
-      } catch (e) {
-        return [];
-      }
-    }
-
-    function sonAramaEkle(sokakAdi, mahalle) {
-      let liste = sonAramalariGetir();
-      // Aynı sokak zaten listede varsa çıkar, en başa tekrar eklenecek
-      liste = liste.filter(item => item.sokak.toLocaleLowerCase('tr') !== sokakAdi.toLocaleLowerCase('tr'));
-      liste.unshift({ sokak: sokakAdi, mahalle: mahalle });
-      liste = liste.slice(0, SON_ARAMALAR_MAKS);
-      try {
-        localStorage.setItem(SON_ARAMALAR_ANAHTAR, JSON.stringify(liste));
-      } catch (e) { /* depolama kullanılamıyorsa sessizce geç */ }
-      sonAramalariGoster();
-    }
-
-    function sonAramalariTemizle() {
-      try {
-        localStorage.removeItem(SON_ARAMALAR_ANAHTAR);
-      } catch (e) { /* yoksay */ }
-      sonAramalariGoster();
-    }
-
-    function sonAramalariGoster() {
-      const liste = sonAramalariGetir();
-      const wrap = document.getElementById('sonAramalarWrap');
-      const chipsDiv = document.getElementById('sonAramalarChips');
-
-      if (!liste.length) {
-        wrap.classList.add('hidden');
-        return;
-      }
-
-      wrap.classList.remove('hidden');
-      chipsDiv.innerHTML = '';
-
-      liste.forEach(item => {
-        const chip = document.createElement('button');
-        chip.className = 'chip-sonarama';
-        chip.innerHTML = `${item.sokak}<span class="chip-mahalle">${item.mahalle}</span>`;
-        chip.onclick = () => {
-          document.getElementById('sokakInput').value = item.sokak;
-          ara();
-        };
-        chipsDiv.appendChild(chip);
-      });
-    }
-
-    let dinliyor = false;
-
-    // ================= Autocomplete (öneri açılır menüsü) =================
-    let acOneriler = [];
-    let acSeciliIndex = -1;
-
-    function escapeHtml(str) {
-      return str.replace(/[&<>"']/g, c => ({
-        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
-      }[c]));
-    }
-
-    function capitalizeSokak(str) {
-      return str.replace(/\S+/g, kelime => kelime.charAt(0).toLocaleUpperCase('tr') + kelime.slice(1));
-    }
-
-    // Eşleşen kısmı vurgulayarak HTML üretir
-    function vurguluMetin(gosterimAdi, qLower) {
-      const lower = gosterimAdi.toLocaleLowerCase('tr');
-      const idx = qLower ? lower.indexOf(qLower) : -1;
-      if (idx === -1) return escapeHtml(gosterimAdi);
-      return escapeHtml(gosterimAdi.slice(0, idx)) +
-        '<mark>' + escapeHtml(gosterimAdi.slice(idx, idx + qLower.length)) + '</mark>' +
-        escapeHtml(gosterimAdi.slice(idx + qLower.length));
-    }
-
-    // Girilen metne göre öneri listesi çıkarır: önce birebir içerenler, sonra ek/kelime farkı gözetmeksizin eşleşenler
-    function sokakOneriListesi(query) {
-      const qLower = query.toLocaleLowerCase('tr').trim();
-      if (!qLower) return [];
-      const qNorm = normalizeSokakAdi(query);
-      const tumSokaklar = Object.keys(sokaklar);
-
-      const duzEslesen = tumSokaklar
-        .filter(k => k.includes(qLower))
-        .sort((a, b) => a.localeCompare(b, 'tr'));
-
-      const normEslesen = tumSokaklar
-        .filter(k => !k.includes(qLower) && normalizeSokakAdi(k).includes(qNorm))
-        .sort((a, b) => a.localeCompare(b, 'tr'));
-
-      return [...duzEslesen, ...normEslesen].slice(0, 8);
-    }
-
-    function autocompleteGoster(query) {
-      const dropdown = document.getElementById('autocompleteDropdown');
-      acOneriler = sokakOneriListesi(query);
-      acSeciliIndex = -1;
-
-      if (acOneriler.length === 0) {
-        autocompleteGizle();
-        return;
-      }
-
-      const qLower = query.toLocaleLowerCase('tr').trim();
-      dropdown.innerHTML = acOneriler.map((key, i) => {
-        const gosterimAdi = capitalizeSokak(key);
-        return `
-          <div class="autocomplete-item" data-idx="${i}" onmousedown="autocompleteSec(${i})">
-            <span class="autocomplete-ad">${vurguluMetin(gosterimAdi, qLower)}</span>
-            <span class="autocomplete-mahalle">${sokaklar[key]}</span>
-          </div>
-        `;
-      }).join('');
-      dropdown.classList.remove('hidden');
-    }
-
-    function autocompleteGizle() {
-      const dropdown = document.getElementById('autocompleteDropdown');
-      dropdown.classList.add('hidden');
-      dropdown.innerHTML = '';
-      acOneriler = [];
-      acSeciliIndex = -1;
-    }
-
-    function autocompleteVurguYenile() {
-      const dropdown = document.getElementById('autocompleteDropdown');
-      Array.from(dropdown.children).forEach((el, i) => {
-        el.classList.toggle('active', i === acSeciliIndex);
-      });
-      const aktifEl = dropdown.children[acSeciliIndex];
-      if (aktifEl) aktifEl.scrollIntoView({ block: 'nearest' });
-    }
-
-    // Öneriye tıklanınca/seçilince: input'a yaz ve ara
-    function autocompleteSec(i) {
-      const key = acOneriler[i];
-      if (!key) return;
-      document.getElementById('sokakInput').value = capitalizeSokak(key);
-      autocompleteGizle();
-      ara();
-    }
-
-    const sokakInputEl = document.getElementById('sokakInput');
-
-    sokakInputEl.addEventListener('input', function(e) {
-      autocompleteGoster(e.target.value);
-    });
-
-    sokakInputEl.addEventListener('focus', function(e) {
-      if (e.target.value.trim()) autocompleteGoster(e.target.value);
-    });
-
-    // Dropdown dışına tıklanınca kapat (öge tıklaması onmousedown ile önce yakalanıyor)
-    sokakInputEl.addEventListener('blur', function() {
-      setTimeout(autocompleteGizle, 150);
-    });
-
-    // Klavye: yukarı/aşağı ile öneriler arasında gezinme, Enter ile seçim/arama, Escape ile kapatma
-    sokakInputEl.addEventListener('keydown', function(e) {
-      const dropdown = document.getElementById('autocompleteDropdown');
-      const dropdownAcik = !dropdown.classList.contains('hidden') && acOneriler.length > 0;
-
-      if (e.key === 'ArrowDown') {
-        if (dropdownAcik) {
-          e.preventDefault();
-          acSeciliIndex = (acSeciliIndex + 1) % acOneriler.length;
-          autocompleteVurguYenile();
-        }
-      } else if (e.key === 'ArrowUp') {
-        if (dropdownAcik) {
-          e.preventDefault();
-          acSeciliIndex = (acSeciliIndex - 1 + acOneriler.length) % acOneriler.length;
-          autocompleteVurguYenile();
-        }
-      } else if (e.key === 'Enter') {
-        if (dropdownAcik && acSeciliIndex >= 0) {
-          e.preventDefault();
-          autocompleteSec(acSeciliIndex);
-        } else {
-          ara();
-          autocompleteGizle();
-        }
-      } else if (e.key === 'Escape') {
-        autocompleteGizle();
-      }
-    });
-
-    // Arama fonksiyonu
-    function ara() {
-      const input = document.getElementById('sokakInput').value;
-      const aranan = input.toLowerCase().trim();
-      const resultDiv = document.getElementById('result');
-
-      if (!aranan) {
-        gosterSonuc('error', '❌ Uyarı', 'Lütfen bir sokak adı girin!');
-        return;
-      }
-
-      const mahalle = sokakBul(input);
-
-      if (mahalle) {
-        gosterSonuc('success', '✅ Bulundu!', 
-          `<div class="sokak-name">${input}</div><div class="mahalle-name">${mahalle}</div>`);
-        sesliSoyle(mahalle);
-        sonAramaEkle(input, mahalle);
-      } else {
-        gosterSonuc('warning', '⚠️ Bulunamadı', 'Bu sokak veritabanında bulunamadı.');
-      }
-    }
-
-    // Sesli konuşma fonksiyonu
-    function sesliSoyle(metin) {
-      // Önceki konuşmaları iptal et
-      window.speechSynthesis.cancel();
-      
-      const utterance = new SpeechSynthesisUtterance(metin);
-      utterance.lang = 'tr-TR';
-      utterance.rate = 1.2;
-      utterance.pitch = 1;
-      utterance.volume = 1;
-      
-      // Hemen konuş
-      window.speechSynthesis.speak(utterance);
-    }
-
-    // Sesli arama
-    function sesliAra() {
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      
-      if (!SpeechRecognition) {
-        gosterSonuc('error', '❌ Uyarı', 'Tarayıcınız ses tanımayı desteklemiyor. Lütfen Chrome veya Edge kullanın.');
-        sesliSoyle('Tarayıcınız ses tanımayı desteklemiyor.');
-        return;
-      }
-
-      const recognition = new SpeechRecognition();
-      recognition.lang = 'tr-TR';
-      recognition.continuous = false;
-      recognition.interimResults = false;
-
-      const voiceBtn = document.getElementById('voiceBtn');
-
-      recognition.onstart = () => {
-        dinliyor = true;
-        voiceBtn.classList.add('listening');
-        voiceBtn.textContent = '🔴 Dinliyor...';
-        gosterSonuc('listening', '🎤 Dinliyorum', 'Sokak adını söyleyin...');
-      };
-
-      recognition.onresult = (event) => {
-        const sesliBilgi = event.results[0][0].transcript;
-        document.getElementById('sokakInput').value = sesliBilgi;
-        
-        const mahalle = sokakBul(sesliBilgi);
-
-        if (mahalle) {
-          gosterSonuc('success', '✅ Bulundu!', 
-            `<div class="sokak-name">${sesliBilgi}</div><div class="mahalle-name">${mahalle}</div>`);
-          sesliSoyle(mahalle);
-          sonAramaEkle(sesliBilgi, mahalle);
-        } else {
-          gosterSonuc('warning', '⚠️ Bulunamadı', 'Bu sokak veritabanında bulunamadı.');
-          sesliSoyle('Bulunamadı');
-        }
-      };
-
-      recognition.onerror = () => {
-        gosterSonuc('error', '❌ Hata', 'Ses tanıma hatası. Lütfen tekrar deneyin.');
-        sesliSoyle('Ses tanıma hatası. Lütfen tekrar deneyin.');
-      };
-
-      recognition.onend = () => {
-        dinliyor = false;
-        voiceBtn.classList.remove('listening');
-        voiceBtn.textContent = '🎤';
-      };
-
-      recognition.start();
-    }
-
-    // Temizle
-    function temizle() {
-      document.getElementById('sokakInput').value = '';
-      document.getElementById('result').classList.add('hidden');
-      autocompleteGizle();
-    }
-
-    // Sonuç göster
-    function gosterSonuc(tip, baslik, mesaj) {
-      const resultDiv = document.getElementById('result');
-      const tipClass = `result-${tip}`;
-      const titleClass = `${tip}-title`;
-
-      resultDiv.innerHTML = `
-        <div class="result-box ${tipClass}">
-          <div class="result-title ${titleClass}">${baslik}</div>
-          <div>${mesaj}</div>
+        <div class="street-list" id="streetList">
+            <!-- Sokak kartları dinamik eklenecek -->
         </div>
-      `;
-      resultDiv.classList.remove('hidden');
-    }
+    </div>
 
-    // Mahalleleri grupla
-    function mahalleSokakMap() {
-      const map = {};
-      Object.entries(sokaklar).forEach(([sokak, mahalle]) => {
-        if (!map[mahalle]) map[mahalle] = [];
-        map[mahalle].push(sokak);
-      });
-      return map;
-    }
+    <!-- Modal: Ekleme Formu -->
+    <div class="modal" id="addModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Yeni Sokak / Bölge Ekle</h3>
+                <button class="btn-delete" onclick="closeModal()"><i class="fa-solid fa-xmark fa-lg"></i></button>
+            </div>
+            <div class="modal-body">
+                <label for="modalRegionSelect">Bölge Seçin veya Yeni Bölge Oluşturun:</label>
+                <select id="modalRegionSelect" onchange="handleRegionSelectChange()">
+                    <!-- Bölgeler yüklenecek -->
+                    <option value="NEW">+ Yeni Bölge Ekle...</option>
+                </select>
 
-    // Mahalle grupları (temel/sabit veri — kullanıcı eklemeleri buna dokunmaz)
-    const mahalleGruplariTemel = [
-      {
-        renk: 'mavi',
-        mahalleler: [
-          'FSM 1', 'FSM 2', 'FSM 3', 'FSM 4',
-          'Köseköy 1', 'Sarımeşe 1', 'İstasyon 1'
-        ]
-      },
-      {
-        renk: 'gri',
-        mahalleler: ['Arslanbey 1', 'Arslanbey 2', 'Balaban 1', 'Derbent 1', 'Maşukiye 1', 'Suadiye 1']
-      },
-      {
-        renk: 'yesil',
-        mahalleler: ['Ataevler 1', 'Ataevler 2', 'Ataevler 3', 'Emekevler 1', 'Uzunçiftlik 1']
-      },
-      {
-        renk: 'kirmizi',
-        mahalleler: ['Dumlupınar 1', 'Dumlupınar 2', 'Ertuğrul 1', 'Eşme 1']
-      },
-      {
-        renk: 'sari',
-        mahalleler: ['Karabaş 1', 'Tepecik 1', 'Ömerağa 1']
-      },
-      {
-        renk: 'beyaz',
-        mahalleler: ['Körfez 1', 'Körfez 2']
-      }
-    ];
+                <div id="newRegionInputGroup" style="display: none;">
+                    <label for="newRegionName">Yeni Bölge Adı:</label>
+                    <input type="text" id="newRegionName" placeholder="Örn: Balaban 2">
+                </div>
 
-    // Grup renklerinin CSS değişken karşılıkları
-    const grupRenkDegiskeni = {
-      gri: 'var(--gray)',
-      yesil: 'var(--success)',
-      kirmizi: 'var(--error)',
-      mavi: 'var(--blue)',
-      sari: 'var(--yellow)',
-      beyaz: 'var(--white-grp)',
-      turuncu: 'var(--accent)',
-      camgobegi: 'var(--cyan)'
-    };
+                <label for="modalStreetName">Sokak / Cadde Adı:</label>
+                <input type="text" id="modalStreetName" placeholder="Örn: Cumhuriyet Caddesi">
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeModal()">İptal</button>
+                <button class="btn-primary" onclick="saveStreet()">Kaydet</button>
+            </div>
+        </div>
+    </div>
 
-    // Yeni eklenen bölgelere sırayla atanacak renkler
-    const BOLGE_RENK_DONGUSU = ['turuncu', 'camgobegi', 'mavi', 'yesil', 'kirmizi', 'sari', 'gri', 'beyaz'];
+    <script>
+        // Balaban 1 Sokakları Listesi
+        const balaban1Sokaklari = [
+            "Arslan caddesi", "Cevizlik caddesi", "Cevizlik evleri Sokak", "Çakıroğlu Sokak",
+            "Bağcılar Sokak", "Kadımezarı yolu caddesi", "İpekyolu caddesi", "Kuplay Sokak",
+            "Ahatlı Sokak", "Arapoğlu Sokak", "Ali oğulları Sokak", "Değirmenkapı caddesi",
+            "Cumhuriyet caddesi", "Kara kadılar caddesi", "Hocalar Sokak", "Aydınlık Sokak",
+            "Meyvelik Sokak", "Doğaner Sokak", "Demirciler Sokak", "Dizdaroğlu caddesi",
+            "Talip Sokak", "Keleşli Sokak", "Şehit İshak Öztürk Sokak", "Şirintepe Sokak",
+            "Şirin Yol Sokak", "Artvin Sokak", "Güllüce Sokak", "Özkoç Sokak",
+            "Özmen Sokak", "Gümüşçü Sokak", "Uzak sokak", "Karpuzluk Sokak",
+            "Nusretiye İzmit caddesi", "Şirinsulhiye İzmit caddesi", "Öğretmenler Sokak", "Kınık Sokak",
+            "Tuzla Sokak", "Kadem Sokak", "Teğmen Sokak", "Yeni Sokak",
+            "Gülence Sokak", "Kırmalar Sokak", "Şirin ağa caddesi", "Doğuş caddesi",
+            "Papatya Sokak", "Uzun yol Sokak", "Rumeli Sokak", "Halk Sokak",
+            "Sarmaşıklı Sokak", "Ali Efendi Sokak", "Mescit Sokak", "Mecit Sokak",
+            "Barut Sokak", "Ömerağa Sokak", "Turcan Sokak", "Seferağa Sokak",
+            "Akarlar Sokak", "Hatıra Sokak", "Destan Sokak", "Deniz kızı Sokak",
+            "Gazi Mustafa Kemal Atatürk 120 ve yukarısı", "Fatih caddesi", "Şanlı Sokak", "Ay Sokak",
+            "Muazzam Sokak", "Gelişim Sokak", "Demirli Sokak", "Demet Sokak",
+            "Asır Sokak", "Orkide Sokak", "Karasu Sokak", "Cesur Sokak",
+            "Güneysu sokak", "Ayazköy sokak", "Kırgızlar sokak", "Semt sokak", "Beyazlı sokak"
+        ];
 
-    // ================= Bölge / Mahalle Ekle-Kaldır Depolama =================
-    const BOLGE_EKLENEN_ANAHTAR = 'sokakBulucu_eklenenBolgeler';
-    const BOLGE_SILINEN_ANAHTAR = 'sokakBulucu_silinenBolgeler';
-    const MAHALLE_EKLENEN_ANAHTAR = 'sokakBulucu_eklenenMahalleler';
-    const MAHALLE_SILINEN_ANAHTAR = 'sokakBulucu_silinenMahalleler';
+        // Varsayılan İlk Veri
+        const initialData = balaban1Sokaklari.map((street, index) => ({
+            id: index + 1,
+            name: street,
+            region: "Balaban 1"
+        }));
 
-    function eklenenBolgeleriGetir() {
-      try {
-        const veri = localStorage.getItem(BOLGE_EKLENEN_ANAHTAR);
-        return veri ? JSON.parse(veri) : [];
-      } catch (e) { return []; }
-    }
+        // Uygulama Durumu (State)
+        let streets = JSON.parse(localStorage.getItem('streets_data')) || initialData;
 
-    function eklenenBolgeleriKaydet(liste) {
-      try { localStorage.setItem(BOLGE_EKLENEN_ANAHTAR, JSON.stringify(liste)); }
-      catch (e) { /* depolama kullanılamıyorsa sessizce geç */ }
-    }
-
-    // Kullanıcının kaldırdığı temel (sabit) bölgelerin id listesi
-    function silinenBolgeleriGetir() {
-      try {
-        const veri = localStorage.getItem(BOLGE_SILINEN_ANAHTAR);
-        return veri ? JSON.parse(veri) : [];
-      } catch (e) { return []; }
-    }
-
-    function silinenBolgeleriKaydet(liste) {
-      try { localStorage.setItem(BOLGE_SILINEN_ANAHTAR, JSON.stringify(liste)); }
-      catch (e) { /* depolama kullanılamıyorsa sessizce geç */ }
-    }
-
-    function eklenenMahalleleriGetir() {
-      try {
-        const veri = localStorage.getItem(MAHALLE_EKLENEN_ANAHTAR);
-        return veri ? JSON.parse(veri) : {};
-      } catch (e) { return {}; }
-    }
-
-    function eklenenMahalleleriKaydet(obj) {
-      try { localStorage.setItem(MAHALLE_EKLENEN_ANAHTAR, JSON.stringify(obj)); }
-      catch (e) { /* depolama kullanılamıyorsa sessizce geç */ }
-    }
-
-    // Kullanıcının kaldırdığı temel (sabit) mahallelerin key listesi
-    function silinenMahalleleriGetir() {
-      try {
-        const veri = localStorage.getItem(MAHALLE_SILINEN_ANAHTAR);
-        return veri ? JSON.parse(veri) : [];
-      } catch (e) { return []; }
-    }
-
-    function silinenMahalleleriKaydet(liste) {
-      try { localStorage.setItem(MAHALLE_SILINEN_ANAHTAR, JSON.stringify(liste)); }
-      catch (e) { /* depolama kullanılamıyorsa sessizce geç */ }
-    }
-
-    function yeniBolgeIdUret() {
-      return 'ozel-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 7);
-    }
-
-    // Etkin bölge/mahalle listesi: temel veri + kullanıcı eklemeleri/kaldırmaları birleştirilerek oluşturulur
-    let mahalleGruplari = [];
-
-    function mahalleGruplariYenidenOlustur() {
-      const eklenenMahalleler = eklenenMahalleleriGetir();
-      const eklenenBolgeler = eklenenBolgeleriGetir();
-      const silinenBolgeler = silinenBolgeleriGetir();
-      const silinenMahalleler = silinenMahalleleriGetir();
-      const yeniListe = [];
-
-      mahalleGruplariTemel.forEach((grup, idx) => {
-        const id = 'temel-' + idx;
-        if (silinenBolgeler.includes(id)) return;
-
-        const temelMahalleler = grup.mahalleler
-          .map(item => {
-            const key = typeof item === 'string' ? item : item.key;
-            const label = typeof item === 'string' ? item : item.label;
-            return { key, label, ozel: false };
-          })
-          .filter(m => !silinenMahalleler.includes(m.key));
-        const ekMahalleler = (eklenenMahalleler[id] || []).map(m => ({ key: m.key, label: m.label, ozel: true }));
-        yeniListe.push({
-          id,
-          ad: null,
-          renk: grup.renk,
-          ozel: false,
-          mahalleler: temelMahalleler.concat(ekMahalleler)
-        });
-      });
-
-      eklenenBolgeler.forEach(bolge => {
-        const ekMahalleler = (eklenenMahalleler[bolge.id] || []).map(m => ({ key: m.key, label: m.label, ozel: true }));
-        yeniListe.push({
-          id: bolge.id,
-          ad: bolge.ad,
-          renk: bolge.renk,
-          ozel: true,
-          mahalleler: ekMahalleler
-        });
-      });
-
-      mahalleGruplari.length = 0;
-      yeniListe.forEach(g => mahalleGruplari.push(g));
-    }
-
-    mahalleGruplariYenidenOlustur();
-
-    // Belirtilen isimde (büyük/küçük harf duyarsız) bir mahalle zaten var mı?
-    function mahalleVarMi(adayAd) {
-      const norm = adayAd.toLocaleLowerCase('tr').trim();
-      return mahalleGruplari.some(g => g.mahalleler.some(m => m.key.toLocaleLowerCase('tr').trim() === norm));
-    }
-
-    // Yeni bölge ekler (isteğe bağlı bir renk döngüsüyle) ve kalıcı hale getirir
-    function bolgeEkleVeriye(ad) {
-      const temizAd = ad.trim();
-      if (!temizAd) return false;
-
-      const eklenen = eklenenBolgeleriGetir();
-      const renk = BOLGE_RENK_DONGUSU[eklenen.length % BOLGE_RENK_DONGUSU.length];
-      eklenen.push({ id: yeniBolgeIdUret(), ad: temizAd, renk });
-      eklenenBolgeleriKaydet(eklenen);
-
-      mahalleGruplariYenidenOlustur();
-      return true;
-    }
-
-    // Bir bölgeyi kaldırır: özel (kullanıcı eklemiş) bölgeyse listeden çıkarır,
-    // temel (sabit) bölgeyse "silinen" listesine ekleyerek gizler. Her iki durumda
-    // da o bölgeye eklenmiş mahalleler de birlikte temizlenir.
-    function bolgeKaldirVeriden(bolgeId) {
-      if (bolgeId.startsWith('ozel-')) {
-        let eklenen = eklenenBolgeleriGetir();
-        eklenen = eklenen.filter(b => b.id !== bolgeId);
-        eklenenBolgeleriKaydet(eklenen);
-      } else {
-        const silinen = silinenBolgeleriGetir();
-        if (!silinen.includes(bolgeId)) {
-          silinen.push(bolgeId);
-          silinenBolgeleriKaydet(silinen);
-        }
-      }
-
-      const eklenenMahalleler = eklenenMahalleleriGetir();
-      if (eklenenMahalleler[bolgeId]) {
-        delete eklenenMahalleler[bolgeId];
-        eklenenMahalleleriKaydet(eklenenMahalleler);
-      }
-
-      mahalleGruplariYenidenOlustur();
-    }
-
-    // Belirtilen bölgeye yeni bir mahalle ekler; isim boşsa veya zaten varsa hata döner
-    function bolgeyeMahalleEkle(bolgeId, label) {
-      const temizLabel = label.trim();
-      if (!temizLabel) return { basarili: false, mesaj: 'Mahalle adı boş olamaz.' };
-      if (mahalleVarMi(temizLabel)) return { basarili: false, mesaj: 'Bu isimde bir mahalle zaten var.' };
-
-      const eklenenMahalleler = eklenenMahalleleriGetir();
-      if (!eklenenMahalleler[bolgeId]) eklenenMahalleler[bolgeId] = [];
-      eklenenMahalleler[bolgeId].push({ key: temizLabel, label: temizLabel });
-      eklenenMahalleleriKaydet(eklenenMahalleler);
-
-      mahalleGruplariYenidenOlustur();
-      return { basarili: true };
-    }
-
-    // Bir bölgeden, kullanıcı tarafından eklenmiş bir mahalleyi kaldırır
-    // Bir bölgeden bir mahalleyi kaldırır: özel (kullanıcı eklemiş) mahalleyse
-    // listeden tamamen çıkarır, temel (sabit) mahalleyse "silinen" listesine
-    // ekleyerek gizler.
-    function bolgedenMahalleKaldir(bolgeId, key, ozelMi) {
-      if (ozelMi) {
-        const eklenenMahalleler = eklenenMahalleleriGetir();
-        if (eklenenMahalleler[bolgeId]) {
-          eklenenMahalleler[bolgeId] = eklenenMahalleler[bolgeId].filter(m => m.key !== key);
-          eklenenMahalleleriKaydet(eklenenMahalleler);
-        }
-      } else {
-        const silinen = silinenMahalleleriGetir();
-        if (!silinen.includes(key)) {
-          silinen.push(key);
-          silinenMahalleleriKaydet(silinen);
-        }
-      }
-      mahalleGruplariYenidenOlustur();
-    }
-
-    // Mahalle butonlarını gruplu, kart bazlı oluştur (3 üstte / 3 altta ızgara)
-    function mahalleButonlariOlustur() {
-      const map = mahalleSokakMap();
-      const container = document.getElementById('mahalleButtons');
-      container.innerHTML = '';
-
-      mahalleGruplari.forEach((grup, idx) => {
-        const card = document.createElement('div');
-        card.className = 'grup-card';
-        card.style.setProperty('--grup-renk', grupRenkDegiskeni[grup.renk] || 'var(--accent)');
-
-        const title = document.createElement('div');
-        title.className = 'grup-card-title';
-        title.innerHTML = `<span class="grup-dot"></span>${grup.ad || 'Bölge ' + (idx + 1)}`;
-        card.appendChild(title);
-
-        const btnWrap = document.createElement('div');
-        btnWrap.className = 'mahalle-buttons';
-
-        grup.mahalleler.forEach(item => {
-          const key = typeof item === 'string' ? item : item.key;
-          const label = typeof item === 'string' ? item : item.label;
-          if (!map[key]) return;
-          const btn = document.createElement('button');
-          btn.className = 'btn-mahalle btn-mahalle-' + grup.renk;
-          btn.textContent = label;
-          btn.onclick = () => mahalleAc(key, btn, label);
-          btnWrap.appendChild(btn);
+        // Başlangıç Yüklemeleri
+        document.addEventListener('DOMContentLoaded', () => {
+            initTheme();
+            renderRegionOptions();
+            filterStreets();
         });
 
-        card.appendChild(btnWrap);
-        container.appendChild(card);
-      });
-    }
-
-    // Mahalle detayını modal olarak aç
-    function mahalleAc(mahalle, btnEl, gosterilecekAd) {
-      document.querySelectorAll('.btn-mahalle').forEach(b => b.classList.remove('active'));
-      btnEl.classList.add('active');
-
-      const map = mahalleSokakMap();
-      const body = document.getElementById('modalBody');
-      body.innerHTML = '';
-      const sokakListesi = map[mahalle] || [];
-
-      const baslik = mahalle;
-      const sesMetni = mahalle;
-
-      document.getElementById('modalBaslik').textContent = '📍 ' + baslik;
-      sesliSoyle(sesMetni);
-      const grid = document.createElement('div');
-      grid.className = 'modal-sokak-grid';
-      sokaklariSirala(sokakListesi).forEach(sokak => {
-        const div = document.createElement('div');
-        div.className = 'modal-sokak-item';
-        div.textContent = sokak;
-        grid.appendChild(div);
-      });
-      body.appendChild(grid);
-
-      document.getElementById('modalOverlay').classList.remove('hidden');
-      document.body.style.overflow = 'hidden';
-    }
-
-    // ================= Sokak Ekle / Kaldır Yönetimi =================
-    let yonetimAktif = false;
-    let yonetimSeciliBolgeIdx = null;
-    let yonetimSeciliMahalleKey = null;
-    let yonetimSeciliMahalleLabel = null;
-
-    // Yönetim panelini aç: bölge seçim ekranıyla başlar
-    function yonetimAc() {
-      yonetimAktif = true;
-      yonetimSeciliBolgeIdx = null;
-      yonetimSeciliMahalleKey = null;
-      yonetimSeciliMahalleLabel = null;
-
-      document.getElementById('modalBaslik').textContent = '🛠️ Sokak Ekle / Kaldır';
-      yonetimBolgeEkraniGoster();
-
-      document.getElementById('modalOverlay').classList.remove('hidden');
-      document.body.style.overflow = 'hidden';
-    }
-
-    // 1. Adım: Bölge seçimi
-    function yonetimBolgeEkraniGoster() {
-      yonetimSeciliBolgeIdx = null;
-      yonetimSeciliMahalleKey = null;
-      yonetimSeciliMahalleLabel = null;
-
-      const body = document.getElementById('modalBody');
-      body.innerHTML = '';
-
-      const baslik = document.createElement('div');
-      baslik.className = 'modal-alt-baslik';
-      baslik.textContent = 'Önce bölge seçin';
-      body.appendChild(baslik);
-
-      const grid = document.createElement('div');
-      grid.className = 'modal-kisi-grid';
-
-      mahalleGruplari.forEach((grup, idx) => {
-        const kart = document.createElement('div');
-        kart.className = 'modal-kisi-kart';
-        kart.innerHTML = `
-          <div class="modal-kisi-ad">${grup.ad || 'Bölge ' + (idx + 1)}</div>
-          <div class="modal-kisi-sayi">${grup.mahalleler.length} mahalle</div>
-        `;
-        kart.onclick = () => yonetimBolgeSec(idx);
-        grid.appendChild(kart);
-      });
-
-      body.appendChild(grid);
-    }
-
-    // 2. Adım: Seçilen bölgedeki mahalleleri göster
-    function yonetimBolgeSec(idx) {
-      yonetimSeciliBolgeIdx = idx;
-      yonetimSeciliMahalleKey = null;
-      yonetimSeciliMahalleLabel = null;
-
-      const map = mahalleSokakMap();
-      const grup = mahalleGruplari[idx];
-      const body = document.getElementById('modalBody');
-      body.innerHTML = '';
-
-      const geri = document.createElement('div');
-      geri.className = 'modal-geri-satir';
-      geri.textContent = '← Bölgelere dön';
-      geri.onclick = () => yonetimBolgeEkraniGoster();
-      body.appendChild(geri);
-
-      const baslik = document.createElement('div');
-      baslik.className = 'modal-alt-baslik';
-      baslik.textContent = `${grup.ad || 'Bölge ' + (idx + 1)} — mahalle seçin`;
-      body.appendChild(baslik);
-
-      const grid = document.createElement('div');
-      grid.className = 'modal-kisi-grid';
-
-      grup.mahalleler.forEach(item => {
-        const key = typeof item === 'string' ? item : item.key;
-        const label = typeof item === 'string' ? item : item.label;
-        const sayi = (map[key] || []).length;
-
-        const kart = document.createElement('div');
-        kart.className = 'modal-kisi-kart';
-        kart.innerHTML = `
-          <div class="modal-kisi-ad">${label}</div>
-          <div class="modal-kisi-sayi">${sayi} sokak</div>
-        `;
-        kart.onclick = () => yonetimMahalleSec(key, label);
-        grid.appendChild(kart);
-      });
-
-      body.appendChild(grid);
-    }
-
-    // 3. Adım: Seçilen mahallede sokak ekle / kaldır ekranı
-    function yonetimMahalleSec(key, label) {
-      yonetimSeciliMahalleKey = key;
-      yonetimSeciliMahalleLabel = label;
-      yonetimEkleKaldirEkraniCiz();
-    }
-
-    function yonetimEkleKaldirEkraniCiz() {
-      const key = yonetimSeciliMahalleKey;
-      const label = yonetimSeciliMahalleLabel;
-      const map = mahalleSokakMap();
-      const body = document.getElementById('modalBody');
-      body.innerHTML = '';
-
-      const geri = document.createElement('div');
-      geri.className = 'modal-geri-satir';
-      geri.textContent = '← Mahallelere dön';
-      geri.onclick = () => yonetimBolgeSec(yonetimSeciliBolgeIdx);
-      body.appendChild(geri);
-
-      const baslikEkle = document.createElement('div');
-      baslikEkle.className = 'modal-alt-baslik';
-      baslikEkle.textContent = `${label} — Sokak Ekle`;
-      body.appendChild(baslikEkle);
-
-      const inputRow = document.createElement('div');
-      inputRow.className = 'yonetim-input-row';
-
-      const input = document.createElement('input');
-      input.type = 'text';
-      input.className = 'yonetim-input';
-      input.id = 'yonetimSokakInput';
-      input.placeholder = 'Örn: Papatya Sokak';
-      input.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') yonetimSokakEkleTikla();
-      });
-      inputRow.appendChild(input);
-
-      const ekleBtn = document.createElement('button');
-      ekleBtn.className = 'yonetim-ekle-btn';
-      ekleBtn.textContent = '+ Ekle';
-      ekleBtn.onclick = () => yonetimSokakEkleTikla();
-      inputRow.appendChild(ekleBtn);
-
-      body.appendChild(inputRow);
-
-      const not = document.createElement('div');
-      not.className = 'yonetim-not';
-      not.textContent = `Eklenen sokak "${label}" mahallesine kaydedilir.`;
-      body.appendChild(not);
-
-      const baslikListe = document.createElement('div');
-      baslikListe.className = 'modal-alt-baslik';
-      const sokaklarListesi = sokaklariSirala(map[key] || []);
-      baslikListe.textContent = `Kayıtlı Sokaklar (${sokaklarListesi.length})`;
-      body.appendChild(baslikListe);
-
-      if (sokaklarListesi.length === 0) {
-        const bos = document.createElement('div');
-        bos.className = 'yonetim-bos';
-        bos.textContent = 'Bu mahallede henüz sokak yok.';
-        body.appendChild(bos);
-      } else {
-        const liste = document.createElement('div');
-        liste.className = 'yonetim-sokak-liste';
-
-        sokaklarListesi.forEach(sokak => {
-          const satir = document.createElement('div');
-          satir.className = 'yonetim-sokak-satir';
-
-          const ad = document.createElement('div');
-          ad.className = 'yonetim-sokak-ad';
-          ad.textContent = sokak;
-          satir.appendChild(ad);
-
-          const silBtn = document.createElement('button');
-          silBtn.className = 'yonetim-sil-btn';
-          silBtn.textContent = '✕';
-          silBtn.title = 'Sokağı kaldır';
-          silBtn.onclick = () => yonetimSokakKaldirTikla(sokak);
-          satir.appendChild(silBtn);
-
-          liste.appendChild(satir);
-        });
-
-        body.appendChild(liste);
-      }
-    }
-
-    // Ekle butonuna tıklanınca çalışır
-    function yonetimSokakEkleTikla() {
-      const input = document.getElementById('yonetimSokakInput');
-      const deger = input.value.trim();
-      if (!deger) return;
-
-      sokakEkleVeriye(deger, yonetimSeciliMahalleKey);
-      yonetimEkleKaldirEkraniCiz();
-
-      // Yeni eklenen sokağın altında input'a odaklan, hızlı ardışık ekleme için
-      const yeniInput = document.getElementById('yonetimSokakInput');
-      if (yeniInput) yeniInput.focus();
-    }
-
-    // Kaldır (✕) butonuna tıklanınca çalışır
-    function yonetimSokakKaldirTikla(sokakAdi) {
-      sokakKaldirVeriden(sokakAdi);
-      yonetimEkleKaldirEkraniCiz();
-    }
-
-    // ================= Bölge Ekle / Kaldır Yönetimi =================
-    let bolgeYonetimAktif = false;
-    let bolgeYonetimSeciliId = null;
-
-    // Bölge yönetim panelini aç: bölge listesiyle başlar
-    function bolgeYonetimAc() {
-      bolgeYonetimAktif = true;
-      bolgeYonetimSeciliId = null;
-
-      document.getElementById('modalBaslik').textContent = '🗺️ Bölge Ekle / Kaldır';
-      bolgeYonetimListeEkraniCiz();
-
-      document.getElementById('modalOverlay').classList.remove('hidden');
-      document.body.style.overflow = 'hidden';
-    }
-
-    // 1. Adım: Bölge listesi + yeni bölge ekleme
-    function bolgeYonetimListeEkraniCiz() {
-      bolgeYonetimSeciliId = null;
-
-      const body = document.getElementById('modalBody');
-      body.innerHTML = '';
-
-      const baslikEkle = document.createElement('div');
-      baslikEkle.className = 'modal-alt-baslik';
-      baslikEkle.textContent = 'Yeni Bölge Ekle';
-      body.appendChild(baslikEkle);
-
-      const inputRow = document.createElement('div');
-      inputRow.className = 'yonetim-input-row';
-
-      const input = document.createElement('input');
-      input.type = 'text';
-      input.className = 'yonetim-input';
-      input.id = 'bolgeAdInput';
-      input.placeholder = 'Örn: Yeni Bölge';
-      input.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') bolgeEkleTikla();
-      });
-      inputRow.appendChild(input);
-
-      const ekleBtn = document.createElement('button');
-      ekleBtn.className = 'yonetim-ekle-btn';
-      ekleBtn.textContent = '+ Ekle';
-      ekleBtn.onclick = () => bolgeEkleTikla();
-      inputRow.appendChild(ekleBtn);
-
-      body.appendChild(inputRow);
-
-      const not = document.createElement('div');
-      not.className = 'yonetim-not';
-      not.textContent = 'Bölgeyi ekledikten sonra üzerine tıklayıp mahalle ekleyebilirsiniz. Bir bölgeyi ✕ ile kaldırdığınızda, o bölge ve içindeki mahalleler listeden gizlenir.';
-      body.appendChild(not);
-
-      const baslikListe = document.createElement('div');
-      baslikListe.className = 'modal-alt-baslik';
-      baslikListe.textContent = `Bölgeler (${mahalleGruplari.length})`;
-      body.appendChild(baslikListe);
-
-      const grid = document.createElement('div');
-      grid.className = 'modal-kisi-grid';
-
-      mahalleGruplari.forEach((grup, idx) => {
-        const kart = document.createElement('div');
-        kart.className = 'modal-kisi-kart modal-kisi-kart-silinebilir';
-        kart.innerHTML = `
-          <div class="modal-kisi-ad">${grup.ad || 'Bölge ' + (idx + 1)}</div>
-          <div class="modal-kisi-sayi">${grup.mahalleler.length} mahalle</div>
-        `;
-        kart.onclick = () => bolgeYonetimMahalleEkraniCiz(grup.id);
-
-        const silBtn = document.createElement('button');
-        silBtn.className = 'modal-kisi-sil';
-        silBtn.textContent = '✕';
-        silBtn.title = 'Bölgeyi kaldır';
-        silBtn.onclick = (e) => {
-          e.stopPropagation();
-          bolgeKaldirVeriden(grup.id);
-          bolgeYonetimListeEkraniCiz();
-        };
-        kart.appendChild(silBtn);
-
-        grid.appendChild(kart);
-      });
-
-      body.appendChild(grid);
-    }
-
-    // Bölge Ekle butonuna tıklanınca çalışır
-    function bolgeEkleTikla() {
-      const input = document.getElementById('bolgeAdInput');
-      const deger = input.value.trim();
-      if (!deger) return;
-
-      bolgeEkleVeriye(deger);
-      bolgeYonetimListeEkraniCiz();
-
-      const yeniInput = document.getElementById('bolgeAdInput');
-      if (yeniInput) yeniInput.focus();
-    }
-
-    // 2. Adım: Seçilen bölgede mahalle ekle / kaldır ekranı
-    function bolgeYonetimMahalleEkraniCiz(bolgeId) {
-      bolgeYonetimSeciliId = bolgeId;
-      const grup = mahalleGruplari.find(g => g.id === bolgeId);
-      if (!grup) { bolgeYonetimListeEkraniCiz(); return; }
-      const idx = mahalleGruplari.indexOf(grup);
-      const bolgeAdi = grup.ad || 'Bölge ' + (idx + 1);
-
-      const body = document.getElementById('modalBody');
-      body.innerHTML = '';
-
-      const geri = document.createElement('div');
-      geri.className = 'modal-geri-satir';
-      geri.textContent = '← Bölgelere dön';
-      geri.onclick = () => bolgeYonetimListeEkraniCiz();
-      body.appendChild(geri);
-
-      const baslikEkle = document.createElement('div');
-      baslikEkle.className = 'modal-alt-baslik';
-      baslikEkle.textContent = `${bolgeAdi} — Mahalle Ekle`;
-      body.appendChild(baslikEkle);
-
-      const inputRow = document.createElement('div');
-      inputRow.className = 'yonetim-input-row';
-
-      const input = document.createElement('input');
-      input.type = 'text';
-      input.className = 'yonetim-input';
-      input.id = 'bolgeMahalleInput';
-      input.placeholder = 'Örn: Yeni Mahalle';
-      input.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') bolgeyeMahalleEkleTikla();
-      });
-      inputRow.appendChild(input);
-
-      const ekleBtn = document.createElement('button');
-      ekleBtn.className = 'yonetim-ekle-btn';
-      ekleBtn.textContent = '+ Ekle';
-      ekleBtn.onclick = () => bolgeyeMahalleEkleTikla();
-      inputRow.appendChild(ekleBtn);
-
-      body.appendChild(inputRow);
-
-      const uyariYeri = document.createElement('div');
-      uyariYeri.id = 'bolgeMahalleUyari';
-      body.appendChild(uyariYeri);
-
-      const not = document.createElement('div');
-      not.className = 'yonetim-not';
-      not.textContent = `Eklenen mahalle "${bolgeAdi}" bölgesine kaydedilir.`;
-      body.appendChild(not);
-
-      const baslikListe = document.createElement('div');
-      baslikListe.className = 'modal-alt-baslik';
-      baslikListe.textContent = `Mahalleler (${grup.mahalleler.length})`;
-      body.appendChild(baslikListe);
-
-      if (grup.mahalleler.length === 0) {
-        const bos = document.createElement('div');
-        bos.className = 'yonetim-bos';
-        bos.textContent = 'Bu bölgede henüz mahalle yok.';
-        body.appendChild(bos);
-      } else {
-        const liste = document.createElement('div');
-        liste.className = 'yonetim-sokak-liste';
-
-        grup.mahalleler.forEach(m => {
-          const satir = document.createElement('div');
-          satir.className = 'yonetim-sokak-satir';
-
-          const ad = document.createElement('div');
-          ad.className = 'yonetim-sokak-ad';
-          ad.textContent = m.label;
-          satir.appendChild(ad);
-
-          const silBtn = document.createElement('button');
-          silBtn.className = 'yonetim-sil-btn';
-          silBtn.textContent = '✕';
-          silBtn.title = 'Mahalleyi kaldır';
-          silBtn.onclick = () => {
-            bolgedenMahalleKaldir(bolgeId, m.key, m.ozel);
-            bolgeYonetimMahalleEkraniCiz(bolgeId);
-          };
-          satir.appendChild(silBtn);
-
-          liste.appendChild(satir);
-        });
-
-        body.appendChild(liste);
-      }
-    }
-
-    // Mahalle Ekle butonuna tıklanınca çalışır
-    function bolgeyeMahalleEkleTikla() {
-      const input = document.getElementById('bolgeMahalleInput');
-      const deger = input.value.trim();
-      const uyariYeri = document.getElementById('bolgeMahalleUyari');
-      if (uyariYeri) uyariYeri.innerHTML = '';
-      if (!deger) return;
-
-      const sonuc = bolgeyeMahalleEkle(bolgeYonetimSeciliId, deger);
-      if (!sonuc.basarili) {
-        if (uyariYeri) {
-          const uyari = document.createElement('div');
-          uyari.className = 'yonetim-uyari';
-          uyari.textContent = sonuc.mesaj;
-          uyariYeri.appendChild(uyari);
+        // Tema Yönetimi
+        function initTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            updateThemeIcon(savedTheme);
         }
-        return;
-      }
 
-      bolgeYonetimMahalleEkraniCiz(bolgeYonetimSeciliId);
-      const yeniInput = document.getElementById('bolgeMahalleInput');
-      if (yeniInput) yeniInput.focus();
-    }
-
-    // Modalı kapat
-    function geriDon() {
-      document.getElementById('modalOverlay').classList.add('hidden');
-      document.body.style.overflow = '';
-      document.querySelectorAll('.btn-mahalle').forEach(b => b.classList.remove('active'));
-
-      if (yonetimAktif || bolgeYonetimAktif) {
-        yonetimAktif = false;
-        bolgeYonetimAktif = false;
-        mahalleButonlariYenile();
-      }
-    }
-
-    // Ana sayfadaki mahalle butonlarını (sokak sayıları/olası ekleme-kaldırmalar sonrası) yeniden oluşturur
-    function mahalleButonlariYenile() {
-      mahalleButonlariOlustur();
-    }
-
-    // Overlay dışına tıklayınca kapat
-    function modalKapat(event) {
-      if (event.target === document.getElementById('modalOverlay')) {
-        geriDon();
-      }
-    }
-
-    // Sayfa yüklendiğinde butonları ve son aramaları oluştur
-    mahalleButonlariOlustur();
-    sonAramalariGoster();
-  </script>
-
-  <script>
-    // ================= Tema Seçimi (Açık / Koyu) =================
-    (function() {
-      var root = document.documentElement;
-      var STORAGE_KEY = 'sokakMahalleTema';
-
-      function uygulaTema(tema) {
-        if (tema === 'light') {
-          root.setAttribute('data-theme', 'light');
-        } else {
-          root.removeAttribute('data-theme');
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateThemeIcon(newTheme);
         }
-        var ikon = document.getElementById('themeIcon');
-        var etiket = document.getElementById('themeLabel');
-        if (ikon) ikon.textContent = tema === 'light' ? '🌙' : '☀️';
-        if (etiket) etiket.textContent = tema === 'light' ? 'Koyu Tema' : 'Açık Tema';
-      }
 
-      var kayitliTema = null;
-      try { kayitliTema = localStorage.getItem(STORAGE_KEY); } catch (e) {}
+        function updateThemeIcon(theme) {
+            const btn = document.getElementById('themeBtn');
+            btn.innerHTML = theme === 'dark' ? '<i class="fa-solid fa-sun"></i>' : '<i class="fa-solid fa-moon"></i>';
+        }
 
-      if (!kayitliTema) {
-        kayitliTema = (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) ? 'light' : 'dark';
-      }
-      uygulaTema(kayitliTema);
+        // Bölgeleri Al
+        function getRegions() {
+            const regions = [...new Set(streets.map(s => s.region))];
+            return regions.sort();
+        }
 
-      window.temaDegistir = function() {
-        var mevcut = root.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
-        var yeni = mevcut === 'light' ? 'dark' : 'light';
-        uygulaTema(yeni);
-        try { localStorage.setItem(STORAGE_KEY, yeni); } catch (e) {}
-      };
-    })();
-  </script>
+        // Filtre ve Form Bölge Seçeneklerini Doldur
+        function renderRegionOptions() {
+            const regionFilter = document.getElementById('regionFilter');
+            const modalRegionSelect = document.getElementById('modalRegionSelect');
+            const regions = getRegions();
+
+            // Arama filtresini güncelle
+            regionFilter.innerHTML = '<option value="ALL">Tüm Bölgeler</option>';
+            regions.forEach(region => {
+                regionFilter.innerHTML += `<option value="${region}">${region}</option>`;
+            });
+
+            // Modal bölgesini güncelle
+            modalRegionSelect.innerHTML = '';
+            regions.forEach(region => {
+                modalRegionSelect.innerHTML += `<option value="${region}">${region}</option>`;
+            });
+            modalRegionSelect.innerHTML += '<option value="NEW">+ Yeni Bölge Ekle...</option>';
+        }
+
+        // Sokakları Listele / Filtrele
+        function filterStreets() {
+            const query = document.getElementById('searchInput').value.toLowerCase().trim();
+            const selectedRegion = document.getElementById('regionFilter').value;
+
+            const filtered = streets.filter(item => {
+                const matchesSearch = item.name.toLowerCase().includes(query);
+                const matchesRegion = selectedRegion === 'ALL' || item.region === selectedRegion;
+                return matchesSearch && matchesRegion;
+            });
+
+            renderStreetList(filtered);
+            
+            // Sayacları güncelle
+            document.getElementById('totalCount').innerText = `Toplam: ${filtered.length} sokak`;
+            document.getElementById('activeFilterText').innerText = `Filtre: ${selectedRegion === 'ALL' ? 'Tümü' : selectedRegion}`;
+        }
+
+        // DOM'a Sokak Kartlarını Yazdır
+        function renderStreetList(list) {
+            const container = document.getElementById('streetList');
+            container.innerHTML = '';
+
+            if (list.length === 0) {
+                container.innerHTML = '<div class="no-result"><i class="fa-solid fa-circle-exclamation fa-2x"></i><br><br>Aranan kriterlere uygun sokak bulunamadı.</div>';
+                return;
+            }
+
+            list.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'street-card';
+                card.innerHTML = `
+                    <div class="street-info">
+                        <div class="street-name">${escapeHtml(item.name)}</div>
+                        <span class="region-badge">${escapeHtml(item.region)}</span>
+                    </div>
+                    <button class="btn-delete" onclick="deleteStreet(${item.id})" title="Sil">
+                        <i class="fa-solid fa-trash-can"></i>
+                    </button>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // Modal İşlemleri
+        function openModal() {
+            document.getElementById('addModal').style.display = 'flex';
+            handleRegionSelectChange();
+        }
+
+        function closeModal() {
+            document.getElementById('addModal').style.display = 'none';
+            document.getElementById('modalStreetName').value = '';
+            document.getElementById('newRegionName').value = '';
+        }
+
+        function handleRegionSelectChange() {
+            const select = document.getElementById('modalRegionSelect');
+            const newRegionGroup = document.getElementById('newRegionInputGroup');
+            
+            if (select.value === 'NEW') {
+                newRegionGroup.style.display = 'block';
+            } else {
+                newRegionGroup.style.display = 'none';
+            }
+        }
+
+        // Yeni Sokak Kaydetme
+        function saveStreet() {
+            const streetInput = document.getElementById('modalStreetName');
+            const regionSelect = document.getElementById('modalRegionSelect');
+            const newRegionInput = document.getElementById('newRegionName');
+
+            const streetName = streetInput.value.trim();
+            let regionName = regionSelect.value;
+
+            if (regionName === 'NEW') {
+                regionName = newRegionInput.value.trim();
+            }
+
+            if (!streetName || !regionName) {
+                alert('Lütfen sokak adı ve bölge alanlarını doldurunuz!');
+                return;
+            }
+
+            const newStreet = {
+                id: Date.now(),
+                name: streetName,
+                region: regionName
+            };
+
+            streets.push(newStreet);
+            saveData();
+
+            closeModal();
+            renderRegionOptions();
+            filterStreets();
+        }
+
+        // Sokak Silme
+        function deleteStreet(id) {
+            if (confirm('Bu sokağı silmek istediğinize emin misiniz?')) {
+                streets = streets.filter(s => s.id !== id);
+                saveData();
+                renderRegionOptions();
+                filterStreets();
+            }
+        }
+
+        // LocalStorage Kayıt
+        function saveData() {
+            localStorage.setItem('streets_data', JSON.stringify(streets));
+        }
+
+        // Sesli Arama (Web Speech API)
+        function sesliAra() {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+            if (!SpeechRecognition) {
+                alert("Tarayıcınız sesli arama özelliğini desteklemiyor.");
+                return;
+            }
+
+            const recognition = new SpeechRecognition();
+            recognition.lang = 'tr-TR';
+            const micBtn = document.getElementById('micBtn');
+
+            recognition.onstart = () => {
+                micBtn.classList.add('listening');
+            };
+
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                document.getElementById('searchInput').value = transcript;
+                filterStreets();
+            };
+
+            recognition.onerror = () => {
+                micBtn.classList.remove('listening');
+            };
+
+            recognition.onend = () => {
+                micBtn.classList.remove('listening');
+            };
+
+            recognition.start();
+        }
+
+        // XSS Önlemi
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.innerText = text;
+            return div.innerHTML;
+        }
+    </script>
 </body>
 </html>
