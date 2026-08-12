@@ -7,6 +7,10 @@
   <meta name="theme-color" content="#0A0E17">
   <title>Sokak Mahalle Bulucu</title>
 
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icons/icon-192.png" type="image/png">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -1181,7 +1185,8 @@
     let paylasimRef = null;
 
     // Config doldurulmadan siteyi açan biri hata almasın diye kontrol ediyoruz
-    if (firebaseConfig.apiKey && firebaseConfig.apiKey !== 'BURAYA_API_KEY') {
+    // (typeof firebase kontrolü: SDK dosyası ağdan yüklenemediyse örn. offline ilk açılışta site yine çökmesin)
+    if (typeof firebase !== 'undefined' && firebaseConfig.apiKey && firebaseConfig.apiKey !== 'BURAYA_API_KEY') {
       try {
         firebase.initializeApp(firebaseConfig);
         paylasimRef = firebase.database().ref('paylasimliVeri');
@@ -2257,6 +2262,32 @@
     }
 
     // Sesli konuşma fonksiyonu
+    // En uygun Türkçe sesi seçer: cihazda yüklü (offline çalışan) sesleri,
+    // internet gerektiren ağ seslerine tercih eder; tr-TR'yi genel tr'ye tercih eder.
+    let turkceSesCache = null;
+    function turkceSesSec() {
+      if (turkceSesCache) return turkceSesCache;
+      if (!window.speechSynthesis) return null;
+
+      const sesler = window.speechSynthesis.getVoices();
+      if (!sesler.length) return null;
+
+      const turkceSesler = sesler.filter(s => s.lang && s.lang.toLowerCase().startsWith('tr'));
+      if (turkceSesler.length === 0) return null;
+
+      const yerelSesler = turkceSesler.filter(s => s.localService);
+      const aday = yerelSesler.length ? yerelSesler : turkceSesler;
+
+      const tamEslesen = aday.find(s => s.lang.toLowerCase() === 'tr-tr');
+      turkceSesCache = tamEslesen || aday[0];
+      return turkceSesCache;
+    }
+
+    // Bazı tarayıcılarda ses listesi asenkron yüklenir; hazır olunca önbelleği sıfırla
+    if (window.speechSynthesis) {
+      window.speechSynthesis.onvoiceschanged = () => { turkceSesCache = null; };
+    }
+
     function sesliSoyle(metin) {
       // Önceki konuşmaları iptal et
       window.speechSynthesis.cancel();
@@ -2266,6 +2297,9 @@
       utterance.rate = 1.2;
       utterance.pitch = 1;
       utterance.volume = 1;
+
+      const secilenSes = turkceSesSec();
+      if (secilenSes) utterance.voice = secilenSes;
       
       // Hemen konuş
       window.speechSynthesis.speak(utterance);
@@ -3093,6 +3127,16 @@
         paylasimVeriGuncellendi(snapshot.val());
       }, (err) => {
         console.error('Firebase okuma hatası:', err);
+      });
+    }
+
+    // Service worker'ı kaydet: sayfa, sabit sokak verisi ve temel dosyalar
+    // önbelleğe alınır, internet olmadan da site açılıp arama yapılabilir
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('service-worker.js').catch((e) => {
+          console.warn('Service worker kaydı başarısız:', e);
+        });
       });
     }
   </script>
