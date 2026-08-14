@@ -298,6 +298,7 @@
 
     .buttons {
       display: flex;
+      align-items: center;
       gap: 0.6rem;
       flex: 0 0 auto;
     }
@@ -332,24 +333,102 @@
     }
 
     .btn-voice {
-      background: var(--accent);
-      color: #fff;
-      padding: 0.8rem 1.1rem;
+      position: relative;
+      flex: 0 0 auto;
+      width: 3rem;
+      height: 3rem;
+      padding: 0;
+      border-radius: 50%;
+      background: var(--bg-panel-2);
+      border: 1px solid var(--line-strong);
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: visible;
+      animation: mic-breathe 2.6s ease-in-out infinite;
+    }
+
+    .btn-voice .voice-icon-mic {
+      width: 1.3rem;
+      height: 1.3rem;
+      transition: opacity 0.15s, transform 0.15s;
+    }
+
+    .btn-voice .voice-bars {
+      display: none;
+      align-items: flex-end;
+      gap: 3px;
+      height: 16px;
+    }
+
+    .btn-voice .voice-bars span {
+      width: 3px;
+      background: #fff;
+      border-radius: 2px;
+      transform-origin: bottom;
+      animation: voice-bar 0.9s ease-in-out infinite;
+    }
+
+    .btn-voice .voice-bars span:nth-child(1) { height: 7px; animation-delay: 0s; }
+    .btn-voice .voice-bars span:nth-child(2) { height: 16px; animation-delay: 0.15s; }
+    .btn-voice .voice-bars span:nth-child(3) { height: 11px; animation-delay: 0.3s; }
+
+    @keyframes voice-bar {
+      0%, 100% { transform: scaleY(0.35); }
+      50% { transform: scaleY(1); }
+    }
+
+    .btn-voice::before,
+    .btn-voice::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      border: 1.5px solid var(--accent);
+      opacity: 0;
+      pointer-events: none;
     }
 
     .btn-voice:hover {
-      background: #FF7A33;
+      background: var(--accent-dim);
+      border-color: var(--accent);
       transform: translateY(-1px);
-      box-shadow: 0 4px 14px rgba(255,107,26,0.35);
+    }
+
+    @keyframes mic-breathe {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(255,107,26,0); }
+      50% { box-shadow: 0 0 0 6px rgba(255,107,26,0.12); }
     }
 
     .btn-voice.listening {
-      animation: pulse 1.3s infinite;
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+      animation: none;
+      box-shadow: 0 4px 14px rgba(255,107,26,0.35);
     }
 
-    @keyframes pulse {
-      0%, 100% { box-shadow: 0 0 0 0 rgba(255,107,26,0.5); }
-      50% { box-shadow: 0 0 0 8px rgba(255,107,26,0); }
+    .btn-voice.listening .voice-icon-mic {
+      display: none;
+    }
+
+    .btn-voice.listening .voice-bars {
+      display: flex;
+    }
+
+    .btn-voice.listening::before,
+    .btn-voice.listening::after {
+      animation: voice-ping 1.6s cubic-bezier(0,0,0.2,1) infinite;
+    }
+
+    .btn-voice.listening::after {
+      animation-delay: 0.5s;
+    }
+
+    @keyframes voice-ping {
+      0% { transform: scale(1); opacity: 0.55; }
+      100% { transform: scale(1.9); opacity: 0; }
     }
 
     .btn-clear {
@@ -1109,7 +1188,15 @@
 
       <div class="buttons">
         <button class="btn-search" onclick="ara()">Ara</button>
-        <button class="btn-voice" id="voiceBtn" onclick="sesliAra()">🎤</button>
+        <button class="btn-voice" id="voiceBtn" onclick="sesliAra()" aria-label="Sesli ara">
+          <svg class="voice-icon-mic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+            <path d="M19 10v1a7 7 0 0 1-14 0v-1"></path>
+            <line x1="12" y1="19" x2="12" y2="23"></line>
+            <line x1="8" y1="23" x2="16" y2="23"></line>
+          </svg>
+          <span class="voice-bars"><span></span><span></span><span></span></span>
+        </button>
         <button class="btn-clear" onclick="temizle()">Temizle</button>
       </div>
     </div>
@@ -1460,7 +1547,7 @@
       'neşem sokak': 'Ertuğrul 1',
       'nişancı sokak': 'Ertuğrul 1',
       'oğuz sokak': 'Ertuğrul 1',
-      'okumuş sokak': 'Ertuğrul 1',
+      'okumuş sokak': ['Ertuğrul 1', 'Suadiye 1'],
       'oruç reis sokak': 'Ertuğrul 1',
       'piri reis sokak': 'Ertuğrul 1',
       'reyhanlı sokak': 'Ertuğrul 1',
@@ -1496,7 +1583,6 @@
       'hemşire sokak': 'Dumlupınar 1',
       'gülderen': 'Dumlupınar 1',
       'gökyüzü': 'Dumlupınar 1',
-      'ersin': 'Dumlupınar 1',
       'hazer': 'Dumlupınar 1',
       'çayır': 'Dumlupınar 1',
 
@@ -1563,7 +1649,6 @@
       'abdurrahman yüksel caddesi': 'Karabaş 1',
       'tepecik sokak': 'Tepecik 1',
       'uğur sokak': 'İstasyon 1',
-      'gökmen sokak': 'Köseköy 1',
       'taşkın sokak': 'FSM 1',
       'gülaçtı sokak': 'FSM 1',
       'yadigar sokak': 'Sarımeşe 1',
@@ -1600,7 +1685,7 @@
       'erengül sokak': 'Maşukiye 1',
       'eski okul sokak': 'Maşukiye 1',
       'fâni sokak': 'Maşukiye 1',
-      'fatih caddesi': 'Maşukiye 1',
+      'fatih caddesi': ['Maşukiye 1', 'Balaban 1'],
       'filbahri sokak': 'Maşukiye 1',
       'garaj yolu': 'Maşukiye 1',
       'gazel sokak': 'Maşukiye 1',
@@ -1647,7 +1732,7 @@
       'ovalı': 'Maşukiye 1',
       'ören sokak': 'Maşukiye 1',
       'palmiye sokak': 'Maşukiye 1',
-      'papatya sokak': 'Maşukiye 1',
+      'papatya sokak': ['Maşukiye 1', 'Balaban 1'],
       'pir sultan abdal cad.': 'Maşukiye 1',
       'portakal sokak': 'Maşukiye 1',
       'sapanca yolu caddesi 140/888': 'Maşukiye 1',
@@ -1681,7 +1766,327 @@
       'bahçelievler sokak': 'Suadiye 1',
       'keleşli sokak': 'Balaban 1',
       'atabey sokak': 'Arslanbey 2',
+
+      // Arslanbey 2 bölgesi (ek liste)
+      'ahlat caddesi': 'Arslanbey 2',
+      'aktaş sokak': 'Arslanbey 2',
+      'aliağa caddesi': 'Arslanbey 2',
+      'andaç': 'Arslanbey 2',
+      'ardınç sokak': 'Arslanbey 2',
+      'atabey': 'Arslanbey 2',
+      'atam': 'Arslanbey 2',
+      'ataşehir': 'Arslanbey 2',
+      'azim': 'Arslanbey 2',
+      'bakırlık': 'Arslanbey 2',
+      'barbaros caddesi': 'Arslanbey 2',
+      'bayrak': 'Arslanbey 2',
+      'bayram': 'Arslanbey 2',
+      'belediye caddesi': 'Arslanbey 2',
+      'beykoz': 'Arslanbey 2',
+      'cantürk': 'Arslanbey 2',
+      'cem': 'Arslanbey 2',
+      'cengaver': 'Arslanbey 2',
+      'çavuş': 'Arslanbey 2',
+      'çimen': 'Arslanbey 2',
+      'denizli sokak': 'Arslanbey 2',
+      'doğanlar': 'Arslanbey 2',
+      'edip': 'Arslanbey 2',
+      'efes': 'Arslanbey 2',
+      'emirgazi': 'Arslanbey 2',
+      'enver paşa cad.': 'Arslanbey 2',
+      'eraslan': 'Arslanbey 2',
+      'erdem': 'Arslanbey 2',
+      'evren caddesi': 'Arslanbey 2',
+      'evrim': 'Arslanbey 2',
+      'gökdere': 'Arslanbey 2',
+      'gökkuşağı cad.': 'Arslanbey 2',
+      'gülenler': 'Arslanbey 2',
+      'gülova': 'Arslanbey 2',
+      'gümüş çeşme': 'Arslanbey 2',
+      'güvenç': 'Arslanbey 2',
+      'güzelhisar': 'Arslanbey 2',
+      'hediyeli': 'Arslanbey 2',
+      'i̇layda sokak': 'Arslanbey 2',
+      'inci tanesi': 'Arslanbey 2',
+      'izmit caddesi': 'Arslanbey 2',
+      'karabeyli': 'Arslanbey 2',
+      'karakuş': 'Arslanbey 2',
+      'karatepe caddesi': 'Arslanbey 2',
+      'kartepe caddesi': 'Arslanbey 2',
+      'kırık': 'Arslanbey 2',
+      'kışla': 'Arslanbey 2',
+      'köprülü': 'Arslanbey 2',
+      'kumlu': 'Arslanbey 2',
+      'kurtulan': 'Arslanbey 2',
+      'makber': 'Arslanbey 2',
+      'manolya': 'Arslanbey 2',
+      'merve': 'Arslanbey 2',
+      'özbay sokak': 'Arslanbey 2',
+      'ruşen': 'Arslanbey 2',
+      'sabit sokak': 'Arslanbey 2',
+      'şahane sokak': 'Arslanbey 2',
+      'şirin sokak': 'Arslanbey 2',
+      'taç yaprak': 'Arslanbey 2',
+      'tarhan': 'Arslanbey 2',
+      'temel': 'Arslanbey 2',
+      'toros': 'Arslanbey 2',
+      'üniversite': 'Arslanbey 2',
+      'üzülmez': 'Arslanbey 2',
+      'yaver': 'Arslanbey 2',
+      'yıldıray cad.': 'Arslanbey 2',
+      'zübeyde': 'Arslanbey 2',
       'latif bey sokak': 'Ömerağa 1',
+
+      // Derbent 1 bölgesi (ek liste)
+      'ayvalık': 'Derbent 1',
+      'yenice': 'Derbent 1',
+      'bayırlı': 'Derbent 1',
+      'dağ sokak': 'Derbent 1',
+      'gediz': 'Derbent 1',
+      'köprü başı': 'Derbent 1',
+      'korkut': 'Derbent 1',
+      'şeker': 'Derbent 1',
+      'yeşilöz sokak': 'Derbent 1',
+      'gökçesu': 'Derbent 1',
+      'sevgi': 'Derbent 1',
+      'mazi': 'Derbent 1',
+      'sarmaşıklı sokak': ['Derbent 1', 'Balaban 1'],
+      'kooparatif cad.': 'Derbent 1',
+      'lütfü arat cad.': 'Derbent 1',
+      'ahmet lütfü arat': 'Derbent 1',
+      'ertürk sokak': 'Derbent 1',
+
+      // Arslanbey 1 bölgesi (ek liste)
+      'emrah': 'Arslanbey 1',
+      'arslanbey osb': 'Arslanbey 1',
+      'alim': 'Arslanbey 1',
+      'arpaçay': 'Arslanbey 1',
+      'atatürk cad': 'Arslanbey 1',
+      'aydinli': 'Arslanbey 1',
+      'baglar': 'Arslanbey 1',
+      'basakci': 'Arslanbey 1',
+      'besik': 'Arslanbey 1',
+      'beyazgul': 'Arslanbey 1',
+      'bihter': 'Arslanbey 1',
+      'birlik sok': 'Arslanbey 1',
+      'bora': 'Arslanbey 1',
+      'bostan': 'Arslanbey 1',
+      'burç': 'Arslanbey 1',
+      'çeltikdüzü sok': 'Arslanbey 1',
+      'demirci': 'Arslanbey 1',
+      'doğan': 'Arslanbey 1',
+      'düzler': 'Arslanbey 1',
+      'eldivan': 'Arslanbey 1',
+      'elit': 'Arslanbey 1',
+      'enerji': 'Arslanbey 1',
+      'engin': 'Arslanbey 1',
+      'göz pınar': 'Arslanbey 1',
+      'gurbet': 'Arslanbey 1',
+      'hamamlı': 'Arslanbey 1',
+      'i̇deal': 'Arslanbey 1',
+      'i̇zmit cad.': 'Arslanbey 1',
+      'karakaya': 'Arslanbey 1',
+      'kartalkaya': 'Arslanbey 1',
+      'kolaylı cad': 'Arslanbey 1',
+      'koray': 'Arslanbey 1',
+      'kuleli': 'Arslanbey 1',
+      'mehmet akif': 'Arslanbey 1',
+      'meltem': 'Arslanbey 1',
+      'müderris': 'Arslanbey 1',
+      'neşelik': 'Arslanbey 1',
+      'özveren': 'Arslanbey 1',
+      'önder': 'Arslanbey 1',
+      'platin': 'Arslanbey 1',
+      'rahmi': 'Arslanbey 1',
+      'simge': 'Arslanbey 1',
+      'sogukpınar': 'Arslanbey 1',
+      'süleymaniye': 'Arslanbey 1',
+      'tabiat': 'Arslanbey 1',
+      'taraklı': 'Arslanbey 1',
+      'ülker': 'Arslanbey 1',
+      'uzun': 'Arslanbey 1',
+      'veysel karani': 'Arslanbey 1',
+      'yavuz sultan selim': 'Arslanbey 1',
+      'yazgan': 'Arslanbey 1',
+      'ala sokak': 'Derbent 1',
+      'basra': 'Derbent 1',
+      'adacık': 'Derbent 1',
+      'türkeli': 'Derbent 1',
+      'acıelma': 'Derbent 1',
+      'bademci': 'Derbent 1',
+      'özgü': 'Derbent 1',
+      'kamu cad.': 'Derbent 1',
+      'şelale': 'Derbent 1',
+      'kafdagı': 'Derbent 1',
+      'şebboy': 'Derbent 1',
+      'aşina': 'Derbent 1',
+      'sedefli': 'Derbent 1',
+      'naz': 'Derbent 1',
+      'ufuk': 'Derbent 1',
+      'serin': 'Derbent 1',
+      'doğukan': 'Derbent 1',
+      'dernek': 'Derbent 1',
+      'atan': 'Derbent 1',
+      'melek suyu': 'Derbent 1',
+      'anıtlar': 'Derbent 1',
+      'acısu': 'Derbent 1',
+      'deniz hava komutanlıgı ana kapı': 'Derbent 1',
+      'deniz hava komutanlıgı emek cad.': 'Derbent 1',
+      'deniz hava lojmanları': 'Derbent 1',
+      'ömer halis demir cad.': 'Derbent 1',
+      'vatan caddesi': 'Derbent 1',
+      'umut caddesi': 'Derbent 1',
+      'göktürk caddesi': 'Derbent 1',
+      'çınarlı caddesi': 'Derbent 1',
+      'güneş caddesi': 'Derbent 1',
+      'sezin sokak': 'Derbent 1',
+      'saygınlar caddesi': 'Derbent 1',
+      'seferhisar caddesi': 'Derbent 1',
+      'gelibolu': 'Derbent 1',
+      'aktif sokak': 'Derbent 1',
+      'ender sokak': 'Derbent 1',
+      'şehit hakan imamoğlu cad.': 'Derbent 1',
+      'aşiyan caddesi': 'Derbent 1',
+      'nisa sokak': 'Derbent 1',
+      'esentepe caddesi': 'Derbent 1',
+      'zeytinlik caddesi latin konakları': 'Derbent 1',
+      'karaoğlan sokak': 'Derbent 1',
+      'asel': 'Derbent 1',
+      'kutup yıldızı': 'Derbent 1',
+      'huzur': 'Derbent 1',
+      'dönemeç': 'Derbent 1',
+      'arda': 'Derbent 1',
+      'kalbur': 'Derbent 1',
+      'metanet': 'Derbent 1',
+      'ulukışla': 'Derbent 1',
+      'kızılay': 'Derbent 1',
+      'rıhtım': 'Derbent 1',
+      'kurşun sokak': 'Derbent 1',
+      'sıla': 'Derbent 1',
+      'abanoz': 'Derbent 1',
+      'şehit zafer dinmez': 'Derbent 1',
+      'haseki': 'Derbent 1',
+      'i̇hlaslı': 'Derbent 1',
+      'ensar': 'Derbent 1',
+      'balkovanı': 'Derbent 1',
+      'sefayolu': 'Derbent 1',
+      'bıldır': 'Derbent 1',
+      'emsal': 'Derbent 1',
+      'akçaoğlu': 'Derbent 1',
+      'sızma': 'Derbent 1',
+      'narin': 'Derbent 1',
+      'uzman': 'Derbent 1',
+      'biga': 'Derbent 1',
+      'reşitbey': 'Derbent 1',
+      'kızılerik': 'Derbent 1',
+      'tunç sokak': 'Derbent 1',
+      'kızılağaç': 'Derbent 1',
+      'kahve sokak': 'Derbent 1',
+      'kekik sokak': 'Derbent 1',
+      'özata': 'Derbent 1',
+      'gökay': 'Derbent 1',
+      'dalyan': 'Derbent 1',
+
+      // Balaban 1 bölgesi (ek liste)
+      'arslan caddesi': 'Balaban 1',
+      'cevizlik caddesi': 'Balaban 1',
+      'cevizlik evleri sokak': 'Balaban 1',
+      'çakıroğlu sokak': 'Balaban 1',
+      'bağcılar sokak': ['Balaban 1', 'Ataevler 3'],
+      'kadımezarı yolu caddesi': 'Balaban 1',
+      'i̇pekyolu caddesi': 'Balaban 1',
+      'kuplay sokak': 'Balaban 1',
+      'ahatlı sokak': 'Balaban 1',
+      'arapoğlu sokak': 'Balaban 1',
+      'ali oğulları sokak': 'Balaban 1',
+      'değirmenkapı caddesi': 'Balaban 1',
+      'cumhuriyet caddesi': 'Balaban 1',
+      'kara kadılar caddesi': 'Balaban 1',
+      'hocalar sokak': 'Balaban 1',
+      'aydınlık sokak': 'Balaban 1',
+      'meyvelik sokak': 'Balaban 1',
+      'doğaner sokak': 'Balaban 1',
+      'demirciler sokak': 'Balaban 1',
+      'dizdaroğlu caddesi': 'Balaban 1',
+      'talip sokak': 'Balaban 1',
+      'şehit i̇shak öztürk sokak': 'Balaban 1',
+      'şirintepe sokak': 'Balaban 1',
+      'şirin yol sokak': 'Balaban 1',
+      'artvin sokak': 'Balaban 1',
+      'güllüce sokak': ['Balaban 1', 'Suadiye 1'],
+      'özkoç sokak': 'Balaban 1',
+      'özmen sokak': 'Balaban 1',
+      'gümüşçü sokak': 'Balaban 1',
+      'uzak sokak': 'Balaban 1',
+      'karpuzluk sokak': 'Balaban 1',
+      'nusretiye i̇zmit caddesi': 'Balaban 1',
+      'şirinsulhiye i̇zmit caddesi': 'Balaban 1',
+      'öğretmenler sokak': 'Balaban 1',
+      'kınık sokak': 'Balaban 1',
+      'tuzla sokak': 'Balaban 1',
+      'kadem sokak': 'Balaban 1',
+      'teğmen sokak': 'Balaban 1',
+      'yeni sokak': 'Balaban 1',
+      'gülence sokak': 'Balaban 1',
+      'kırmalar sokak': 'Balaban 1',
+      'şirin ağa caddesi': 'Balaban 1',
+      'doğuş caddesi': 'Balaban 1',
+      'uzun yol sokak': 'Balaban 1',
+      'rumeli sokak': 'Balaban 1',
+      'halk sokak': 'Balaban 1',
+      'ali efendi sokak': 'Balaban 1',
+      'mescit sokak': 'Balaban 1',
+      'mecit sokak': 'Balaban 1',
+      'barut sokak': 'Balaban 1',
+      'ömerağa sokak': 'Balaban 1',
+      'turcan sokak': 'Balaban 1',
+      'seferağa sokak': 'Balaban 1',
+      'akarlar sokak': 'Balaban 1',
+      'hatıra sokak': 'Balaban 1',
+      'destan sokak': 'Balaban 1',
+      'deniz kızı sokak': 'Balaban 1',
+      'gazi mustafa kemal atatürk 120 ve yukarısı': 'Balaban 1',
+      'şanlı sokak': 'Balaban 1',
+      'ay sokak': 'Balaban 1',
+      'muazzam sokak': 'Balaban 1',
+      'gelişim sokak': 'Balaban 1',
+      'demirli sokak': 'Balaban 1',
+      'demet sokak': 'Balaban 1',
+      'asır sokak': 'Balaban 1',
+      'orkide sokak': 'Balaban 1',
+      'karasu sokak': 'Balaban 1',
+      'cesur sokak': 'Balaban 1',
+      'güneysu sokak': 'Balaban 1',
+      'ayazköy sokak': 'Balaban 1',
+      'kırgızlar sokak': 'Balaban 1',
+      'semt sokak': 'Balaban 1',
+      'beyazlı sokak': 'Balaban 1',
+
+      // Firebase paylaşılan veriden aktarılan ekler
+      'atlas': 'Balaban 1',
+      'aydınlı sokak': 'Arslanbey 1',
+      'aydınlık': 'Emekevler 1',
+      'açıl sokak': 'FSM 3',
+      'beyazgül sokak 1-94': 'Arslanbey 1',
+      'ersin sokak': 'Dumlupınar 1',
+      'ferah 16 - 21 - 23': 'FSM 3',
+      'ferah sokak 1 - 15': 'FSM 2',
+      'fetih sokak 1 - 23 ts': 'Sarımeşe 1',
+      'fetih sokak 2 - 40 çs': 'Sarımeşe 1',
+      'gören sokak': 'Derbent 1',
+      'görkem sokak': 'Sarımeşe 1',
+      'gülbahçesi sokak': 'Dumlupınar 1',
+      'kamelya sitesi': 'Balaban 1',
+      'meryem sokak': 'FSM 3',
+      'mobesko': 'Köseköy 1',
+      'sezgin sokak': 'Köseköy 1',
+      'subaşı sokak': 'FSM 2',
+      'sırat sokak': 'Balaban 1',
+      'yakacık sokak': 'Sarımeşe 1',
+      'yazgı sokak': 'FSM 4',
+      'özenti sokak': 'FSM 2',
+      'şüheda sokak': 'İstasyon 1',
+
 
       // Ömerağa 1 bölgesi (ek liste)
       'akcacami 38-18': 'Ömerağa 1',
@@ -1786,7 +2191,6 @@
       'dermanlı': 'FSM 2',
       'duru': 'FSM 2',
       'eken': 'FSM 2',
-      'emrah': 'FSM 2',
       'erkoçak': 'FSM 2',
       'fedakar': 'FSM 2',
       'fener': 'FSM 2',
@@ -2046,6 +2450,125 @@
       'yaprak sokak': 'İstasyon 1',
       'zambak sokak': 'İstasyon 1',
 
+      // Suadiye 1 bölgesi (ek liste)
+      'acarlar çıkmazı': 'Suadiye 1',
+      'adıgüzel sokak': 'Suadiye 1',
+      'albay hüseyin çıkmazı': 'Suadiye 1',
+      'alperler çıkmazı': 'Suadiye 1',
+      'artezyen sokak': 'Suadiye 1',
+      'askercik sokak': 'Suadiye 1',
+      'atılay sokak': 'Suadiye 1',
+      'atabay sokak': 'Suadiye 1',
+      'ayvaz sokak': 'Suadiye 1',
+      'balım sokak': 'Suadiye 1',
+      'belediye başkanı hüsnü i̇lhan caddesi': 'Suadiye 1',
+      'belediye başkanı hüseyin top sokak': 'Suadiye 1',
+      'belediye başkanı mehmet sezgin sokak': 'Suadiye 1',
+      'belediye başkanı musa öğünç sokak': 'Suadiye 1',
+      'belediye başkanı tefik atabay sokak': 'Suadiye 1',
+      'belediye başkanı veysel kanyılmaz sokak': 'Suadiye 1',
+      'botanik sokak': 'Suadiye 1',
+      'cavizlik sokak': 'Suadiye 1',
+      'ceyda sokak': 'Suadiye 1',
+      'çamlık çıkmazı': 'Suadiye 1',
+      'çanakçı suyu sokak': 'Suadiye 1',
+      'çelebi çıkmazı': 'Suadiye 1',
+      'çelebiler sokak': 'Suadiye 1',
+      'çepiller sokak': 'Suadiye 1',
+      'çepni caddesi': 'Suadiye 1',
+      'çevikel sokak': 'Suadiye 1',
+      'çörtlence sokak': 'Suadiye 1',
+      'çınar evleri caddesi': 'Suadiye 1',
+      'değirmen sokak': 'Suadiye 1',
+      'değirmenci sokak': 'Suadiye 1',
+      'dereli sokak': 'Suadiye 1',
+      'diriliş sokak': 'Suadiye 1',
+      'doğal sokak': 'Suadiye 1',
+      'doğalar sokak': 'Suadiye 1',
+      'dönel sokak': 'Suadiye 1',
+      'dr. mehmet kıvanç sokak': 'Suadiye 1',
+      'dutluk sokak': 'Suadiye 1',
+      'elçi sokak': 'Suadiye 1',
+      'eminbey sokak': 'Suadiye 1',
+      'emengen çıkmazı': 'Suadiye 1',
+      'erenler caddesi': 'Suadiye 1',
+      'eroğlu sokak': 'Suadiye 1',
+      'erdoğan sokak': 'Suadiye 1',
+      'ergül çıkmazı': 'Suadiye 1',
+      'eski i̇zmit yolu caddesi': 'Suadiye 1',
+      'fahri sokak': 'Suadiye 1',
+      'fazilet sokak': 'Suadiye 1',
+      'fındık sokak': 'Suadiye 1',
+      'fikir sokak': 'Suadiye 1',
+      'galyançlar sokak': 'Suadiye 1',
+      'gede sokak': 'Suadiye 1',
+      'göktaş sokak': 'Suadiye 1',
+      'gülbahçe caddesi': 'Suadiye 1',
+      'gülşehir sokak': 'Suadiye 1',
+      'gültalı sokak': 'Suadiye 1',
+      'göztepe sokak': 'Suadiye 1',
+      'hacı eli sokak': 'Suadiye 1',
+      'hacı recep sokak': 'Suadiye 1',
+      'hakim mustafa çıkmazı': 'Suadiye 1',
+      'haliloğlu çıkmazı': 'Suadiye 1',
+      'harmanlık sokak': 'Suadiye 1',
+      'hastane sokak': 'Suadiye 1',
+      'heyrek caddesi': 'Suadiye 1',
+      'hoca ali efendi sokak': 'Suadiye 1',
+      'i̇mamoğlu sokak': 'Suadiye 1',
+      'kabakoz sokak': 'Suadiye 1',
+      'kadir aslan sokak': 'Suadiye 1',
+      'kaldırım sokak': 'Suadiye 1',
+      'kanaat sokak': 'Suadiye 1',
+      'karabalık sokak': 'Suadiye 1',
+      'karadere caddesi': 'Suadiye 1',
+      'karalar sokak': 'Suadiye 1',
+      'kazdallar çıkmazı': 'Suadiye 1',
+      'kayı sokak': 'Suadiye 1',
+      'kemerli sokak': 'Suadiye 1',
+      'kermanlar sokak': 'Suadiye 1',
+      'kıvanç çıkmazı': 'Suadiye 1',
+      'kıvrak sokak': 'Suadiye 1',
+      'kiremithan sokak': 'Suadiye 1',
+      'korcan caddesi': 'Suadiye 1',
+      'korucu sokak': 'Suadiye 1',
+      'memişler sokak': 'Suadiye 1',
+      'mesudiye caddesi': 'Suadiye 1',
+      'meşrutiyet sokak': 'Suadiye 1',
+      'müezzinoğlu sokak': 'Suadiye 1',
+      'nazif okumuş caddesi': 'Suadiye 1',
+      'okçapınar sokak': 'Suadiye 1',
+      'ortaklar sokak': 'Suadiye 1',
+      'özdal caddesi': 'Suadiye 1',
+      'özkanlı sokak': 'Suadiye 1',
+      'öncü sokak': 'Suadiye 1',
+      'özüer çıkmazı': 'Suadiye 1',
+      'pervane sokak': 'Suadiye 1',
+      'recep yılmaz sokak': 'Suadiye 1',
+      'salman sokak': 'Suadiye 1',
+      'seymenbaşı sokak': 'Suadiye 1',
+      'sipahi sokak': 'Suadiye 1',
+      'sobacı sokak': 'Suadiye 1',
+      'suadiye bağdat caddesi': 'Suadiye 1',
+      'sumotaş sokak': 'Suadiye 1',
+      'tabay sokak': 'Suadiye 1',
+      'tanzimat sokak': 'Suadiye 1',
+      'topçular sokak': 'Suadiye 1',
+      'topkapı caddesi': 'Suadiye 1',
+      'turan sokak': 'Suadiye 1',
+      'turoğlu sokak': 'Suadiye 1',
+      'uzay çıkmazı': 'Suadiye 1',
+      'üç yol sokak': 'Suadiye 1',
+      'üzümlü sokak': 'Suadiye 1',
+      'villa sokak': 'Suadiye 1',
+      'yılmazlar sokak': 'Suadiye 1',
+      'yonca sokak': ['Suadiye 1', 'Sarımeşe 1'],
+      'yoncalı sokak': 'Suadiye 1',
+      'yudum sokak': 'Suadiye 1',
+      'zincirlikuyu sokak': 'Suadiye 1',
+      'sert sokak': 'Suadiye 1',
+      'öğretmen necati çıkmazı': 'Suadiye 1',
+
       // İstasyon 1 bölgesi (ek liste)
       'ankara caddesi 81-265': 'İstasyon 1',
       'asalet': 'İstasyon 1',
@@ -2174,7 +2697,6 @@
       'yakamoz sokak': 'Sarımeşe 1',
       'yamak sokak': 'Sarımeşe 1',
       'yedekçi sokak': 'Sarımeşe 1',
-      'yonca sokak': 'Sarımeşe 1',
       'zuhal sokak': 'Sarımeşe 1',
 
       // FSM4 bölgesi
@@ -2328,7 +2850,6 @@
       'nihan sokak': 'Ataevler 3',
       'sezen sokak': 'Ataevler 3',
       'secil sokak': 'Ataevler 3',
-      'bağcılar sokak': 'Ataevler 3',
       'sibel sokak': 'Ataevler 3',
       'fakir bayburt sokak': 'Ataevler 3',
       'ulubatlı hasan caddesi': 'Ataevler 3'
@@ -2343,6 +2864,17 @@
         .replace(/\b(sokak|sokağı|sk|caddesi|cadde|cad|bulvarı|bulvari|meydanı|meydani)\b/g, '')
         .replace(/\s+/g, ' ')
         .trim();
+    }
+
+    // Bazı tarayıcıların ses tanıma motoru, arka arkaya söylenen özel isimleri
+    // boşluksuz tek kelime olarak birleştirebiliyor (ör. "AhmetLütfüArat").
+    // Bu fonksiyon, harf dizisinde küçük harften büyük harfe geçişleri bularak
+    // bu tür bitişik kelimeleri tekrar ayırır (ör. "AhmetLütfüArat" -> "Ahmet Lütfü Arat").
+    function sesTranskriptDuzelt(metin) {
+      if (!metin) return metin;
+      // Zaten birden fazla kelime varsa dokunma; sorun sadece tek bitişik kelimede olur
+      if (/\s/.test(metin.trim())) return metin;
+      return metin.replace(/(\p{Ll})(\p{Lu})/gu, '$1 $2').trim();
     }
 
     // --- Kullanıcı tarafından eklenen/kaldırılan sokaklar (tüm ziyaretçiler arasında paylaşılır) ---
@@ -2779,12 +3311,11 @@
       recognition.onstart = () => {
         dinliyor = true;
         voiceBtn.classList.add('listening');
-        voiceBtn.textContent = '🔴 Dinliyor...';
         gosterSonuc('listening', '🎤 Dinliyorum', 'Sokak adını söyleyin...');
       };
 
       recognition.onresult = (event) => {
-        const sesliBilgi = event.results[0][0].transcript;
+        const sesliBilgi = sesTranskriptDuzelt(event.results[0][0].transcript);
         document.getElementById('sokakInput').value = sesliBilgi;
         
         const mahalle = sokakBul(sesliBilgi);
@@ -2810,7 +3341,6 @@
       recognition.onend = () => {
         dinliyor = false;
         voiceBtn.classList.remove('listening');
-        voiceBtn.textContent = '🎤';
       };
 
       recognition.start();
