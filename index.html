@@ -426,6 +426,68 @@
       animation-delay: 0.5s;
     }
 
+    .chat-mode-row {
+      flex: 1 1 100%;
+      display: flex;
+      justify-content: flex-end;
+      margin-top: -0.6rem;
+    }
+
+    .chat-mode-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(var(--tint-rgb),0.05);
+      border: 1px solid var(--line-strong);
+      border-radius: 2rem;
+      padding: 0.45rem 0.9rem 0.45rem 0.7rem;
+      font-family: var(--body);
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .chat-mode-toggle:hover {
+      border-color: var(--cyan);
+      color: var(--cyan);
+    }
+
+    .chat-mode-toggle .dot-switch {
+      width: 30px;
+      height: 17px;
+      border-radius: 999px;
+      background: rgba(var(--tint-rgb),0.14);
+      position: relative;
+      transition: background 0.2s;
+      flex: 0 0 auto;
+    }
+
+    .chat-mode-toggle .dot-switch::after {
+      content: '';
+      position: absolute;
+      top: 2px; left: 2px;
+      width: 13px; height: 13px;
+      border-radius: 50%;
+      background: var(--text-muted);
+      transition: transform 0.2s, background 0.2s;
+    }
+
+    .chat-mode-toggle.active {
+      border-color: var(--cyan);
+      color: var(--cyan);
+    }
+
+    .chat-mode-toggle.active .dot-switch {
+      background: var(--cyan-dim);
+    }
+
+    .chat-mode-toggle.active .dot-switch::after {
+      background: var(--cyan);
+      transform: translateX(13px);
+    }
+
     @keyframes voice-ping {
       0% { transform: scale(1); opacity: 0.55; }
       100% { transform: scale(1.9); opacity: 0; }
@@ -491,35 +553,6 @@
       font-weight: 700;
       color: var(--text-primary);
       margin-top: 0.35rem;
-    }
-
-    .oneri-satir {
-      font-size: 0.85rem;
-      color: var(--text-muted);
-      margin-top: 0.75rem;
-      margin-bottom: 0.5rem;
-    }
-
-    .oneri-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
-      background: var(--accent-dim);
-      border: 1px solid rgba(255,107,26,0.4);
-      border-radius: 0.5rem;
-      padding: 0.5rem 0.9rem;
-      font-family: var(--display);
-      font-size: 1rem;
-      font-weight: 600;
-      color: var(--accent);
-      cursor: pointer;
-      transition: all 0.15s;
-    }
-
-    .oneri-btn:hover {
-      background: var(--accent);
-      border-color: var(--accent);
-      color: #fff;
     }
 
     .sonaramalar-wrap {
@@ -1227,6 +1260,13 @@
           <span class="voice-bars"><span></span><span></span><span></span></span>
         </button>
         <button class="btn-clear" onclick="temizle()">Temizle</button>
+      </div>
+
+      <div class="chat-mode-row">
+        <button type="button" class="chat-mode-toggle" id="surekliModBtn" onclick="surekliModDegistir()">
+          <span class="dot-switch"></span>
+          <span id="surekliModEtiket">Sohbet Modu: Kapalı</span>
+        </button>
       </div>
     </div>
 
@@ -3026,85 +3066,6 @@
     }
 
 
-    // İki metin arasındaki Levenshtein (düzenleme) mesafesini hesaplar:
-    // birini diğerine dönüştürmek için gereken minimum ekleme/silme/değiştirme sayısı
-    function levenshteinMesafe(a, b) {
-      const m = a.length, n = b.length;
-      if (m === 0) return n;
-      if (n === 0) return m;
-
-      let onceki = Array.from({ length: n + 1 }, (_, i) => i);
-      let simdiki = new Array(n + 1);
-
-      for (let i = 1; i <= m; i++) {
-        simdiki[0] = i;
-        for (let j = 1; j <= n; j++) {
-          const maliyet = a[i - 1] === b[j - 1] ? 0 : 1;
-          simdiki[j] = Math.min(
-            simdiki[j - 1] + 1,      // ekleme
-            onceki[j] + 1,           // silme
-            onceki[j - 1] + maliyet  // değiştirme
-          );
-        }
-        [onceki, simdiki] = [simdiki, onceki];
-      }
-      return onceki[n];
-    }
-
-    // Aranan sokak tam/esnek eşleşmediğinde (yazım hatası, ses tanımanın yanlış
-    // algılaması vb.), veritabanındaki en yakın ismi bulur. Alakasız bir sokağı
-    // "öneri" diye göstermemek için sadece makul bir benzerlik eşiğinin altındaki
-    // sonuçlar döndürülür; eşik, aranan metnin uzunluğuna göre ölçeklenir.
-    let sonOneriKey = null;
-    function enYakinSokakBul(girilenAd) {
-      const normAranan = normalizeSokakAdi(girilenAd);
-      if (!normAranan) return null;
-
-      let enIyiNorm = null;
-      let enIyiMesafe = Infinity;
-
-      Object.keys(sokaklarNormalize).forEach(norm => {
-        const mesafe = levenshteinMesafe(normAranan, norm);
-        if (mesafe < enIyiMesafe) {
-          enIyiMesafe = mesafe;
-          enIyiNorm = norm;
-        }
-      });
-
-      if (enIyiNorm === null) return null;
-
-      const esik = Math.max(2, Math.ceil(normAranan.length * 0.34));
-      if (enIyiMesafe > esik) return null;
-
-      return sokaklarNormalize[enIyiNorm];
-    }
-
-    // "Bunu mu demek istediniz?" önerisine tıklanınca çalışır
-    function oneriSokakSec() {
-      if (!sonOneriKey) return;
-      document.getElementById('sokakInput').value = capitalizeSokak(sonOneriKey);
-      ara();
-    }
-
-    // Bulunamadı durumunda en yakın sokağı öneren sonuç HTML'ini üretir; öneri
-    // yoksa düz "bulunamadı" mesajı döner. sonOneriKey yan etkisini de günceller.
-    function bulunamadiSonucOlustur(girilenAd) {
-      const oneriKey = enYakinSokakBul(girilenAd);
-      sonOneriKey = oneriKey;
-
-      if (!oneriKey) {
-        return { mesaj: 'Bu sokak veritabanında bulunamadı.', oneriAdi: null };
-      }
-
-      const oneriAdi = capitalizeSokak(oneriKey);
-      const mesaj =
-        `<div class="sokak-name">${escapeHtml(girilenAd)}</div>` +
-        `<div class="oneri-satir">Bulunamadı, bunu mu demek istediniz?</div>` +
-        `<button type="button" class="oneri-btn" onclick="oneriSokakSec()">${escapeHtml(oneriAdi)}</button>`;
-
-      return { mesaj, oneriAdi };
-    }
-
     // Sokak listesini Türkçe alfabetik sıraya göre diz
     function sokaklariSirala(liste) {
       return [...liste].sort((a, b) => a.localeCompare(b, 'tr'));
@@ -3351,8 +3312,7 @@
         sesliSoyle(mahalleListesi.join(' ve '));
         sonAramaEkle(input, mahalleListesi.join(', '));
       } else {
-        const { mesaj } = bulunamadiSonucOlustur(input);
-        gosterSonuc('warning', '⚠️ Bulunamadı', mesaj);
+        gosterSonuc('warning', '⚠️ Bulunamadı', 'Bu sokak veritabanında bulunamadı.');
       }
     }
 
@@ -3383,7 +3343,7 @@
       window.speechSynthesis.onvoiceschanged = () => { turkceSesCache = null; };
     }
 
-    function sesliSoyle(metin) {
+    function sesliSoyle(metin, onEnd) {
       // Önceki konuşmaları iptal et
       window.speechSynthesis.cancel();
       
@@ -3395,12 +3355,52 @@
 
       const secilenSes = turkceSesSec();
       if (secilenSes) utterance.voice = secilenSes;
+
+      // Sohbet modunda: cevap söylenip bitince otomatik olarak tekrar dinlemeye geç
+      if (typeof onEnd === 'function') {
+        utterance.onend = onEnd;
+        utterance.onerror = onEnd;
+      }
       
       // Hemen konuş
       window.speechSynthesis.speak(utterance);
     }
 
+    // Sohbet Modu (sürekli dinleme) açık/kapalı durumu
+    let surekliMod = false;
+
+    function surekliModDegistir() {
+      surekliMod = !surekliMod;
+      const btn = document.getElementById('surekliModBtn');
+      const etiket = document.getElementById('surekliModEtiket');
+
+      if (surekliMod) {
+        btn.classList.add('active');
+        etiket.textContent = 'Sohbet Modu: Açık';
+        sesliSoyle('Sohbet modu açık. Sokakları art arda sorabilirsiniz. Durdurmak için tekrar dokunun.', () => {
+          if (surekliMod && !dinliyor) sesliAra();
+        });
+      } else {
+        btn.classList.remove('active');
+        etiket.textContent = 'Sohbet Modu: Kapalı';
+        window.speechSynthesis.cancel();
+        if (aktifRecognition) {
+          try { aktifRecognition.abort(); } catch (e) {}
+        }
+      }
+    }
+
+    // Sohbet modundayken bir sonraki dinlemeyi otomatik başlatır
+    function surekliModSonrakiAdim() {
+      if (!surekliMod) return;
+      setTimeout(() => {
+        if (surekliMod && !dinliyor) sesliAra();
+      }, 300);
+    }
+
     // Sesli arama
+    let aktifRecognition = null;
+
     function sesliAra() {
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
       
@@ -3410,7 +3410,10 @@
         return;
       }
 
+      if (dinliyor) return;
+
       const recognition = new SpeechRecognition();
+      aktifRecognition = recognition;
       recognition.lang = 'tr-TR';
       recognition.continuous = false;
       recognition.interimResults = false;
@@ -3420,7 +3423,7 @@
       recognition.onstart = () => {
         dinliyor = true;
         voiceBtn.classList.add('listening');
-        gosterSonuc('listening', '🎤 Dinliyorum', 'Sokak adını söyleyin...');
+        gosterSonuc('listening', '🎤 Dinliyorum', surekliMod ? 'Sokak adını söyleyin... (Sohbet modu açık)' : 'Sokak adını söyleyin...');
       };
 
       recognition.onresult = (event) => {
@@ -3434,18 +3437,25 @@
           const mahalleHTML = mahalleListesi.map(m => `<div class="mahalle-name">${m}</div>`).join('');
           gosterSonuc('success', '✅ Bulundu!', 
             `<div class="sokak-name">${sesliBilgi}</div>${mahalleHTML}`);
-          sesliSoyle(mahalleListesi.join(' ve '));
           sonAramaEkle(sesliBilgi, mahalleListesi.join(', '));
+          sesliSoyle(mahalleListesi.join(' ve '), surekliModSonrakiAdim);
         } else {
-          const { mesaj, oneriAdi } = bulunamadiSonucOlustur(sesliBilgi);
-          gosterSonuc('warning', '⚠️ Bulunamadı', mesaj);
-          sesliSoyle(oneriAdi ? `Bulunamadı. ${oneriAdi} mi demek istediniz?` : 'Bulunamadı');
+          gosterSonuc('warning', '⚠️ Bulunamadı', 'Bu sokak veritabanında bulunamadı.');
+          sesliSoyle('Bulunamadı', surekliModSonrakiAdim);
         }
       };
 
-      recognition.onerror = () => {
+      recognition.onerror = (event) => {
+        // Kasıtlı durdurma (ör. sohbet modu kapatıldığında) sessizce geç, hata gösterme
+        if (event.error === 'aborted') return;
+
+        // Sohbet modunda sessizlikte rahatsız edici uyarı vermeden sessizce tekrar dinlemeye geç
+        if (surekliMod && event.error === 'no-speech') {
+          surekliModSonrakiAdim();
+          return;
+        }
         gosterSonuc('error', '❌ Hata', 'Ses tanıma hatası. Lütfen tekrar deneyin.');
-        sesliSoyle('Ses tanıma hatası. Lütfen tekrar deneyin.');
+        sesliSoyle('Ses tanıma hatası. Lütfen tekrar deneyin.', surekliModSonrakiAdim);
       };
 
       recognition.onend = () => {
