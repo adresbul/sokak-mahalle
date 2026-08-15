@@ -493,6 +493,35 @@
       margin-top: 0.35rem;
     }
 
+    .oneri-satir {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 0.75rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .oneri-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: var(--accent-dim);
+      border: 1px solid rgba(255,107,26,0.4);
+      border-radius: 0.5rem;
+      padding: 0.5rem 0.9rem;
+      font-family: var(--display);
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--accent);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .oneri-btn:hover {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
     .sonaramalar-wrap {
       max-width: 960px;
       margin: 1.25rem auto 0;
@@ -2997,6 +3026,85 @@
     }
 
 
+    // İki metin arasındaki Levenshtein (düzenleme) mesafesini hesaplar:
+    // birini diğerine dönüştürmek için gereken minimum ekleme/silme/değiştirme sayısı
+    function levenshteinMesafe(a, b) {
+      const m = a.length, n = b.length;
+      if (m === 0) return n;
+      if (n === 0) return m;
+
+      let onceki = Array.from({ length: n + 1 }, (_, i) => i);
+      let simdiki = new Array(n + 1);
+
+      for (let i = 1; i <= m; i++) {
+        simdiki[0] = i;
+        for (let j = 1; j <= n; j++) {
+          const maliyet = a[i - 1] === b[j - 1] ? 0 : 1;
+          simdiki[j] = Math.min(
+            simdiki[j - 1] + 1,      // ekleme
+            onceki[j] + 1,           // silme
+            onceki[j - 1] + maliyet  // değiştirme
+          );
+        }
+        [onceki, simdiki] = [simdiki, onceki];
+      }
+      return onceki[n];
+    }
+
+    // Aranan sokak tam/esnek eşleşmediğinde (yazım hatası, ses tanımanın yanlış
+    // algılaması vb.), veritabanındaki en yakın ismi bulur. Alakasız bir sokağı
+    // "öneri" diye göstermemek için sadece makul bir benzerlik eşiğinin altındaki
+    // sonuçlar döndürülür; eşik, aranan metnin uzunluğuna göre ölçeklenir.
+    let sonOneriKey = null;
+    function enYakinSokakBul(girilenAd) {
+      const normAranan = normalizeSokakAdi(girilenAd);
+      if (!normAranan) return null;
+
+      let enIyiNorm = null;
+      let enIyiMesafe = Infinity;
+
+      Object.keys(sokaklarNormalize).forEach(norm => {
+        const mesafe = levenshteinMesafe(normAranan, norm);
+        if (mesafe < enIyiMesafe) {
+          enIyiMesafe = mesafe;
+          enIyiNorm = norm;
+        }
+      });
+
+      if (enIyiNorm === null) return null;
+
+      const esik = Math.max(2, Math.ceil(normAranan.length * 0.34));
+      if (enIyiMesafe > esik) return null;
+
+      return sokaklarNormalize[enIyiNorm];
+    }
+
+    // "Bunu mu demek istediniz?" önerisine tıklanınca çalışır
+    function oneriSokakSec() {
+      if (!sonOneriKey) return;
+      document.getElementById('sokakInput').value = capitalizeSokak(sonOneriKey);
+      ara();
+    }
+
+    // Bulunamadı durumunda en yakın sokağı öneren sonuç HTML'ini üretir; öneri
+    // yoksa düz "bulunamadı" mesajı döner. sonOneriKey yan etkisini de günceller.
+    function bulunamadiSonucOlustur(girilenAd) {
+      const oneriKey = enYakinSokakBul(girilenAd);
+      sonOneriKey = oneriKey;
+
+      if (!oneriKey) {
+        return { mesaj: 'Bu sokak veritabanında bulunamadı.', oneriAdi: null };
+      }
+
+      const oneriAdi = capitalizeSokak(oneriKey);
+      const mesaj =
+        `<div class="sokak-name">${escapeHtml(girilenAd)}</div>` +
+        `<div class="oneri-satir">Bulunamadı, bunu mu demek istediniz?</div>` +
+        `<button type="button" class="oneri-btn" onclick="oneriSokakSec()">${escapeHtml(oneriAdi)}</button>`;
+
+      return { mesaj, oneriAdi };
+    }
+
     // Sokak listesini Türkçe alfabetik sıraya göre diz
     function sokaklariSirala(liste) {
       return [...liste].sort((a, b) => a.localeCompare(b, 'tr'));
@@ -3243,7 +3351,8 @@
         sesliSoyle(mahalleListesi.join(' ve '));
         sonAramaEkle(input, mahalleListesi.join(', '));
       } else {
-        gosterSonuc('warning', '⚠️ Bulunamadı', 'Bu sokak veritabanında bulunamadı.');
+        const { mesaj } = bulunamadiSonucOlustur(input);
+        gosterSonuc('warning', '⚠️ Bulunamadı', mesaj);
       }
     }
 
@@ -3328,8 +3437,9 @@
           sesliSoyle(mahalleListesi.join(' ve '));
           sonAramaEkle(sesliBilgi, mahalleListesi.join(', '));
         } else {
-          gosterSonuc('warning', '⚠️ Bulunamadı', 'Bu sokak veritabanında bulunamadı.');
-          sesliSoyle('Bulunamadı');
+          const { mesaj, oneriAdi } = bulunamadiSonucOlustur(sesliBilgi);
+          gosterSonuc('warning', '⚠️ Bulunamadı', mesaj);
+          sesliSoyle(oneriAdi ? `Bulunamadı. ${oneriAdi} mi demek istediniz?` : 'Bulunamadı');
         }
       };
 
