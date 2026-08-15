@@ -322,14 +322,24 @@
 
     .btn-search {
       flex: 1;
-      background: var(--text-primary);
-      color: var(--bg-deep);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      background: linear-gradient(135deg, var(--accent), #ff8a3d);
+      color: #fff;
+      box-shadow: 0 4px 16px rgba(255,107,26,0.28);
     }
 
     .btn-search:hover {
-      background: #fff;
-      transform: translateY(-1px);
-      box-shadow: 0 4px 14px rgba(var(--tint-rgb),0.15);
+      background: linear-gradient(135deg, #ff7a2e, var(--accent));
+      transform: translateY(-2px);
+      box-shadow: 0 10px 26px rgba(255,107,26,0.4);
+    }
+
+    .btn-search:active {
+      transform: translateY(0) scale(0.98);
+      box-shadow: 0 4px 14px rgba(255,107,26,0.3);
     }
 
     .btn-voice {
@@ -429,9 +439,30 @@
     .chat-mode-row {
       flex: 1 1 100%;
       display: flex;
-      justify-content: flex-end;
-      margin-top: -0.6rem;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-top: 0.9rem;
     }
+
+    .btn-voice-lg {
+      width: 4.4rem;
+      height: 4.4rem;
+      flex: 0 0 auto;
+    }
+
+    .btn-voice-lg .voice-icon-mic {
+      width: 1.9rem;
+      height: 1.9rem;
+    }
+
+    .btn-voice-lg .voice-bars {
+      height: 22px;
+    }
+
+    .btn-voice-lg .voice-bars span:nth-child(1) { height: 9px; }
+    .btn-voice-lg .voice-bars span:nth-child(2) { height: 22px; }
+    .btn-voice-lg .voice-bars span:nth-child(3) { height: 15px; }
 
     .chat-mode-toggle {
       display: inline-flex;
@@ -488,21 +519,259 @@
       transform: translateX(13px);
     }
 
+    /* ================= Yapay Zeka Avatarı ================= */
+    .ai-avatar-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(4,6,12,0.78);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      z-index: 300;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.25rem;
+    }
+
+    .ai-avatar-overlay.hidden { display: none; }
+
+    .ai-avatar-panel {
+      width: 100%;
+      max-width: 380px;
+      background: linear-gradient(180deg, var(--bg-panel-2), var(--bg-panel));
+      border: 1px solid var(--line-strong);
+      border-radius: 1.5rem;
+      padding: 2rem 1.5rem 1.5rem;
+      position: relative;
+      text-align: center;
+      box-shadow: 0 30px 70px rgba(0,0,0,0.55);
+    }
+
+    .ai-avatar-close {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      width: 2.1rem;
+      height: 2.1rem;
+      border-radius: 50%;
+      border: 1px solid var(--line-strong);
+      background: rgba(var(--tint-rgb),0.05);
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .ai-avatar-close:hover {
+      color: var(--error);
+      border-color: var(--error);
+      background: var(--error-dim);
+    }
+
+    .ai-face-wrap {
+      position: relative;
+      width: 176px;
+      height: 176px;
+      margin: 0.25rem auto 1.1rem;
+    }
+
+    .ai-face-ring {
+      position: absolute;
+      inset: -12px;
+      border-radius: 50%;
+      border: 2px solid var(--cyan);
+      opacity: 0;
+    }
+
+    .ai-avatar-panel[data-state="listening"] .ai-face-ring {
+      animation: face-ping 1.5s cubic-bezier(0,0,0.2,1) infinite;
+    }
+
+    .ai-avatar-panel[data-state="listening"] .ai-face-ring.ring-2 {
+      animation-delay: 0.5s;
+    }
+
+    @keyframes face-ping {
+      0% { transform: scale(0.92); opacity: 0.55; }
+      100% { transform: scale(1.4); opacity: 0; }
+    }
+
+    .ai-face-wrap.breathe {
+      animation: face-breathe 3.4s ease-in-out infinite;
+    }
+
+    @keyframes face-breathe {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.03); }
+    }
+
+    .ai-robot {
+      width: 176px;
+      height: 176px;
+      display: block;
+      filter: drop-shadow(0 14px 30px rgba(0,0,0,0.4));
+    }
+
+    .ai-ear-glow {
+      opacity: 0.35;
+      transition: opacity 0.3s;
+    }
+
+    .ai-avatar-panel[data-state="listening"] .ai-ear-glow,
+    .ai-avatar-panel[data-state="speaking"] .ai-ear-glow {
+      animation: ear-pulse 1s ease-in-out infinite;
+      transform-origin: center;
+    }
+
+    @keyframes ear-pulse {
+      0%, 100% { opacity: 0.35; transform: scale(1); }
+      50% { opacity: 0.9; transform: scale(1.22); }
+    }
+
+    .ai-antenna-tip {
+      animation: antenna-blink 2.6s infinite;
+    }
+
+    @keyframes antenna-blink {
+      0%, 88%, 100% { opacity: 1; }
+      94% { opacity: 0.25; }
+    }
+
+    .ai-eyes-arc {
+      transform-origin: 100px 104px;
+      animation: eye-blink-op 4.6s infinite;
+    }
+
+    @keyframes eye-blink-op {
+      0%, 92%, 100% { opacity: 1; }
+      96% { opacity: 0.2; }
+    }
+
+    .ai-avatar-panel[data-state="listening"] .ai-eyes-arc {
+      animation: eye-blink-op 4.6s infinite, eyes-alert-svg 1.1s ease-in-out infinite;
+    }
+
+    @keyframes eyes-alert-svg {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.14); }
+    }
+
+    .ai-smile {
+      opacity: 1;
+      transition: opacity 0.15s;
+    }
+
+    .ai-talk-bars {
+      opacity: 0;
+      transition: opacity 0.15s;
+    }
+
+    .ai-avatar-panel[data-state="speaking"] .ai-smile {
+      opacity: 0;
+    }
+
+    .ai-avatar-panel[data-state="speaking"] .ai-talk-bars {
+      opacity: 1;
+    }
+
+    .ai-talk-bars .bar {
+      animation: bar-bounce 0.5s ease-in-out infinite;
+      transform-box: fill-box;
+      transform-origin: center;
+    }
+
+    .ai-talk-bars .bar2 { animation-delay: 0.12s; }
+    .ai-talk-bars .bar3 { animation-delay: 0.24s; }
+
+    @keyframes bar-bounce {
+      0%, 100% { transform: scaleY(0.55); }
+      50% { transform: scaleY(1.6); }
+    }
+
+    .ai-status {
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--cyan);
+      margin-bottom: 0.9rem;
+      min-height: 1.1rem;
+    }
+
+    .ai-avatar-panel[data-state="idle"] .ai-status { color: var(--text-muted); }
+    .ai-avatar-panel[data-state="error"] .ai-status { color: var(--error); }
+
+    .ai-result-box {
+      min-height: 54px;
+      margin-bottom: 1.4rem;
+    }
+
+    .ai-result-sokak {
+      font-family: var(--display);
+      font-weight: 700;
+      font-size: 1.05rem;
+      margin-bottom: 0.35rem;
+    }
+
+    .ai-result-mahalle {
+      color: var(--success);
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+
+    .ai-result-mahalle.not-found { color: var(--error); }
+
+    .ai-result-placeholder {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+
+    .ai-ask-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: var(--accent-dim);
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      border-radius: 2rem;
+      padding: 0.65rem 1.3rem;
+      font-family: var(--body);
+      font-weight: 600;
+      font-size: 0.88rem;
+    }
+
+    .ai-ask-btn:hover {
+      background: var(--accent);
+      color: #fff;
+    }
+
     @keyframes voice-ping {
       0% { transform: scale(1); opacity: 0.55; }
       100% { transform: scale(1.9); opacity: 0; }
     }
 
     .btn-clear {
-      background: transparent;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.45rem;
+      background: rgba(var(--tint-rgb),0.04);
       color: var(--text-muted);
       border: 1px solid var(--line-strong);
-      padding: 0.8rem 1.1rem;
+      padding: 0.8rem 1.2rem;
     }
 
     .btn-clear:hover {
-      border-color: var(--text-muted);
-      color: var(--text-primary);
+      background: var(--error-dim);
+      border-color: var(--error);
+      color: var(--error);
+    }
+
+    .btn-clear:active {
+      transform: scale(0.98);
     }
 
     .result {
@@ -1249,8 +1518,18 @@
       </div>
 
       <div class="buttons">
-        <button class="btn-search" onclick="ara()">Ara</button>
-        <button class="btn-voice" id="voiceBtn" onclick="sesliAra()" aria-label="Sesli ara">
+        <button class="btn-search" onclick="ara()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          <span>Ara</span>
+        </button>
+        <button class="btn-clear" onclick="temizle()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          <span>Temizle</span>
+        </button>
+      </div>
+
+      <div class="chat-mode-row">
+        <button class="btn-voice btn-voice-lg" id="voiceBtn" onclick="sesliAra()" aria-label="Sesli ara">
           <svg class="voice-icon-mic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
             <path d="M19 10v1a7 7 0 0 1-14 0v-1"></path>
@@ -1259,10 +1538,6 @@
           </svg>
           <span class="voice-bars"><span></span><span></span><span></span></span>
         </button>
-        <button class="btn-clear" onclick="temizle()">Temizle</button>
-      </div>
-
-      <div class="chat-mode-row">
         <button type="button" class="chat-mode-toggle" id="surekliModBtn" onclick="surekliModDegistir()">
           <span class="dot-switch"></span>
           <span id="surekliModEtiket">Sohbet Modu: Kapalı</span>
@@ -1300,6 +1575,94 @@
   </div>
 
   <!-- Modal -->
+  <!-- Yapay Zeka Avatarı Overlay -->
+  <div class="ai-avatar-overlay hidden" id="aiAvatarOverlay">
+    <div class="ai-avatar-panel" id="aiAvatarPanel" data-state="idle">
+      <button type="button" class="ai-avatar-close" onclick="avatarKapat()" aria-label="Kapat">✕</button>
+
+      <div class="ai-face-wrap breathe">
+        <div class="ai-face-ring"></div>
+        <div class="ai-face-ring ring-2"></div>
+        <svg class="ai-robot" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="aiHeadGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#f1f5f7"/>
+              <stop offset="55%" stop-color="#c7d6da"/>
+              <stop offset="100%" stop-color="#93aab0"/>
+            </linearGradient>
+            <radialGradient id="aiEarGlow" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#FF9A3C" stop-opacity="0.95"/>
+              <stop offset="100%" stop-color="#FF9A3C" stop-opacity="0"/>
+            </radialGradient>
+            <linearGradient id="aiEyeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#00E5C7"/>
+              <stop offset="100%" stop-color="#FF9A3C"/>
+            </linearGradient>
+            <filter id="aiNeon" x="-60%" y="-60%" width="220%" height="220%">
+              <feGaussianBlur stdDeviation="2.4" result="blur"/>
+              <feMerge>
+                <feMergeNode in="blur"/>
+                <feMergeNode in="SourceGraphic"/>
+              </feMerge>
+            </filter>
+          </defs>
+
+          <!-- kulaklık ışık halkaları -->
+          <circle class="ai-ear-glow" cx="28" cy="106" r="24" fill="url(#aiEarGlow)"/>
+          <circle class="ai-ear-glow" cx="172" cy="106" r="24" fill="url(#aiEarGlow)"/>
+
+          <!-- kulaklık gövdeleri -->
+          <rect x="10" y="84" width="26" height="46" rx="13" fill="#1c2a33"/>
+          <rect x="164" y="84" width="26" height="46" rx="13" fill="#1c2a33"/>
+          <rect x="12" y="86" width="8" height="42" rx="4" fill="#FF9A3C" opacity="0.85"/>
+          <rect x="180" y="86" width="8" height="42" rx="4" fill="#FF9A3C" opacity="0.85"/>
+
+          <!-- anten -->
+          <line x1="100" y1="18" x2="100" y2="4" stroke="#93aab0" stroke-width="3" stroke-linecap="round"/>
+          <circle class="ai-antenna-tip" cx="100" cy="4" r="5" fill="#00E5C7"/>
+
+          <!-- kafa -->
+          <path d="M40 62 Q40 20 100 20 Q160 20 160 62 L160 128 Q160 168 100 176 Q40 168 40 128 Z" fill="url(#aiHeadGrad)" stroke="#7d9499" stroke-width="1.5"/>
+
+          <!-- yüz ekranı -->
+          <rect x="60" y="80" width="80" height="58" rx="26" fill="#0d1b22"/>
+
+          <!-- gülen gözler -->
+          <g class="ai-eyes-arc" filter="url(#aiNeon)">
+            <path d="M76 106 Q86 92 96 106" stroke="url(#aiEyeGrad)" stroke-width="6" fill="none" stroke-linecap="round"/>
+            <path d="M104 106 Q114 92 124 106" stroke="url(#aiEyeGrad)" stroke-width="6" fill="none" stroke-linecap="round"/>
+          </g>
+
+          <!-- gülümseme (bekleme / dinleme) -->
+          <path class="ai-smile" d="M82 120 Q100 132 118 120" stroke="#00E5C7" stroke-width="4.5" fill="none" stroke-linecap="round" filter="url(#aiNeon)"/>
+
+          <!-- konuşma çubukları (konuşurken) -->
+          <g class="ai-talk-bars" filter="url(#aiNeon)">
+            <rect class="bar bar1" x="80" y="116" width="7" height="12" rx="3.5" fill="#00E5C7"/>
+            <rect class="bar bar2" x="96.5" y="108" width="7" height="20" rx="3.5" fill="#FF9A3C"/>
+            <rect class="bar bar3" x="113" y="116" width="7" height="12" rx="3.5" fill="#00E5C7"/>
+          </g>
+        </svg>
+      </div>
+
+      <div class="ai-status" id="aiStatus">Başlatılıyor...</div>
+
+      <div class="ai-result-box" id="aiResultBox">
+        <div class="ai-result-placeholder">Bir sokak adı söyleyin...</div>
+      </div>
+
+      <button type="button" class="ai-ask-btn" id="aiAskBtn" onclick="sesliAra()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+          <path d="M19 10v1a7 7 0 0 1-14 0v-1"></path>
+          <line x1="12" y1="19" x2="12" y2="23"></line>
+          <line x1="8" y1="23" x2="16" y2="23"></line>
+        </svg>
+        <span>Tekrar Sor</span>
+      </button>
+    </div>
+  </div>
+
   <div class="modal-overlay hidden" id="modalOverlay" onclick="modalKapat(event)">
     <div class="modal-box">
       <div class="modal-header">
@@ -3356,11 +3719,15 @@
       const secilenSes = turkceSesSec();
       if (secilenSes) utterance.voice = secilenSes;
 
-      // Sohbet modunda: cevap söylenip bitince otomatik olarak tekrar dinlemeye geç
-      if (typeof onEnd === 'function') {
-        utterance.onend = onEnd;
-        utterance.onerror = onEnd;
-      }
+      // Konuşma başlayınca avatarın ağzını oynat, bitince duruma göre eski haline dön
+      utterance.onstart = () => avatarDurumAyarla('speaking', '💬 Konuşuyor');
+      utterance.onend = () => {
+        avatarDurumAyarla(surekliMod ? 'idle' : 'idle', surekliMod ? '⏳ Tekrar dinlemeye hazırlanıyor...' : '⏸ Bekliyor');
+        if (typeof onEnd === 'function') onEnd();
+      };
+      utterance.onerror = () => {
+        if (typeof onEnd === 'function') onEnd();
+      };
       
       // Hemen konuş
       window.speechSynthesis.speak(utterance);
@@ -3398,6 +3765,46 @@
       }, 300);
     }
 
+    // ================= Yapay Zeka Avatarı Kontrolü =================
+    function avatarAc() {
+      document.getElementById('aiAvatarOverlay').classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    }
+
+    // Avatar sadece ✕ tuşuna basılınca kapanır: her şeyi durdurur ve sohbet modunu kapatır
+    function avatarKapat() {
+      window.speechSynthesis.cancel();
+      if (aktifRecognition) {
+        try { aktifRecognition.abort(); } catch (e) {}
+      }
+      if (surekliMod) {
+        surekliMod = false;
+        const btn = document.getElementById('surekliModBtn');
+        const etiket = document.getElementById('surekliModEtiket');
+        if (btn) btn.classList.remove('active');
+        if (etiket) etiket.textContent = 'Sohbet Modu: Kapalı';
+      }
+      document.getElementById('aiAvatarOverlay').classList.add('hidden');
+      document.body.style.overflow = '';
+    }
+
+    function avatarDurumAyarla(durum, mesaj) {
+      const panel = document.getElementById('aiAvatarPanel');
+      const status = document.getElementById('aiStatus');
+      if (panel) panel.setAttribute('data-state', durum);
+      if (status && mesaj) status.textContent = mesaj;
+    }
+
+    function avatarSonucGoster(sokak, mahalleListesi) {
+      const kutu = document.getElementById('aiResultBox');
+      if (!kutu) return;
+      if (mahalleListesi) {
+        kutu.innerHTML = `<div class="ai-result-sokak">${sokak}</div><div class="ai-result-mahalle">${mahalleListesi.join(' / ')}</div>`;
+      } else {
+        kutu.innerHTML = `<div class="ai-result-sokak">${sokak}</div><div class="ai-result-mahalle not-found">Bulunamadı</div>`;
+      }
+    }
+
     // Sesli arama
     let aktifRecognition = null;
 
@@ -3412,6 +3819,9 @@
 
       if (dinliyor) return;
 
+      avatarAc();
+      avatarDurumAyarla('idle', 'Başlatılıyor...');
+
       const recognition = new SpeechRecognition();
       aktifRecognition = recognition;
       recognition.lang = 'tr-TR';
@@ -3423,6 +3833,7 @@
       recognition.onstart = () => {
         dinliyor = true;
         voiceBtn.classList.add('listening');
+        avatarDurumAyarla('listening', '🎤 Dinliyorum');
         gosterSonuc('listening', '🎤 Dinliyorum', surekliMod ? 'Sokak adını söyleyin... (Sohbet modu açık)' : 'Sokak adını söyleyin...');
       };
 
@@ -3431,30 +3842,35 @@
         document.getElementById('sokakInput').value = sesliBilgi;
         
         const mahalle = sokakBul(sesliBilgi);
+        avatarDurumAyarla('idle', '💭 Aranıyor...');
 
         if (mahalle) {
           const mahalleListesi = Array.isArray(mahalle) ? mahalle : [mahalle];
           const mahalleHTML = mahalleListesi.map(m => `<div class="mahalle-name">${m}</div>`).join('');
           gosterSonuc('success', '✅ Bulundu!', 
             `<div class="sokak-name">${sesliBilgi}</div>${mahalleHTML}`);
+          avatarSonucGoster(sesliBilgi, mahalleListesi);
           sonAramaEkle(sesliBilgi, mahalleListesi.join(', '));
           sesliSoyle(mahalleListesi.join(' ve '), surekliModSonrakiAdim);
         } else {
           gosterSonuc('warning', '⚠️ Bulunamadı', 'Bu sokak veritabanında bulunamadı.');
+          avatarSonucGoster(sesliBilgi, null);
           sesliSoyle('Bulunamadı', surekliModSonrakiAdim);
         }
       };
 
       recognition.onerror = (event) => {
-        // Kasıtlı durdurma (ör. sohbet modu kapatıldığında) sessizce geç, hata gösterme
+        // Kasıtlı durdurma (ör. sohbet modu veya avatar kapatıldığında) sessizce geç, hata gösterme
         if (event.error === 'aborted') return;
 
         // Sohbet modunda sessizlikte rahatsız edici uyarı vermeden sessizce tekrar dinlemeye geç
         if (surekliMod && event.error === 'no-speech') {
+          avatarDurumAyarla('idle', '⏳ Sessizlik... tekrar deneniyor');
           surekliModSonrakiAdim();
           return;
         }
         gosterSonuc('error', '❌ Hata', 'Ses tanıma hatası. Lütfen tekrar deneyin.');
+        avatarDurumAyarla('error', '❌ Ses tanıma hatası');
         sesliSoyle('Ses tanıma hatası. Lütfen tekrar deneyin.', surekliModSonrakiAdim);
       };
 
