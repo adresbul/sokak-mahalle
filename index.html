@@ -209,8 +209,15 @@
       flex-wrap: wrap;
     }
 
+    .chat-mode-row-top {
+      flex: 1 1 100%;
+      display: flex;
+      justify-content: flex-end;
+    }
+
     .field {
-      flex: 1 1 340px;
+      flex: 1 1 220px;
+      max-width: 320px;
       position: relative;
     }
 
@@ -305,7 +312,7 @@
 
     @media (max-width: 640px) {
       .main { flex-direction: column; align-items: stretch; }
-      .field { flex: 1 1 auto; }
+      .field { flex: 1 1 auto; max-width: none; }
       .buttons { flex-direction: row; }
     }
 
@@ -318,6 +325,19 @@
       font-size: 0.92rem;
       cursor: pointer;
       transition: all 0.2s;
+    }
+
+    /* Tüm butonlarda tutarlı "basılma" mikro-etkileşimi.
+       Daha spesifik seçicili :active kuralları (ör. .btn-search:active)
+       CSS özgüllüğü sayesinde bunun önüne geçer. */
+    button:active {
+      transform: scale(0.97);
+    }
+
+    /* Buton olmayan ama tıklanabilir kart/öğeler için de aynı tutarlılık */
+    .modal-kisi-kart:active,
+    .autocomplete-item:active {
+      transform: scale(0.98);
     }
 
     .btn-search {
@@ -345,8 +365,8 @@
     .btn-voice {
       position: relative;
       flex: 0 0 auto;
-      width: 3rem;
-      height: 3rem;
+      width: 3.6rem;
+      height: 3.6rem;
       padding: 0;
       border-radius: 50%;
       background: var(--bg-panel-2);
@@ -360,8 +380,8 @@
     }
 
     .btn-voice .voice-icon-mic {
-      width: 1.3rem;
-      height: 1.3rem;
+      width: 1.55rem;
+      height: 1.55rem;
       transition: opacity 0.15s, transform 0.15s;
     }
 
@@ -369,7 +389,7 @@
       display: none;
       align-items: flex-end;
       gap: 3px;
-      height: 16px;
+      height: 18px;
     }
 
     .btn-voice .voice-bars span {
@@ -537,7 +557,7 @@
 
     .ai-avatar-panel {
       width: 100%;
-      max-width: 380px;
+      max-width: 420px;
       background: linear-gradient(180deg, var(--bg-panel-2), var(--bg-panel));
       border: 1px solid var(--line-strong);
       border-radius: 1.5rem;
@@ -693,14 +713,14 @@
     .ai-result-sokak {
       font-family: var(--display);
       font-weight: 700;
-      font-size: 1.05rem;
+      font-size: 1.25rem;
       margin-bottom: 0.35rem;
     }
 
     .ai-result-mahalle {
       color: var(--success);
       font-weight: 600;
-      font-size: 0.95rem;
+      font-size: 1.1rem;
     }
 
     .ai-result-mahalle.not-found { color: var(--error); }
@@ -725,6 +745,117 @@
     }
 
     .ai-ask-btn:hover {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    /* ================= AI Sohbet Balonları ================= */
+    .ai-chat-log {
+      max-height: 260px;
+      overflow-y: auto;
+      margin-bottom: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.55rem;
+      text-align: left;
+      padding-right: 0.2rem;
+      scroll-behavior: smooth;
+    }
+
+    .ai-chat-log:empty { display: none; }
+
+    .ai-chat-log::-webkit-scrollbar { width: 5px; }
+    .ai-chat-log::-webkit-scrollbar-thumb { background: var(--line-strong); border-radius: 3px; }
+
+    .ai-bubble {
+      max-width: 86%;
+      padding: 0.6rem 0.85rem;
+      border-radius: 1rem;
+      font-family: var(--body);
+      font-size: 0.86rem;
+      line-height: 1.42;
+      word-break: break-word;
+      animation: bubble-in 0.18s ease;
+    }
+
+    @keyframes bubble-in {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .ai-bubble-user {
+      align-self: flex-end;
+      background: var(--accent-dim);
+      border: 1px solid var(--accent);
+      color: var(--text-primary);
+      border-bottom-right-radius: 0.3rem;
+    }
+
+    .ai-bubble-ai {
+      align-self: flex-start;
+      background: rgba(var(--tint-rgb),0.05);
+      border: 1px solid var(--line-strong);
+      color: var(--text-primary);
+      border-bottom-left-radius: 0.3rem;
+    }
+
+    .ai-bubble-ai .ai-result-sokak {
+      font-family: var(--display);
+      font-weight: 700;
+      font-size: 1rem;
+      margin-bottom: 0.2rem;
+    }
+
+    .ai-bubble-ai .ai-result-mahalle {
+      color: var(--success);
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+
+    .ai-bubble-ai .ai-result-mahalle.not-found { color: var(--error); }
+
+    .ai-bubble-ai .ai-oneri-liste { margin-top: 0.5rem; }
+
+    .ai-chat-input-row {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 0.9rem;
+    }
+
+    .ai-chat-input {
+      flex: 1;
+      min-width: 0;
+      background: rgba(var(--tint-rgb),0.04);
+      border: 1px solid var(--line-strong);
+      border-radius: 0.8rem;
+      padding: 0.65rem 0.9rem;
+      color: var(--text-primary);
+      font-family: var(--body);
+      font-size: 0.88rem;
+    }
+
+    .ai-chat-input:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .ai-chat-input::placeholder { color: var(--text-muted); }
+
+    .ai-chat-send-btn {
+      flex: 0 0 auto;
+      width: 2.7rem;
+      border-radius: 0.8rem;
+      border: 1px solid var(--accent);
+      background: var(--accent-dim);
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .ai-chat-send-btn:hover {
       background: var(--accent);
       color: #fff;
     }
@@ -763,6 +894,49 @@
       border-top: none;
     }
 
+    /* ================= Yükleniyor İskeleti (Firebase verisi beklenirken) ================= */
+    @keyframes skeletonSismir {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+
+    .skeleton-line,
+    .skeleton-chip {
+      border-radius: 0.4rem;
+      background: linear-gradient(90deg, rgba(var(--tint-rgb),0.06) 25%, rgba(var(--tint-rgb),0.13) 37%, rgba(var(--tint-rgb),0.06) 63%);
+      background-size: 400% 100%;
+      animation: skeletonSismir 1.4s ease infinite;
+    }
+
+    .skeleton-title {
+      width: 55%;
+      height: 0.7rem;
+      margin-bottom: 0.85rem;
+      border-radius: 2rem;
+    }
+
+    .skeleton-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .skeleton-chip {
+      width: 4.5rem;
+      height: 1.9rem;
+      border-radius: 2rem;
+    }
+
+    .skeleton-chip:nth-child(2) { width: 3.6rem; }
+    .skeleton-chip:nth-child(3) { width: 5.2rem; }
+
+    .skeleton-card {
+      border: 3px solid var(--line);
+      border-radius: 0.75rem;
+      padding: 1rem 1.1rem;
+      background: rgba(var(--tint-rgb),0.012);
+    }
+
     .result-box {
       border-radius: 0.6rem;
       padding: 1.25rem 1.4rem;
@@ -792,17 +966,92 @@
     .sokak-name {
       font-family: var(--mono);
       color: var(--text-muted);
-      font-size: 0.85rem;
+      font-size: 1.05rem;
       text-transform: uppercase;
       letter-spacing: 0.04em;
     }
 
     .mahalle-name {
       font-family: var(--display);
-      font-size: 1.6rem;
+      font-size: 1.9rem;
       font-weight: 700;
       color: var(--text-primary);
       margin-top: 0.35rem;
+    }
+
+    @keyframes sonucBelir {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .sokak-name,
+    .mahalle-name,
+    .ai-result-sokak,
+    .ai-result-mahalle {
+      animation: sonucBelir 0.38s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
+    .mahalle-name { animation-delay: 0.06s; }
+    .ai-result-mahalle { animation-delay: 0.06s; }
+
+    .oneri-baslik {
+      margin-top: 1rem;
+      margin-bottom: 0.6rem;
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      letter-spacing: 0.02em;
+      color: var(--text-muted);
+    }
+
+    .oneri-liste {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .oneri-chip {
+      background: rgba(var(--tint-rgb),0.05);
+      border: 1px solid var(--line-strong);
+      border-radius: 2rem;
+      padding: 0.5rem 1rem;
+      font-family: var(--body);
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .oneri-chip:hover {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
+    .ai-oneri-liste {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin-top: 0.6rem;
+    }
+
+    .ai-oneri-chip {
+      background: rgba(var(--tint-rgb),0.06);
+      border: 1px solid var(--line-strong);
+      border-radius: 2rem;
+      padding: 0.35rem 0.8rem;
+      font-family: var(--body);
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .ai-oneri-chip:hover {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
     }
 
     .sonaramalar-wrap {
@@ -1492,6 +1741,13 @@
 
     <!-- Ana Bölüm -->
     <div class="main">
+      <div class="chat-mode-row-top">
+        <button type="button" class="chat-mode-toggle" id="surekliModBtn" onclick="surekliModDegistir()">
+          <span class="dot-switch"></span>
+          <span id="surekliModEtiket">Sohbet Modu: Kapalı</span>
+        </button>
+      </div>
+
       <div class="field">
         <label>Sokak Adı</label>
         <input type="text" id="sokakInput" placeholder="Örn: Koç Sokak" autocomplete="off">
@@ -1507,10 +1763,7 @@
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
           <span>Temizle</span>
         </button>
-      </div>
-
-      <div class="chat-mode-row">
-        <button class="btn-voice btn-voice-lg" id="voiceBtn" onclick="sesliAra()" aria-label="Sesli ara">
+        <button class="btn-voice" id="voiceBtn" onclick="sesliAra()" aria-label="Sesli ara">
           <svg class="voice-icon-mic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
             <path d="M19 10v1a7 7 0 0 1-14 0v-1"></path>
@@ -1518,10 +1771,6 @@
             <line x1="8" y1="23" x2="16" y2="23"></line>
           </svg>
           <span class="voice-bars"><span></span><span></span><span></span></span>
-        </button>
-        <button type="button" class="chat-mode-toggle" id="surekliModBtn" onclick="surekliModDegistir()">
-          <span class="dot-switch"></span>
-          <span id="surekliModEtiket">Sohbet Modu: Kapalı</span>
         </button>
       </div>
     </div>
@@ -1577,8 +1826,18 @@
 
       <div class="ai-status" id="aiStatus">Başlatılıyor...</div>
 
-      <div class="ai-result-box" id="aiResultBox">
-        <div class="ai-result-placeholder">Bir sokak adı söyleyin...</div>
+      <div class="ai-chat-log" id="aiChatLog">
+        <div class="ai-result-placeholder">Bir sokak adı söyleyin veya aşağıya yazın...</div>
+      </div>
+
+      <div class="ai-chat-input-row">
+        <input type="text" class="ai-chat-input" id="aiChatInput" placeholder="Örn: Bağdat Caddesi hangi mahallede?" autocomplete="off" onkeypress="if(event.key==='Enter'){ event.preventDefault(); avatarYaziGonder(); }">
+        <button type="button" class="ai-chat-send-btn" id="aiChatSendBtn" onclick="avatarYaziGonder()" aria-label="Gönder">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="22" y1="2" x2="11" y2="13"></line>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+          </svg>
+        </button>
       </div>
 
       <button type="button" class="ai-ask-btn" id="aiAskBtn" onclick="sesliAra()">
@@ -1588,7 +1847,7 @@
           <line x1="12" y1="19" x2="12" y2="23"></line>
           <line x1="8" y1="23" x2="16" y2="23"></line>
         </svg>
-        <span>Tekrar Sor</span>
+        <span>Sesle Sor</span>
       </button>
     </div>
   </div>
@@ -3358,24 +3617,277 @@
       sokaklariYenidenOlustur();
     }
 
-    // Girilen/söylenen sokak adına göre mahalleyi bulur
-    // (önce tam eşleşme, sonra esnek eşleşme, sonra boşluklardan bağımsız eşleşme)
-    function sokakBul(girilenAd) {
-      const aranan = girilenAd.toLocaleLowerCase('tr').trim();
+    // İki metin arasındaki düzenleme (Levenshtein) mesafesini hesaplar.
+    // Yazım hatası toleransı için kullanılır: mesafe ne kadar küçükse iki metin o kadar benzer demektir.
+    function levenshteinMesafesi(a, b) {
+      const m = a.length, n = b.length;
+      if (m === 0) return n;
+      if (n === 0) return m;
+      const dp = new Array(n + 1);
+      for (let j = 0; j <= n; j++) dp[j] = j;
+      for (let i = 1; i <= m; i++) {
+        let onceki = dp[0];
+        dp[0] = i;
+        for (let j = 1; j <= n; j++) {
+          const gecici = dp[j];
+          dp[j] = a[i - 1] === b[j - 1] ? onceki : 1 + Math.min(onceki, dp[j], dp[j - 1]);
+          onceki = gecici;
+        }
+      }
+      return dp[n];
+    }
 
-      if (sokaklar[aranan]) return sokaklar[aranan];
+    // Sesli tanıma motorları Türkçe'ye özgü harfleri (ı, ş, ç, ö, ü, ğ) sık sık
+    // yanlış algılayıp Latin karşılığına çeviriyor (ör. "Sıtkı" -> "Sitki").
+    // Bu fonksiyon karşılaştırma için bu harfleri sadeleştirir.
+    function turkceSadeleştir(str) {
+      return str
+        .replace(/ı/g, 'i')
+        .replace(/ş/g, 's')
+        .replace(/ç/g, 'c')
+        .replace(/ö/g, 'o')
+        .replace(/ü/g, 'u')
+        .replace(/ğ/g, 'g');
+    }
+
+    // Girilen/söylenen sokak adına göre veritabanındaki gerçek anahtarı (sokak adını) bulur.
+    // Kademeler: 1) tam eşleşme, 2) esnek eşleşme, 3) boşluksuz eşleşme,
+    // 4) kısmi/baştan eşleşme ("Cahit Sıtkı" -> "Cahit Sıtkı Tarancı Sokak"),
+    // 5) aynısı ama Türkçe harf karışıklığına toleranslı (sesli tanımada sık görülür),
+    // 6) yazım hatası toleransı (Levenshtein mesafesi ile en yakın sokağı bulma, harf karışıklığına da toleranslı).
+    function sokakAnahtarBul(girilenAd) {
+      const aranan = girilenAd.toLocaleLowerCase('tr').trim();
+      if (!aranan) return null;
+
+      if (sokaklar[aranan]) return aranan;
 
       const normAranan = normalizeSokakAdi(girilenAd);
-      const eslesenKey = sokaklarNormalize[normAranan];
-      if (eslesenKey) return sokaklar[eslesenKey];
+      if (sokaklarNormalize[normAranan]) return sokaklarNormalize[normAranan];
 
       // "Eski demir yolu" gibi kelimelerin farklı yerden ayrıldığı durumlarda
       // boşlukları tamamen yok sayarak tekrar dene ("eskidemiryolu" == "eskidemiryolu")
       const normArananBosluksuz = normalizeSokakAdiBosluksuz(girilenAd);
-      const eslesenKeyBosluksuz = sokaklarNormalizeBosluksuz[normArananBosluksuz];
-      if (eslesenKeyBosluksuz) return sokaklar[eslesenKeyBosluksuz];
+      if (sokaklarNormalizeBosluksuz[normArananBosluksuz]) return sokaklarNormalizeBosluksuz[normArananBosluksuz];
+
+      if (!normAranan) return null;
+
+      const tumAnahtarlar = Object.keys(sokaklar);
+
+      // Kısmi eşleşme: aranan metin, bir sokağın adının başında kelime bütünlüğüyle geçiyorsa
+      // (ör. "cahit sıtkı" -> "cahit sıtkı tarancı"), soyadı/eki yazmasa da bulur.
+      const basEslesenler = tumAnahtarlar.filter(k => {
+        const normK = normalizeSokakAdi(k);
+        return normK !== normAranan && normK.startsWith(normAranan + ' ');
+      });
+      if (basEslesenler.length) {
+        basEslesenler.sort((a, b) => normalizeSokakAdi(a).length - normalizeSokakAdi(b).length);
+        return basEslesenler[0];
+      }
+
+      // Aynı kısmi eşleşmeyi, Türkçe harf karışıklığına (ı/i, ş/s, ç/c, ö/o, ü/u, ğ/g)
+      // toleranslı biçimde tekrar dener. Sesli aramada sık karşılaşılan bir durumdur.
+      const sadeAranan = turkceSadeleştir(normAranan);
+      const sadeBasEslesenler = tumAnahtarlar.filter(k => {
+        const sadeK = turkceSadeleştir(normalizeSokakAdi(k));
+        return sadeK !== sadeAranan && sadeK.startsWith(sadeAranan + ' ');
+      });
+      if (sadeBasEslesenler.length) {
+        sadeBasEslesenler.sort((a, b) => normalizeSokakAdi(a).length - normalizeSokakAdi(b).length);
+        return sadeBasEslesenler[0];
+      }
+
+      // Yazım hatası toleransı: en yakın (en küçük düzenleme mesafeli) sokağı bul.
+      // Sadeleştirilmiş metinler üzerinden hesaplanır ki hem yazım hatalarını hem de
+      // sesli tanımanın Türkçe harf karışıklıklarını aynı anda tolere edebilsin.
+      // Kısa isimlerde yanlış eşleşmeyi önlemek için mesafe/uzunluk oranına göre bir eşik uygulanır.
+      let enYakinKey = null;
+      let enYakinMesafe = Infinity;
+      tumAnahtarlar.forEach(k => {
+        const sadeK = turkceSadeleştir(normalizeSokakAdi(k));
+        const mesafe = levenshteinMesafesi(sadeAranan, sadeK);
+        if (mesafe < enYakinMesafe) {
+          enYakinMesafe = mesafe;
+          enYakinKey = k;
+        }
+      });
+
+      if (enYakinKey) {
+        const sadeEnYakin = turkceSadeleştir(normalizeSokakAdi(enYakinKey));
+        const uzunluk = Math.max(sadeAranan.length, sadeEnYakin.length);
+        const esikOrani = 0.3;
+        if (uzunluk > 0 && enYakinMesafe <= 3 && (enYakinMesafe / uzunluk) <= esikOrani) {
+          return enYakinKey;
+        }
+      }
 
       return null;
+    }
+
+    // Girilen/söylenen sokak adına göre mahalleyi bulur
+    function sokakBul(girilenAd) {
+      const key = sokakAnahtarBul(girilenAd);
+      return key ? sokaklar[key] : null;
+    }
+
+    // ================= Doğal Cümle Anlama (sunucusuz "sohbet hissi") =================
+    // Gerçek bir yapay zeka modeli çağırmadan, kullanıcının doğal cümle içinde
+    // sorduğu sokak adını ayıklar ve selamlama/teşekkür gibi küçük sohbetleri
+    // farklı, rastgele seçilmiş cümlelerle yanıtlayarak konuşma hissi verir.
+
+    function rastgeleSec(dizi) {
+      return dizi[Math.floor(Math.random() * dizi.length)];
+    }
+
+    // Cümlenin başındaki/sonundaki selamlama, dolgu ve nezaket ifadelerini temizleyip
+    // aradaki asıl sokak/cadde adını çıkarmaya çalışır. Örn:
+    // "Bağdat Caddesi hangi mahallede?" -> "Bağdat Caddesi"
+    // "Bana Fevzi Çakmak Sokak'ın nerede olduğunu söyler misin" -> "Fevzi Çakmak Sokak"
+    function cumledenSokakCikar(girdiHam) {
+      let m = (girdiHam || '').trim();
+      if (!m) return '';
+
+      // Başındaki selamlama/dolgu kelimelerini at
+      m = m.replace(/^(merhaba|selam|iyi günler|iyi akşamlar|günaydın|kolay gelsin|peki|şey|hı+|eee|şimdi|bak)[,]?\s+/i, '');
+      // Sonundaki soru işaretini ve nezaket eklerini geçici olarak at
+      m = m.replace(/\s*\?+$/, '');
+      m = m.replace(/\s+(acaba|lütfen|rica etsem)$/i, '');
+
+      const kaliplar = [
+        /^bana\s+(.+?)['’]?(nin|nın|nun|nün|ın|in|un|ün)?\s+(mahallesini|hangi mahallede oldu[ğg]unu|nerede oldu[ğg]unu)\s*söyle(r misin| misin)?$/i,
+        /^(.+?)\s+(hangi mahalledeydi|hangi mahallede|hangi mahalleye ba[ğg]l[ıi]|hangi semtte|hangi bölgede)$/i,
+        /^(.+?)\s+mahallesi\s+neresi$/i,
+        /^(.+?)\s+hangi\s+mahalle$/i,
+        /^(.+?)['’]?\s*(nin|nın|nun|nün|ın|in|un|ün)?\s+nerede(dir)?$/i,
+        /^(.+?)['’]?\s*(nin|nın|nun|nün|ın|in|un|ün)?\s+nerde(dir)?$/i,
+        /^(.+?)\s+neresi(dir)?$/i,
+      ];
+
+      for (const rgx of kaliplar) {
+        const eslesme = m.match(rgx);
+        if (eslesme && eslesme[1] && eslesme[1].trim().length > 1) {
+          return eslesme[1].trim();
+        }
+      }
+
+      return m.trim();
+    }
+
+    // Selamlama / hâl hatır / teşekkür / veda gibi küçük sohbet kalıpları.
+    // Bunlar sokak veritabanıyla ilgili değildir; doğrudan sohbet gibi cevaplanır.
+    const SELAM_KALIP = /^(merhaba+|selam(lar)?|hey|iyi günler|iyi akşamlar|günaydın)\s*[!.]?$/i;
+    const NASILSIN_KALIP = /^(naber|nas[ıi]ls[ıi]n|ne haber|nas[ıi]l gidiyor)\s*\??$/i;
+    const TESEKKUR_KALIP = /(teşekkür|sağ ?ol|eyvallah|elin[ei]ze sağlık|süpersin|harikasın)/i;
+    const VEDA_KALIP = /^(görüşürüz|hoşça kal|iyi geceler|kapat|çık[ıi]ş|dur|yeter|bitir|kapa)\s*[!.]?$/i;
+
+    const SELAM_YANITLARI = [
+      'Merhaba! Hangi sokağı merak ediyorsunuz?',
+      'Selam! Bir sokak adı söyleyin, hemen mahallesine bakayım.',
+      'Merhaba, buradayım. Sokak adını söylemeniz yeterli.'
+    ];
+    const NASILSIN_YANITLARI = [
+      'İyiyim, teşekkürler! Hangi sokağı arıyorsunuz?',
+      'Gayet iyiyim, siz nasılsınız? Bir sokak sormak isterseniz buradayım.'
+    ];
+    const TESEKKUR_YANITLARI = [
+      'Rica ederim! Başka bir sokak var mı?',
+      'Ne demek, yardımcı olabildiysem ne mutlu.',
+      'Rica ederim, başka sorunuz varsa buradayım.'
+    ];
+    const VEDA_YANITLARI = [
+      'Görüşmek üzere!',
+      'İyi günler, tekrar bekleriz!',
+      'Hoşça kalın!'
+    ];
+
+    // Bulundu/bulunamadı için birkaç farklı cümle kalıbı; her seferinde rastgele
+    // biri seçilir ki cevaplar hep aynı kalıptan çıkmasın, gerçek bir sohbet hissi versin.
+    const BULUNDU_KALIPLARI = [
+      (sokak, mahalle) => `${sokak}, ${mahalle} mahallesinde.`,
+      (sokak, mahalle) => `${sokak} dediniz — orası ${mahalle}'de yer alıyor.`,
+      (sokak, mahalle) => `Buldum! ${sokak}, ${mahalle} sınırları içinde.`,
+      (sokak, mahalle) => `${sokak}, ${mahalle} mahallesine bağlı.`
+    ];
+    const BULUNAMADI_KALIPLARI = [
+      (sokak) => `Üzgünüm, "${sokak}" adında bir sokak bulamadım.`,
+      (sokak) => `"${sokak}" diye bir kayıt göremiyorum veritabanında.`,
+      (sokak) => `Maalesef "${sokak}" için bir sonuç bulamadım.`
+    ];
+
+    function kucukSohbetYaniti(girdiHam) {
+      const m = (girdiHam || '').trim();
+      if (!m) return null;
+      if (SELAM_KALIP.test(m)) return rastgeleSec(SELAM_YANITLARI);
+      if (NASILSIN_KALIP.test(m)) return rastgeleSec(NASILSIN_YANITLARI);
+      if (TESEKKUR_KALIP.test(m)) return rastgeleSec(TESEKKUR_YANITLARI);
+      return null;
+    }
+
+    // Hiçbir eşleşme bulunamadığında gösterilecek "bunu mu demek istediniz" önerileri.
+    // Levenshtein mesafesi/uzunluk oranına göre en yakın birkaç sokağı döndürür.
+    function enYakinOnerileriBul(girilenAd, adet = 3) {
+      const normAranan = normalizeSokakAdi(girilenAd);
+      if (!normAranan) return [];
+      const sadeAranan = turkceSadeleştir(normAranan);
+      const tumAnahtarlar = Object.keys(sokaklar);
+
+      const skorlu = tumAnahtarlar.map(k => {
+        const sadeK = turkceSadeleştir(normalizeSokakAdi(k));
+        const mesafe = levenshteinMesafesi(sadeAranan, sadeK);
+        const uzunluk = Math.max(sadeAranan.length, sadeK.length) || 1;
+        return { k, oran: mesafe / uzunluk, mesafe };
+      });
+
+      skorlu.sort((a, b) => a.oran - b.oran || a.mesafe - b.mesafe);
+
+      // Çok alakasız sonuçları eleyerek en fazla `adet` kadar öneri döndür
+      return skorlu.filter(s => s.oran <= 0.6).slice(0, adet).map(s => s.k);
+    }
+
+    // En son gösterilen "bunu mu demek istediniz" önerileri (tıklanınca kullanılır)
+    let sonOneriler = [];
+
+    // Öneri çipine tıklanınca o sokağı doğrudan sonuç olarak göster
+    function oneriSecTikla(idx) {
+      const key = sonOneriler[idx];
+      if (!key) return;
+      const gosterimAdi = capitalizeSokak(key);
+      const mahalle = sokaklar[key];
+      const mahalleListesi = Array.isArray(mahalle) ? mahalle : [mahalle];
+      const mahalleHTML = mahalleListesi.map(m => `<div class="mahalle-name">${escapeHtml(m)}</div>`).join('');
+
+      const inputEl = document.getElementById('sokakInput');
+      if (inputEl) inputEl.value = gosterimAdi;
+
+      gosterSonuc('success', '✅ Bulundu!',
+        `<div class="sokak-name">${escapeHtml(gosterimAdi)}</div>${mahalleHTML}`);
+
+      const avatarAcikMi = !document.getElementById('aiAvatarOverlay').classList.contains('hidden');
+      if (avatarAcikMi) {
+        sohbetMesajEkle('ai', `<div class="ai-result-sokak">${escapeHtml(gosterimAdi)}</div><div class="ai-result-mahalle">${escapeHtml(mahalleListesi.join(' / '))}</div>`);
+      }
+
+      sesliSoyle(rastgeleSec(BULUNDU_KALIPLARI)(gosterimAdi, mahalleListesi.join(' ve ')));
+      sonAramaEkle(gosterimAdi, mahalleListesi.join(', '));
+    }
+
+    // "Bunu mu demek istediniz?" öneri bloğunun HTML'ini üretir (büyük sonuç kartı için)
+    function oneriBlokHTML(girilenAd) {
+      sonOneriler = enYakinOnerileriBul(girilenAd, 3);
+      if (!sonOneriler.length) return '';
+      const chips = sonOneriler
+        .map((k, i) => `<button type="button" class="oneri-chip" onclick="oneriSecTikla(${i})">${escapeHtml(capitalizeSokak(k))}</button>`)
+        .join('');
+      return `<div class="oneri-baslik">Bunlardan birini mi demek istediniz?</div><div class="oneri-liste">${chips}</div>`;
+    }
+
+    // Aynısı, AI avatar panelindeki küçük sonuç kutusu için
+    function aiOneriBlokHTML(girilenAd) {
+      sonOneriler = enYakinOnerileriBul(girilenAd, 3);
+      if (!sonOneriler.length) return '';
+      const chips = sonOneriler
+        .map((k, i) => `<button type="button" class="ai-oneri-chip" onclick="oneriSecTikla(${i})">${escapeHtml(capitalizeSokak(k))}</button>`)
+        .join('');
+      return `<div class="ai-oneri-liste">${chips}</div>`;
     }
 
 
@@ -3386,7 +3898,7 @@
 
     // --- Son Aranananlar ---
     const SON_ARAMALAR_ANAHTAR = 'sokakBulucu_sonAramalar';
-    const SON_ARAMALAR_MAKS = 10;
+    const SON_ARAMALAR_MAKS = 3;
 
     function sonAramalariGetir() {
       try {
@@ -3432,7 +3944,7 @@
       liste.forEach(item => {
         const chip = document.createElement('button');
         chip.className = 'chip-sonarama';
-        chip.innerHTML = `${item.sokak}<span class="chip-mahalle">${item.mahalle}</span>`;
+        chip.innerHTML = `${escapeHtml(item.sokak)}<span class="chip-mahalle">${escapeHtml(item.mahalle)}</span>`;
         chip.onclick = () => {
           document.getElementById('sokakInput').value = item.sokak;
           ara();
@@ -3604,6 +4116,30 @@
       }
     });
 
+    // Klavye kısayolu: "/" tuşuna basınca doğrudan arama kutusuna odaklan
+    // (başka bir yazı alanında yazarken veya bir modal açıkken tetiklenmez)
+    document.addEventListener('keydown', function(e) {
+      if (e.key !== '/') return;
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
+
+      const hedef = e.target;
+      const yaziAlaninda = hedef && (
+        hedef.tagName === 'INPUT' ||
+        hedef.tagName === 'TEXTAREA' ||
+        hedef.isContentEditable
+      );
+      if (yaziAlaninda) return;
+
+      const modalOverlay = document.getElementById('modalOverlay');
+      const modalAcik = modalOverlay && !modalOverlay.classList.contains('hidden');
+      const avatarOverlay = document.getElementById('aiAvatarOverlay');
+      const avatarAcik = avatarOverlay && !avatarOverlay.classList.contains('hidden');
+      if (modalAcik || avatarAcik) return;
+
+      e.preventDefault();
+      sokakInputEl.focus();
+    });
+
     // Arama fonksiyonu
     function ara() {
       const input = document.getElementById('sokakInput').value;
@@ -3615,17 +4151,20 @@
         return;
       }
 
-      const mahalle = sokakBul(input);
+      const eslesenKey = sokakAnahtarBul(input);
+      const mahalle = eslesenKey ? sokaklar[eslesenKey] : null;
+      const gosterimAdi = eslesenKey ? capitalizeSokak(eslesenKey) : input;
 
       if (mahalle) {
         const mahalleListesi = Array.isArray(mahalle) ? mahalle : [mahalle];
-        const mahalleHTML = mahalleListesi.map(m => `<div class="mahalle-name">${m}</div>`).join('');
+        const mahalleHTML = mahalleListesi.map(m => `<div class="mahalle-name">${escapeHtml(m)}</div>`).join('');
         gosterSonuc('success', '✅ Bulundu!', 
-          `<div class="sokak-name">${input}</div>${mahalleHTML}`);
+          `<div class="sokak-name">${escapeHtml(gosterimAdi)}</div>${mahalleHTML}`);
         sesliSoyle(mahalleListesi.join(' ve '));
-        sonAramaEkle(input, mahalleListesi.join(', '));
+        sonAramaEkle(gosterimAdi, mahalleListesi.join(', '));
       } else {
-        gosterSonuc('warning', '⚠️ Bulunamadı', 'Bu sokak veritabanında bulunamadı.');
+        gosterSonuc('warning', '⚠️ Bulunamadı',
+          `Bu sokak veritabanında bulunamadı.${oneriBlokHTML(input)}`);
       }
     }
 
@@ -3719,6 +4258,8 @@
     function avatarAc() {
       document.getElementById('aiAvatarOverlay').classList.remove('hidden');
       document.body.style.overflow = 'hidden';
+      const girdi = document.getElementById('aiChatInput');
+      if (girdi) setTimeout(() => girdi.focus(), 50);
     }
 
     // Avatar sadece ✕ tuşuna basılınca kapanır: her şeyi durdurur ve sohbet modunu kapatır
@@ -3736,6 +4277,7 @@
       }
       document.getElementById('aiAvatarOverlay').classList.add('hidden');
       document.body.style.overflow = '';
+      sohbetSifirla();
     }
 
     function avatarDurumAyarla(durum, mesaj) {
@@ -3745,14 +4287,92 @@
       if (status && mesaj) status.textContent = mesaj;
     }
 
-    function avatarSonucGoster(sokak, mahalleListesi) {
-      const kutu = document.getElementById('aiResultBox');
-      if (!kutu) return;
-      if (mahalleListesi) {
-        kutu.innerHTML = `<div class="ai-result-sokak">${sokak}</div><div class="ai-result-mahalle">${mahalleListesi.join(' / ')}</div>`;
-      } else {
-        kutu.innerHTML = `<div class="ai-result-sokak">${sokak}</div><div class="ai-result-mahalle not-found">Bulunamadı</div>`;
+    // ================= Sohbet Günlüğü (chat balonları) =================
+    let sohbetGecmisi = [];
+
+    function sohbetMesajEkle(rol, icerikHTML) {
+      sohbetGecmisi.push({ rol, icerikHTML });
+      sohbetGecmisiCiz();
+    }
+
+    function sohbetGecmisiCiz() {
+      const log = document.getElementById('aiChatLog');
+      if (!log) return;
+      if (!sohbetGecmisi.length) {
+        log.innerHTML = '<div class="ai-result-placeholder">Bir sokak adı söyleyin veya aşağıya yazın...</div>';
+        return;
       }
+      log.innerHTML = sohbetGecmisi.map(m =>
+        `<div class="ai-bubble ${m.rol === 'kullanici' ? 'ai-bubble-user' : 'ai-bubble-ai'}">${m.icerikHTML}</div>`
+      ).join('');
+      log.scrollTop = log.scrollHeight;
+    }
+
+    function sohbetSifirla() {
+      sohbetGecmisi = [];
+      sohbetGecmisiCiz();
+    }
+
+    // Hem sesli hem yazılı girdiyi ortak işleyen merkezi fonksiyon: doğal cümleden
+    // sokak adını çıkarır, küçük sohbet/veda kalıplarını yakalar, sonucu hem sohbet
+    // balonu hem sesli yanıt olarak verir.
+    function avatarSorguIsle(hamMetin) {
+      const girdi = (hamMetin || '').trim();
+      if (!girdi) return;
+
+      sohbetMesajEkle('kullanici', escapeHtml(girdi));
+
+      if (VEDA_KALIP.test(girdi)) {
+        const veda = rastgeleSec(VEDA_YANITLARI);
+        sohbetMesajEkle('ai', escapeHtml(veda));
+        avatarDurumAyarla('idle', '👋 Görüşürüz');
+        sesliSoyle(veda, () => avatarKapat());
+        return;
+      }
+
+      const kucukYanit = kucukSohbetYaniti(girdi);
+      if (kucukYanit) {
+        avatarDurumAyarla('idle', '💬 Sohbet');
+        sohbetMesajEkle('ai', escapeHtml(kucukYanit));
+        sesliSoyle(kucukYanit, surekliModSonrakiAdim);
+        return;
+      }
+
+      const sokakSorgusu = cumledenSokakCikar(girdi);
+      const eslesenKey = sokakAnahtarBul(sokakSorgusu);
+      const mahalle = eslesenKey ? sokaklar[eslesenKey] : null;
+      const gosterimAdi = eslesenKey ? capitalizeSokak(eslesenKey) : sokakSorgusu;
+
+      avatarDurumAyarla('idle', '💭 Aranıyor...');
+      document.getElementById('sokakInput').value = gosterimAdi;
+
+      if (mahalle) {
+        const mahalleListesi = Array.isArray(mahalle) ? mahalle : [mahalle];
+        const yanitMetni = rastgeleSec(BULUNDU_KALIPLARI)(gosterimAdi, mahalleListesi.join(' ve '));
+
+        sohbetMesajEkle('ai', `<div class="ai-result-sokak">${escapeHtml(gosterimAdi)}</div><div class="ai-result-mahalle">${escapeHtml(mahalleListesi.join(' / '))}</div>`);
+        gosterSonuc('success', '✅ Bulundu!',
+          `<div class="sokak-name">${escapeHtml(gosterimAdi)}</div>${mahalleListesi.map(m => `<div class="mahalle-name">${escapeHtml(m)}</div>`).join('')}`);
+        sonAramaEkle(gosterimAdi, mahalleListesi.join(', '));
+        sesliSoyle(yanitMetni, surekliModSonrakiAdim);
+      } else {
+        const yanitMetni = rastgeleSec(BULUNAMADI_KALIPLARI)(gosterimAdi);
+
+        sohbetMesajEkle('ai', `${escapeHtml(yanitMetni)}${aiOneriBlokHTML(sokakSorgusu)}`);
+        gosterSonuc('warning', '⚠️ Bulunamadı',
+          `Bu sokak veritabanında bulunamadı.${oneriBlokHTML(sokakSorgusu)}`);
+        sesliSoyle(yanitMetni, surekliModSonrakiAdim);
+      }
+    }
+
+    // Yazılı sohbet kutusundan gönder butonuna/Enter'a basılınca çalışır
+    function avatarYaziGonder() {
+      const input = document.getElementById('aiChatInput');
+      if (!input) return;
+      const deger = input.value.trim();
+      if (!deger) return;
+      input.value = '';
+      avatarSorguIsle(deger);
     }
 
     // Sesli arama
@@ -3789,24 +4409,7 @@
 
       recognition.onresult = (event) => {
         const sesliBilgi = sesTranskriptDuzelt(event.results[0][0].transcript);
-        document.getElementById('sokakInput').value = sesliBilgi;
-        
-        const mahalle = sokakBul(sesliBilgi);
-        avatarDurumAyarla('idle', '💭 Aranıyor...');
-
-        if (mahalle) {
-          const mahalleListesi = Array.isArray(mahalle) ? mahalle : [mahalle];
-          const mahalleHTML = mahalleListesi.map(m => `<div class="mahalle-name">${m}</div>`).join('');
-          gosterSonuc('success', '✅ Bulundu!', 
-            `<div class="sokak-name">${sesliBilgi}</div>${mahalleHTML}`);
-          avatarSonucGoster(sesliBilgi, mahalleListesi);
-          sonAramaEkle(sesliBilgi, mahalleListesi.join(', '));
-          sesliSoyle(mahalleListesi.join(' ve '), surekliModSonrakiAdim);
-        } else {
-          gosterSonuc('warning', '⚠️ Bulunamadı', 'Bu sokak veritabanında bulunamadı.');
-          avatarSonucGoster(sesliBilgi, null);
-          sesliSoyle('Bulunamadı', surekliModSonrakiAdim);
-        }
+        avatarSorguIsle(sesliBilgi);
       };
 
       recognition.onerror = (event) => {
@@ -4079,6 +4682,22 @@
         }
       }
       mahalleGruplariYenidenOlustur();
+    }
+
+    // Firebase'den ilk veri gelene kadar mahalle alanında gösterilecek yükleniyor iskeleti
+    function mahalleIskeletGoster() {
+      const container = document.getElementById('mahalleButtons');
+      if (!container) return;
+      container.innerHTML = Array.from({ length: 6 }).map(() => `
+        <div class="skeleton-card">
+          <div class="skeleton-line skeleton-title"></div>
+          <div class="skeleton-chips">
+            <div class="skeleton-chip"></div>
+            <div class="skeleton-chip"></div>
+            <div class="skeleton-chip"></div>
+          </div>
+        </div>
+      `).join('');
     }
 
     // Mahalle butonlarını gruplu, kart bazlı oluştur (3 üstte / 3 altta ızgara)
@@ -4590,19 +5209,37 @@
       }
     }
 
-    // Sayfa yüklendiğinde butonları ve son aramaları oluştur
-    // (Firebase verisi gelmeden önce en azından sabit veriyle bir şey göster)
-    mahalleButonlariOlustur();
+    // Sayfa yüklendiğinde son aramaları oluştur.
+    // Mahalle alanı: Firebase'e bağlıysak paylaşılan veri gelene kadar kısa bir
+    // "yükleniyor" iskeleti gösterilir (ilk açılışı daha profesyonel hissettirir);
+    // Firebase'e bağlı değilsek doğrudan sabit veriyle gösterilir.
     sonAramalariGoster();
 
-    // Firebase'e bağlıysak, paylaşılan veriyi dinle: hem ilk yüklemede hem de
-    // başka bir kullanıcı ekleme/kaldırma yaptığında ekran otomatik güncellenir
+    let firebaseIlkVeriGeldi = false;
+
     if (firebaseAktif) {
+      mahalleIskeletGoster();
+
+      // Firebase makul sürede yanıt vermezse (yavaş bağlantı, izin hatası vb.)
+      // kullanıcıyı iskelet ekranda bırakmamak için sabit veriyle geri düşülür
+      setTimeout(() => {
+        if (!firebaseIlkVeriGeldi) mahalleButonlariOlustur();
+      }, 4000);
+
+      // Firebase'e bağlıysak, paylaşılan veriyi dinle: hem ilk yüklemede hem de
+      // başka bir kullanıcı ekleme/kaldırma yaptığında ekran otomatik güncellenir
       paylasimRef.on('value', (snapshot) => {
+        firebaseIlkVeriGeldi = true;
         paylasimVeriGuncellendi(snapshot.val());
       }, (err) => {
         console.error('Firebase okuma hatası:', err);
+        if (!firebaseIlkVeriGeldi) {
+          firebaseIlkVeriGeldi = true;
+          mahalleButonlariOlustur();
+        }
       });
+    } else {
+      mahalleButonlariOlustur();
     }
 
     // Service worker'ı kaydet: sayfa, sabit sokak verisi ve temel dosyalar
