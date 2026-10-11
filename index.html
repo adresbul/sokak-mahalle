@@ -434,17 +434,6 @@
       50% { transform: scaleY(1); }
     }
 
-    .btn-voice::before,
-    .btn-voice::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      border-radius: 50%;
-      border: 1.5px solid var(--accent);
-      opacity: 0;
-      pointer-events: none;
-    }
-
     .btn-voice:hover {
       background: var(--accent-dim);
       border-color: var(--accent);
@@ -470,15 +459,6 @@
 
     .btn-voice.listening .voice-bars {
       display: flex;
-    }
-
-    .btn-voice.listening::before,
-    .btn-voice.listening::after {
-      animation: voice-ping 1.6s cubic-bezier(0,0,0.2,1) infinite;
-    }
-
-    .btn-voice.listening::after {
-      animation-delay: 0.5s;
     }
 
     .chat-mode-row {
@@ -510,15 +490,23 @@
     .btn-voice-lg .voice-bars span:nth-child(3) { height: 12px; }
 
     .chat-mode-toggle {
+      position: absolute;
+      top: 0.85rem;
+      left: 0.85rem;
+      height: 38px;
       display: inline-flex;
+      flex-direction: column;
       align-items: center;
-      gap: 0.5rem;
+      justify-content: center;
+      gap: 3px;
       background: rgba(var(--tint-rgb),0.05);
       border: 1px solid var(--line-strong);
-      border-radius: 2rem;
-      padding: 0.45rem 0.9rem 0.45rem 0.7rem;
+      border-radius: 0.75rem;
+      padding: 0 0.6rem;
+      line-height: 1;
+      white-space: nowrap;
       font-family: var(--body);
-      font-size: 0.78rem;
+      font-size: 0.66rem;
       font-weight: 600;
       color: var(--text-muted);
       cursor: pointer;
@@ -531,8 +519,8 @@
     }
 
     .chat-mode-toggle .dot-switch {
-      width: 30px;
-      height: 17px;
+      width: 26px;
+      height: 14px;
       border-radius: 999px;
       background: rgba(var(--tint-rgb),0.14);
       position: relative;
@@ -544,7 +532,7 @@
       content: '';
       position: absolute;
       top: 2px; left: 2px;
-      width: 13px; height: 13px;
+      width: 10px; height: 10px;
       border-radius: 50%;
       background: var(--text-muted);
       transition: transform 0.2s, background 0.2s;
@@ -561,7 +549,84 @@
 
     .chat-mode-toggle.active .dot-switch::after {
       background: var(--cyan);
-      transform: translateX(13px);
+      transform: translateX(12px);
+    }
+
+    /* ================= Silme Sonrası "Geri Al" Şeridi ================= */
+    .geri-al-serit {
+      position: fixed;
+      left: 50%;
+      bottom: 20px;
+      z-index: 1100;
+      display: flex;
+      align-items: center;
+      gap: 0.9rem;
+      max-width: calc(100vw - 2rem);
+      padding: 0.7rem 0.8rem 0.7rem 1rem;
+      background: var(--bg-panel-2);
+      border: 1px solid var(--line-strong);
+      border-radius: 0.9rem;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.4);
+      overflow: hidden;
+      opacity: 0;
+      transform: translate(-50%, 16px);
+      pointer-events: none;
+      transition: opacity 0.25s ease, transform 0.25s ease;
+    }
+
+    .geri-al-serit.acik {
+      opacity: 1;
+      transform: translate(-50%, 0);
+      pointer-events: auto;
+    }
+
+    .geri-al-mesaj {
+      font-family: var(--body);
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-primary);
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .geri-al-btn {
+      flex: 0 0 auto;
+      font-family: var(--body);
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--accent);
+      background: var(--accent-dim);
+      border: 1px solid var(--accent);
+      border-radius: 0.6rem;
+      padding: 0.4rem 0.85rem;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .geri-al-btn:hover {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .geri-al-sure {
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      height: 3px;
+      width: 100%;
+      background: var(--accent);
+      transform-origin: left;
+    }
+
+    .geri-al-serit.acik .geri-al-sure {
+      animation: geri-al-sayac 6s linear forwards;
+    }
+
+    @keyframes geri-al-sayac {
+      from { transform: scaleX(1); }
+      to { transform: scaleX(0); }
     }
 
     /* ================= Yapay Zeka Avatarı ================= */
@@ -1611,28 +1676,29 @@
       transform: translateY(-2px);
     }
 
-    .modal-kisi-kart-silinebilir { padding-top: 1.35rem; }
+    .modal-kisi-kart-silinebilir { padding-top: 2.2rem; }
 
     .modal-kisi-sil {
       position: absolute;
-      top: 0.35rem;
-      right: 0.35rem;
+      top: 0.4rem;
+      right: 0.4rem;
       background: var(--error-dim);
       color: var(--error);
-      border: 1px solid rgba(255,77,109,0.3);
-      border-radius: 0.25rem;
-      width: 10px;
-      height: 10px;
+      border: 1px solid rgba(255,77,109,0.35);
+      border-radius: 0.4rem;
+      width: 24px;
+      height: 24px;
+      min-width: 24px;
+      padding: 0;                 /* genel buton dolgusunu sıfırla (dikdörtgen görünüm ve kaybolan X'in sebebi) */
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      font-size: 0.4rem;
       line-height: 1;
       transition: all 0.2s;
     }
 
-    .modal-kisi-sil .x-ikon { --x-kalinlik: 4; width: 6px; height: 6px; }
+    .modal-kisi-sil .x-ikon { --x-kalinlik: 2.8; width: 11px; height: 11px; flex: 0 0 auto; }
 
     .modal-kisi-sil:hover { background: var(--error); color: #fff; }
 
@@ -1751,6 +1817,8 @@
       border-radius: 0.4rem;
       width: 28px;
       height: 28px;
+      min-width: 28px;
+      padding: 0;                 /* genel buton dolgusunu sıfırla (dikdörtgen görünüm ve kaybolan X'in sebebi) */
       flex-shrink: 0;
       display: flex;
       align-items: center;
@@ -1761,7 +1829,7 @@
       transition: all 0.2s;
     }
 
-    .yonetim-sil-btn .x-ikon { --x-kalinlik: 2.8; width: 12px; height: 12px; }
+    .yonetim-sil-btn .x-ikon { --x-kalinlik: 2.8; width: 12px; height: 12px; flex: 0 0 auto; }
 
     .yonetim-sil-btn:hover { background: var(--error); color: #fff; }
 
@@ -2152,13 +2220,6 @@
 
     <!-- Ana Bölüm -->
     <div class="main">
-      <div class="chat-mode-row-top">
-        <button type="button" class="chat-mode-toggle" id="surekliModBtn" onclick="surekliModDegistir()">
-          <span class="dot-switch"></span>
-          <span id="surekliModEtiket">Sohbet Modu: Kapalı</span>
-        </button>
-      </div>
-
       <div class="field">
         <label>Sokak Adı</label>
         <input type="text" id="sokakInput" placeholder="Örn: Koç Sokak" autocomplete="off">
@@ -2192,6 +2253,11 @@
     <!-- Yapay Zeka Konuşma Kartı (mikrofona basınca yavaşça belirir) -->
     <div class="ai-avatar-overlay hidden" id="aiAvatarOverlay">
       <div class="ai-avatar-panel" id="aiAvatarPanel" data-state="idle">
+        <button type="button" class="chat-mode-toggle" id="surekliModBtn" onclick="surekliModDegistir()" aria-label="Sohbet modu">
+          <span class="dot-switch"></span>
+          <span id="surekliModEtiket">S/M: Kapalı</span>
+        </button>
+
         <button type="button" class="ai-avatar-close" onclick="avatarKapat()" aria-label="Kapat">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><line x1="5" y1="5" x2="19" y2="19"></line><line x1="19" y1="5" x2="5" y2="19"></line></svg>
         </button>
@@ -4234,8 +4300,45 @@
       return null;
     }
 
+    // İki tek kelimenin benzerliği: 0 = aynı, 1 = alakasız.
+    // Başı tutan kelimeler ("taran" / "tarancı") ve küçük yazım farkları da benzer sayılır.
+    function kelimeBenzerligi(q, w) {
+      if (q === w) return 0;
+      if (q.length >= 3 && w.length >= 3 && (w.startsWith(q) || q.startsWith(w))) return 0.1;
+      if (q.length >= 4 && w.length >= 4) {
+        const oran = levenshteinMesafesi(q, w) / Math.max(q.length, w.length);
+        if (oran <= 0.25) return oran;
+      }
+      return 1;
+    }
+
+    // Aranan metindeki HER kelime, sokak adının herhangi bir yerindeki bir kelimeyle
+    // eşleşiyorsa düşük (iyi) skor döner. Böylece sadece ortadaki ya da sondaki kelime
+    // söylense bile (ör. "Tarancı" -> "Cahit Sıtkı Tarancı") sokak bulunur.
+    function kelimeBazliSkor(sadeAranan, sadeK) {
+      const qk = sadeAranan.split(' ').filter(Boolean);
+      const kk = sadeK.split(' ').filter(Boolean);
+      if (!qk.length || !kk.length) return Infinity;
+      const kullanilan = new Set();
+      let toplam = 0;
+      for (const q of qk) {
+        let en = 1, enIdx = -1;
+        kk.forEach((w, i) => {
+          if (kullanilan.has(i)) return;
+          const b = kelimeBenzerligi(q, w);
+          if (b < en) { en = b; enIdx = i; }
+        });
+        if (enIdx < 0) return Infinity;
+        kullanilan.add(enIdx);
+        toplam += en;
+      }
+      // Sokak adında aranandan fazla kelime varsa çok az ceza (kısa adlar öne çıksın)
+      return toplam / qk.length + 0.02 * Math.max(0, kk.length - qk.length);
+    }
+
     // Hiçbir eşleşme bulunamadığında gösterilecek "bunu mu demek istediniz" önerileri.
-    // Levenshtein mesafesi/uzunluk oranına göre en yakın birkaç sokağı döndürür.
+    // İki ölçüten iyi olanı kullanılır: 1) tüm adın yazım benzerliği (Levenshtein),
+    // 2) kelime bazlı eşleşme (adın ortasındaki/sonundaki kelime tek başına söylense de bulur).
     function enYakinOnerileriBul(girilenAd, adet = 3) {
       const normAranan = normalizeSokakAdi(girilenAd);
       if (!normAranan) return [];
@@ -4246,13 +4349,15 @@
         const sadeK = turkceSadeleştir(normalizeSokakAdi(k));
         const mesafe = levenshteinMesafesi(sadeAranan, sadeK);
         const uzunluk = Math.max(sadeAranan.length, sadeK.length) || 1;
-        return { k, oran: mesafe / uzunluk, mesafe };
+        const oran = mesafe / uzunluk;
+        const skor = Math.min(oran, kelimeBazliSkor(sadeAranan, sadeK));
+        return { k, skor, mesafe, uzunluk: sadeK.length };
       });
 
-      skorlu.sort((a, b) => a.oran - b.oran || a.mesafe - b.mesafe);
+      skorlu.sort((a, b) => a.skor - b.skor || a.mesafe - b.mesafe || a.uzunluk - b.uzunluk);
 
       // Çok alakasız sonuçları eleyerek en fazla `adet` kadar öneri döndür
-      return skorlu.filter(s => s.oran <= 0.6).slice(0, adet).map(s => s.k);
+      return skorlu.filter(s => s.skor <= 0.6).slice(0, adet).map(s => s.k);
     }
 
     // En son gösterilen "bunu mu demek istediniz" önerileri (tıklanınca kullanılır)
@@ -4647,13 +4752,13 @@
 
       if (surekliMod) {
         btn.classList.add('active');
-        etiket.textContent = 'Sohbet Modu: Açık';
+        etiket.textContent = 'S/M: Açık';
         sesliSoyle('Sohbet modu açık. Sokakları art arda sorabilirsiniz. Durdurmak için tekrar dokunun.', () => {
           if (surekliMod && !dinliyor) sesliAra();
         });
       } else {
         btn.classList.remove('active');
-        etiket.textContent = 'Sohbet Modu: Kapalı';
+        etiket.textContent = 'S/M: Kapalı';
         window.speechSynthesis.cancel();
         if (aktifRecognition) {
           try { aktifRecognition.abort(); } catch (e) {}
@@ -4696,7 +4801,7 @@
         const btn = document.getElementById('surekliModBtn');
         const etiket = document.getElementById('surekliModEtiket');
         if (btn) btn.classList.remove('active');
-        if (etiket) etiket.textContent = 'Sohbet Modu: Kapalı';
+        if (etiket) etiket.textContent = 'S/M: Kapalı';
       }
       const kart = document.getElementById('aiAvatarOverlay');
       kart.classList.remove('acik');
@@ -5551,6 +5656,7 @@
           silBtn.className = 'yonetim-sil-btn';
           silBtn.innerHTML = X_IKON_SVG;
           silBtn.title = 'Sokağı kaldır';
+          silBtn.setAttribute('aria-label', 'Sokağı kaldır');
           silBtn.onclick = () => yonetimSokakKaldirTikla(sokak, key);
           satir.appendChild(silBtn);
 
@@ -5577,7 +5683,10 @@
 
     // Kaldır (✕) butonuna tıklanınca çalışır
     function yonetimSokakKaldirTikla(sokakAdi, mahalleKey) {
-      sokakKaldirVeriden(sokakAdi, mahalleKey);
+      silmeyiGeriAlinabilirYap(
+        () => sokakKaldirVeriden(sokakAdi, mahalleKey),
+        `"${capitalizeSokak(sokakAdi)}" kaldırıldı`
+      );
       yonetimEkleKaldirEkraniCiz();
     }
 
@@ -5656,9 +5765,13 @@
         silBtn.className = 'modal-kisi-sil';
         silBtn.innerHTML = X_IKON_SVG;
         silBtn.title = 'Bölgeyi kaldır';
+          silBtn.setAttribute('aria-label', 'Bölgeyi kaldır');
         silBtn.onclick = (e) => {
           e.stopPropagation();
-          bolgeKaldirVeriden(grup.id);
+          silmeyiGeriAlinabilirYap(
+            () => bolgeKaldirVeriden(grup.id),
+            `"${grup.ad || 'Bölge ' + (idx + 1)}" bölgesi kaldırıldı`
+          );
           bolgeYonetimListeEkraniCiz();
         };
         kart.appendChild(silBtn);
@@ -5761,8 +5874,12 @@
           silBtn.className = 'yonetim-sil-btn';
           silBtn.innerHTML = X_IKON_SVG;
           silBtn.title = 'Mahalleyi kaldır';
+          silBtn.setAttribute('aria-label', 'Mahalleyi kaldır');
           silBtn.onclick = () => {
-            bolgedenMahalleKaldir(bolgeId, m.key, m.ozel);
+            silmeyiGeriAlinabilirYap(
+              () => bolgedenMahalleKaldir(bolgeId, m.key, m.ozel),
+              `"${m.label}" mahallesi kaldırıldı`
+            );
             bolgeYonetimMahalleEkraniCiz(bolgeId);
           };
           satir.appendChild(silBtn);
@@ -5796,6 +5913,68 @@
       bolgeYonetimMahalleEkraniCiz(bolgeYonetimSeciliId);
       const yeniInput = document.getElementById('bolgeMahalleInput');
       if (yeniInput) yeniInput.focus();
+    }
+
+    // ================= Silme İşlemlerinde "Geri Al" =================
+    // Bir silme işleminden önce paylaşılan verinin yedeği alınır; işlem sonrası altta
+    // birkaç saniyelik bir şerit çıkar. "Geri al"a basılırsa sadece silmenin değiştirdiği
+    // veri alanları eski haline döndürülür (Firebase açıksa herkes için).
+    const GERI_AL_SURE_MS = 6000;
+    let geriAlZamanlayici = null;
+    let geriAlYedek = null;
+
+    function silmeyiGeriAlinabilirYap(islem, mesaj) {
+      const onceki = JSON.parse(JSON.stringify(paylasimliVeri));
+      islem();
+      const degisen = Object.keys(onceki).filter(
+        alan => JSON.stringify(onceki[alan]) !== JSON.stringify(paylasimliVeri[alan])
+      );
+      if (!degisen.length) return;
+      geriAlYedek = { onceki, degisen };
+      geriAlSeridiGoster(mesaj);
+    }
+
+    function geriAlSeridiGoster(mesaj) {
+      let serit = document.getElementById('geriAlSerit');
+      if (!serit) {
+        serit = document.createElement('div');
+        serit.id = 'geriAlSerit';
+        serit.className = 'geri-al-serit';
+        serit.setAttribute('role', 'status');
+        serit.setAttribute('aria-live', 'polite');
+        serit.innerHTML =
+          '<span class="geri-al-mesaj"></span>' +
+          '<button type="button" class="geri-al-btn" onclick="geriAlUygula()">Geri al</button>' +
+          '<span class="geri-al-sure"></span>';
+        document.body.appendChild(serit);
+      }
+      serit.querySelector('.geri-al-mesaj').textContent = mesaj;
+
+      // Sayaç çubuğu animasyonunu baştan başlat
+      serit.classList.remove('acik');
+      void serit.offsetWidth;
+      serit.classList.add('acik');
+
+      clearTimeout(geriAlZamanlayici);
+      geriAlZamanlayici = setTimeout(geriAlSeridiGizle, GERI_AL_SURE_MS);
+    }
+
+    function geriAlSeridiGizle() {
+      clearTimeout(geriAlZamanlayici);
+      geriAlYedek = null;
+      const serit = document.getElementById('geriAlSerit');
+      if (serit) serit.classList.remove('acik');
+    }
+
+    function geriAlUygula() {
+      if (!geriAlYedek) return;
+      const { onceki, degisen } = geriAlYedek;
+      degisen.forEach(alan => {
+        paylasimAlaniniKaydet(alan, JSON.parse(JSON.stringify(onceki[alan])));
+      });
+      // Sokak/bölge/mahalle verisini yeniden kurar, ekranları ve açık yönetim panelini tazeler
+      paylasimVeriGuncellendi(paylasimliVeri);
+      geriAlSeridiGizle();
     }
 
     // Tüm ✕ düğmelerinde ortak kullanılan ikon (hover'da döner, düğmeyle birlikte kırmızıya döner)
