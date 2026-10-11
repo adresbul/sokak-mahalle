@@ -42,6 +42,7 @@
       --white-grp: #CBD4E1;
       --white-dim: rgba(203,212,225,0.1);
       --btn-primary-hover: #ffffff;
+      --son-yazi: var(--text-primary); /* koyu temada okunabilirlik için açık renk */
       --mono: 'JetBrains Mono', ui-monospace, monospace;
       --display: 'Space Grotesk', sans-serif;
       --body: 'Inter', -apple-system, sans-serif;
@@ -72,6 +73,7 @@
       --white-grp: #334155;
       --white-dim: rgba(51,65,85,0.06);
       --btn-primary-hover: #2A1C0D;
+      --son-yazi: #000000;
     }
 
     /* ================= Tema Değiştirme Butonu ================= */
@@ -570,7 +572,8 @@
       opacity: 0;
       overflow: hidden;
       transform: translateY(14px);
-      margin: 0;
+      margin: 0 -16px;
+      padding: 0 16px 30px; /* kart gölgesinin kesilmemesi için pay */
       transition: max-height 1.2s ease, opacity 1.2s ease, transform 1.2s ease, margin 1.2s ease;
     }
 
@@ -578,7 +581,7 @@
       max-height: 900px;
       opacity: 1;
       transform: none;
-      margin: 1.25rem 0;
+      margin: 1.25rem -16px calc(1.25rem - 30px);
     }
 
     .ai-avatar-overlay.hidden { display: none; }
@@ -598,10 +601,12 @@
 
     .ai-avatar-close {
       position: absolute;
-      top: 1rem;
-      right: 1rem;
-      width: 2.1rem;
-      height: 2.1rem;
+      top: 0.85rem;
+      right: 0.85rem;
+      width: 38px;
+      height: 38px;
+      min-width: 38px;
+      padding: 0;                 /* genel buton dolgusunu sıfırla (yassı görünümün sebebi) */
       border-radius: 50%;
       border: 1px solid var(--line-strong);
       background: rgba(var(--tint-rgb),0.05);
@@ -609,9 +614,17 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1rem;
+      line-height: 1;
       cursor: pointer;
-      transition: all 0.2s;
+      transition: color 0.2s, border-color 0.2s, background 0.2s, transform 0.2s;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .ai-avatar-close svg {
+      width: 14px;
+      height: 14px;
+      display: block;
+      transition: transform 0.25s ease;
     }
 
     .ai-avatar-close:hover {
@@ -619,6 +632,8 @@
       border-color: var(--error);
       background: var(--error-dim);
     }
+
+    .ai-avatar-close:hover svg { transform: rotate(90deg); }
 
     .ai-face-wrap {
       position: relative;
@@ -1127,13 +1142,13 @@
       font-size: 0.72rem;
       letter-spacing: 0.1em;
       text-transform: uppercase;
-      color: var(--cyan);
+      color: var(--son-yazi);
     }
 
     .btn-sonaramalar-temizle {
       background: transparent;
       border: 1px solid var(--line-strong);
-      color: var(--text-muted);
+      color: var(--son-yazi);
       padding: 0.35rem 0.75rem;
       font-size: 0.75rem;
       border-radius: 2rem;
@@ -1158,7 +1173,7 @@
       font-family: var(--body);
       font-size: 0.85rem;
       font-weight: 600;
-      color: var(--cyan);
+      color: var(--son-yazi);
       cursor: pointer;
       transition: all 0.2s;
       text-transform: capitalize;
@@ -1496,7 +1511,13 @@
       line-height: 1;
     }
 
-    .modal-close:hover { background: rgba(255,107,26,0.15); border-color: var(--accent); }
+    .modal-close .x-ikon { --x-kalinlik: 2.6; width: 14px; height: 14px; }
+
+    .modal-close:hover {
+      background: var(--error-dim);
+      border-color: var(--error);
+      color: var(--error);
+    }
 
     .modal-body {
       overflow-y: auto;
@@ -1610,6 +1631,8 @@
       line-height: 1;
       transition: all 0.2s;
     }
+
+    .modal-kisi-sil .x-ikon { --x-kalinlik: 4; width: 6px; height: 6px; }
 
     .modal-kisi-sil:hover { background: var(--error); color: #fff; }
 
@@ -1737,6 +1760,8 @@
       line-height: 1;
       transition: all 0.2s;
     }
+
+    .yonetim-sil-btn .x-ikon { --x-kalinlik: 2.8; width: 12px; height: 12px; }
 
     .yonetim-sil-btn:hover { background: var(--error); color: #fff; }
 
@@ -2028,6 +2053,85 @@
       border-bottom: 1px solid var(--line);
       border-radius: 0 0 1rem 1rem;
     }
+
+    /* ================= Robot Yazı Ekranı ================= */
+    .ai-yazi-ekran {
+      min-height: 5.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.9rem;
+      padding: 0.25rem 0 0.5rem;
+    }
+
+    .ay-satir {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.35rem;
+      text-align: center;
+    }
+
+    /* Sokak adı: üstte, daha küçük */
+    .ay-sokak {
+      font-family: var(--mono);
+      font-size: clamp(1.05rem, 4.2vw, 1.4rem);
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      color: var(--text-primary);
+    }
+
+    /* Mahalle: altta, daha büyük */
+    .ay-sonuc {
+      font-family: var(--mono);
+      font-size: clamp(1.6rem, 8vw, 2.6rem);
+      font-weight: 700;
+      line-height: 1.15;
+      letter-spacing: 0.01em;
+      color: var(--accent);
+    }
+
+    .ay-sonuc.hata { color: var(--error); }
+
+    .ay-mesaj {
+      font-family: var(--mono);
+      font-size: 1.05rem;
+      font-weight: 500;
+      line-height: 1.5;
+      color: var(--text-primary);
+      text-align: center;
+    }
+
+    .ay-oneri { opacity: 0; transition: opacity 0.5s ease; }
+    .ay-oneri.goster { opacity: 1; }
+
+    :root[data-theme="light"] .chip-sonarama:hover { color: #000000; }
+
+    /* ================= Ortak ✕ ikonu: hover'da 90° döner ================= */
+    .x-ikon {
+      display: block;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: var(--x-kalinlik, 2.6);
+      stroke-linecap: round;
+      transition: transform 0.25s ease;
+      pointer-events: none;
+    }
+
+    .btn-clear svg { transition: transform 0.25s ease; }
+
+    .ai-avatar-close:hover svg,
+    .modal-close:hover .x-ikon,
+    .modal-kisi-sil:hover .x-ikon,
+    .yonetim-sil-btn:hover .x-ikon,
+    .btn-clear:hover svg {
+      transform: rotate(90deg);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .x-ikon, .btn-clear svg, .ai-avatar-close svg { transition: none; }
+    }
   </style>
 </head>
 <body>
@@ -2088,7 +2192,9 @@
     <!-- Yapay Zeka Konuşma Kartı (mikrofona basınca yavaşça belirir) -->
     <div class="ai-avatar-overlay hidden" id="aiAvatarOverlay">
       <div class="ai-avatar-panel" id="aiAvatarPanel" data-state="idle">
-        <button type="button" class="ai-avatar-close" onclick="avatarKapat()" aria-label="Kapat">✕</button>
+        <button type="button" class="ai-avatar-close" onclick="avatarKapat()" aria-label="Kapat">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><line x1="5" y1="5" x2="19" y2="19"></line><line x1="19" y1="5" x2="5" y2="19"></line></svg>
+        </button>
 
         <button type="button" class="ai-face-wrap" id="aiOrbBtn" onclick="orbTikla()" aria-label="Kargo yapay zekasına sesli sor">
           <span class="ai-face-ring"></span>
@@ -2130,7 +2236,7 @@
         <div class="ai-status" id="aiStatus">Başlatılıyor...</div>
         <div class="ai-orb-ipucu">Tekrar sormak için kargo robotuna dokunun</div>
 
-        <div class="ai-chat-log" id="aiChatLog">
+        <div class="ai-yazi-ekran" id="aiYaziEkran">
           <div class="ai-result-placeholder">Bir sokak adı söyleyin...</div>
         </div>
       </div>
@@ -2167,7 +2273,7 @@
     <div class="modal-box">
       <div class="modal-header">
         <div class="modal-header-title" id="modalBaslik"></div>
-        <button class="modal-close" onclick="geriDon()">✕</button>
+        <button class="modal-close" onclick="geriDon()" aria-label="Kapat"><svg class="x-ikon" viewBox="0 0 24 24" aria-hidden="true"><line x1="5" y1="5" x2="19" y2="19"></line><line x1="19" y1="5" x2="5" y2="19"></line></svg></button>
       </div>
       <div class="modal-body" id="modalBody"></div>
     </div>
@@ -4111,8 +4217,9 @@
     ];
 
     // Bulundu/bulunamadı için tek, sabit cümle (hem yazılı hem sesli cevapta aynısı kullanılır)
+    // Sesli cevap kısa tutulur: sadece mahalle adı okunur
     function bulunduCumlesi(sokak, mahalle) {
-      return `${sokak}, ${mahalle} mahallesinde.`;
+      return mahalle;
     }
     function bulunamadiCumlesi(sokak) {
       return `${sokak} adında bir sokak bulunamadı.`;
@@ -4172,7 +4279,7 @@
       } else {
         // Sesli mod: teslimat etiketi kapanır, cevap robot kartında kalır
         sesliModunaGec();
-        sohbetMesajEkle('ai', `<div class="ai-result-sokak">${escapeHtml(gosterimAdi)}</div><div class="ai-result-mahalle">${escapeHtml(mahalleListesi.join(' / '))}</div>`);
+        robotSonucYaz(gosterimAdi, mahalleListesi);
       }
 
       sesliSoyle(bulunduCumlesi(gosterimAdi, mahalleListesi.join(' ve ')));
@@ -4619,44 +4726,67 @@
       if (status && mesaj) status.textContent = mesaj;
     }
 
-    // ================= Sohbet Günlüğü (chat balonları) =================
-    let sohbetGecmisi = [];
-
-    function sohbetMesajEkle(rol, icerikHTML) {
-      sohbetGecmisi.push({ rol, icerikHTML });
-      sohbetGecmisiCiz();
-    }
-
-    function sohbetGecmisiCiz() {
-      const log = document.getElementById('aiChatLog');
-      if (!log) return;
-      if (!sohbetGecmisi.length) {
-        log.innerHTML = '<div class="ai-result-placeholder">Bir sokak adı söyleyin...</div>';
-        return;
-      }
-      log.innerHTML = sohbetGecmisi.map(m =>
-        `<div class="ai-bubble ${m.rol === 'kullanici' ? 'ai-bubble-user' : 'ai-bubble-ai'}">${m.icerikHTML}</div>`
-      ).join('');
-      log.scrollTop = log.scrollHeight;
+    // ================= Robot Yazı Ekranı (sohbet değil, büyük daktilo yazısı) =================
+    function robotEkranSifirla() {
+      const ekran = document.getElementById('aiYaziEkran');
+      if (ekran) ekran.innerHTML = '<div class="ai-result-placeholder">Bir sokak adı söyleyin...</div>';
     }
 
     function sohbetSifirla() {
-      sohbetGecmisi = [];
-      sohbetGecmisiCiz();
+      yazmaIptal();
+      robotEkranSifirla();
     }
 
-    // Hem sesli hem yazılı girdiyi ortak işleyen merkezi fonksiyon: doğal cümleden
-    // sokak adını çıkarır, küçük sohbet/veda kalıplarını yakalar, sonucu hem sohbet
-    // balonu hem sesli yanıt olarak verir.
+    // Sokak adı üstte (küçük), mahalle altta (büyük) olacak şekilde daktilo efektiyle yazar.
+    // sonuc: tek metin ya da birden fazla mahalle için dizi (her biri ayrı satır)
+    function robotSonucYaz(sokak, sonuc, secenek) {
+      const ekran = document.getElementById('aiYaziEkran');
+      if (!ekran) return;
+      secenek = secenek || {};
+      const sonuclar = (Array.isArray(sonuc) ? sonuc : [sonuc]).map(m => m.toLocaleUpperCase('tr'));
+
+      ekran.innerHTML = '<div class="ay-satir"></div><div class="ay-oneri"></div>';
+      const satir = ekran.querySelector('.ay-satir');
+      const oneri = ekran.querySelector('.ay-oneri');
+
+      const kSokak = document.createElement('div');
+      kSokak.className = 'ay-sokak';
+      satir.appendChild(kSokak);
+      const kutular = [yazmaKutusuKur(kSokak, sokak)];
+
+      sonuclar.forEach(m => {
+        const el = document.createElement('div');
+        el.className = 'ay-sonuc' + (secenek.hata ? ' hata' : '');
+        satir.appendChild(el);
+        kutular.push(yazmaKutusuKur(el, m));
+      });
+
+      daktiloYaz(kutular, 30, () => {
+        if (secenek.oneriHTML) {
+          oneri.innerHTML = secenek.oneriHTML;
+          oneri.classList.add('goster');
+        }
+      });
+    }
+
+    // Selam / veda gibi kısa mesajlar: aynı daktilo yazısıyla, daha küçük
+    function robotMesajYaz(metin) {
+      const ekran = document.getElementById('aiYaziEkran');
+      if (!ekran) return;
+      ekran.innerHTML = '<div class="ay-mesaj"></div>';
+      const el = ekran.querySelector('.ay-mesaj');
+      daktiloYaz([yazmaKutusuKur(el, metin)], 26);
+    }
+
+    // Hem sesli girdiyi işleyen merkezi fonksiyon: doğal cümleden sokak adını çıkarır,
+    // küçük sohbet/veda kalıplarını yakalar, sonucu robotun ekranında yazar ve sesli söyler.
     function avatarSorguIsle(hamMetin) {
       const girdi = (hamMetin || '').trim();
       if (!girdi) return;
 
-      sohbetMesajEkle('kullanici', escapeHtml(girdi));
-
       if (VEDA_KALIP.test(girdi)) {
         const veda = rastgeleSec(VEDA_YANITLARI);
-        sohbetMesajEkle('ai', escapeHtml(veda));
+        robotMesajYaz(veda);
         avatarDurumAyarla('idle', '👋 Görüşürüz');
         sesliSoyle(veda, () => avatarKapat());
         return;
@@ -4665,7 +4795,7 @@
       const kucukYanit = kucukSohbetYaniti(girdi);
       if (kucukYanit) {
         avatarDurumAyarla('idle', '💬 Sohbet');
-        sohbetMesajEkle('ai', escapeHtml(kucukYanit));
+        robotMesajYaz(kucukYanit);
         sesliSoyle(kucukYanit, surekliModSonrakiAdim);
         return;
       }
@@ -4681,16 +4811,12 @@
 
       if (mahalle) {
         const mahalleListesi = Array.isArray(mahalle) ? mahalle : [mahalle];
-        const yanitMetni = bulunduCumlesi(gosterimAdi, mahalleListesi.join(' ve '));
-
-        sohbetMesajEkle('ai', `<div class="ai-result-sokak">${escapeHtml(gosterimAdi)}</div><div class="ai-result-mahalle">${escapeHtml(mahalleListesi.join(' / '))}</div>`);
+        robotSonucYaz(gosterimAdi, mahalleListesi);
         sonAramaEkle(gosterimAdi, mahalleListesi.join(', '));
-        sesliSoyle(yanitMetni, surekliModSonrakiAdim);
+        sesliSoyle(bulunduCumlesi(gosterimAdi, mahalleListesi.join(' ve ')), surekliModSonrakiAdim);
       } else {
-        const yanitMetni = bulunamadiCumlesi(gosterimAdi);
-
-        sohbetMesajEkle('ai', `${escapeHtml(yanitMetni)}${aiOneriBlokHTML(sokakSorgusu)}`);
-        sesliSoyle(yanitMetni, surekliModSonrakiAdim);
+        robotSonucYaz(gosterimAdi, 'Bulunamadı', { hata: true, oneriHTML: aiOneriBlokHTML(sokakSorgusu) });
+        sesliSoyle(bulunamadiCumlesi(gosterimAdi), surekliModSonrakiAdim);
       }
     }
 
@@ -5423,7 +5549,7 @@
 
           const silBtn = document.createElement('button');
           silBtn.className = 'yonetim-sil-btn';
-          silBtn.textContent = '✕';
+          silBtn.innerHTML = X_IKON_SVG;
           silBtn.title = 'Sokağı kaldır';
           silBtn.onclick = () => yonetimSokakKaldirTikla(sokak, key);
           satir.appendChild(silBtn);
@@ -5528,7 +5654,7 @@
 
         const silBtn = document.createElement('button');
         silBtn.className = 'modal-kisi-sil';
-        silBtn.textContent = '✕';
+        silBtn.innerHTML = X_IKON_SVG;
         silBtn.title = 'Bölgeyi kaldır';
         silBtn.onclick = (e) => {
           e.stopPropagation();
@@ -5633,7 +5759,7 @@
 
           const silBtn = document.createElement('button');
           silBtn.className = 'yonetim-sil-btn';
-          silBtn.textContent = '✕';
+          silBtn.innerHTML = X_IKON_SVG;
           silBtn.title = 'Mahalleyi kaldır';
           silBtn.onclick = () => {
             bolgedenMahalleKaldir(bolgeId, m.key, m.ozel);
@@ -5671,6 +5797,9 @@
       const yeniInput = document.getElementById('bolgeMahalleInput');
       if (yeniInput) yeniInput.focus();
     }
+
+    // Tüm ✕ düğmelerinde ortak kullanılan ikon (hover'da döner, düğmeyle birlikte kırmızıya döner)
+    const X_IKON_SVG = '<svg class="x-ikon" viewBox="0 0 24 24" aria-hidden="true"><line x1="5" y1="5" x2="19" y2="19"></line><line x1="19" y1="5" x2="5" y2="19"></line></svg>';
 
     // Modalı kapat
     function geriDon() {
