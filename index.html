@@ -4242,6 +4242,13 @@
       return turkceSadeleştir(kelimeler.join(''));
     }
 
+    // Normalde "360-400" gibi iki ucu çift olan bir aralık sadece çift tarafı kapsar.
+    // Aşağıdaki kayıtlar ise tek ve çift iki tarafı da kapsar (kayıt adı küçük harfle yazılır).
+    // Yeni bir aralığın iki tarafı da dağıtılıyorsa adını buraya eklemek yeterli.
+    const IKI_TARAFLI_KAYITLAR = new Set([
+      'bağdat cad. 360-400'
+    ]);
+
     function aralikKurali(taban, a, b, parite) {
       const bas = Math.min(a, b), son = Math.max(a, b);
       let p = parite;
@@ -4310,11 +4317,49 @@
       return { taban: r[1].trim(), numara: Number(r[2]) };
     }
 
+    // Sesli aramada ses tanıma bazen sayıyı rakamla değil yazıyla verir
+    // ("bağdat caddesi üç yüz doksan sekiz" -> "bağdat caddesi 398").
+    // Sorgunun SONUNDAKİ sayı kelimelerini rakama çevirir; öncesinde en az bir kelime
+    // (sokak adı) yoksa ya da sonda sayı kelimesi yoksa metne dokunmaz.
+    const SAYI_KELIMELERI = {
+      'sıfır': 0, 'bir': 1, 'iki': 2, 'üç': 3, 'dört': 4, 'beş': 5, 'altı': 6, 'yedi': 7,
+      'sekiz': 8, 'dokuz': 9, 'on': 10, 'yirmi': 20, 'otuz': 30, 'kırk': 40, 'elli': 50,
+      'altmış': 60, 'yetmiş': 70, 'seksen': 80, 'doksan': 90
+    };
+    const SAYI_SONEK = new Set(['numaralı', 'numarası', 'numara', 'no']);
+
+    function sayiKelimeleriniRakamaCevir(girdi) {
+      const kelimeler = (girdi || '').toLocaleLowerCase('tr').trim()
+        .replace(/[.,?!]+$/, '').split(/\s+/).filter(Boolean);
+      if (kelimeler.length < 2) return girdi;
+
+      // "numara", "no" gibi sondaki eki geçici olarak ayır
+      let sonek = null;
+      if (SAYI_SONEK.has(kelimeler[kelimeler.length - 1])) sonek = kelimeler.pop();
+
+      // Sondan geriye doğru ardışık sayı kelimelerini topla
+      let i = kelimeler.length;
+      while (i > 0 && (kelimeler[i - 1] in SAYI_KELIMELERI || kelimeler[i - 1] === 'yüz' || kelimeler[i - 1] === 'bin')) i--;
+      if (i === kelimeler.length || i === 0) return girdi;   // sonda sayı yok ya da tamamı sayı
+
+      let toplam = 0, parca = 0;
+      for (const k of kelimeler.slice(i)) {
+        if (k === 'yüz') parca = (parca || 1) * 100;
+        else if (k === 'bin') { toplam += (parca || 1) * 1000; parca = 0; }
+        else parca += SAYI_KELIMELERI[k];
+      }
+      const sayi = toplam + parca;
+      if (!sayi || sayi > 9999) return girdi;
+
+      return kelimeler.slice(0, i).concat(String(sayi), sonek ? [sonek] : []).join(' ');
+    }
+
     // Numaralı bir sorguyu çözer. Dönüş:
     //   null                              -> numaralı sorgu değil (eski arama akışı devam eder)
     //   { gosterimAdi, mahalleler }       -> bulundu
     //   { gosterimAdi, bulunamadi, kayitlar } -> cadde var ama bu numarayı kapsayan kayıt yok
     function numaraliSokakBul(girdi) {
+      girdi = sayiKelimeleriniRakamaCevir(girdi);
       const sorgu = sorgudanNumaraAyir(girdi);
       if (!sorgu) return null;
 
@@ -4330,7 +4375,12 @@
       const adaylar = [];
       Object.keys(sokaklar).forEach(key => {
         const kural = numaraKuraliCikar(key);
-        if (kural && tabanAnahtari(kural.taban) === hedef) adaylar.push({ key, kural });
+        if (kural && tabanAnahtari(kural.taban) === hedef) {
+          // İki ucu da aynı cinsten (ör. 360-400) yazılan ama aslında iki tarafı da
+          // dağıtılan aralıklar: tek ve çift numaraların hepsi kapsansın
+          if (IKI_TARAFLI_KAYITLAR.has(key.toLocaleLowerCase('tr')) && !kural.sayilar) kural.parite = 'hepsi';
+          adaylar.push({ key, kural });
+        }
       });
       if (!adaylar.length) return null;
 
