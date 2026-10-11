@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Sokak adını söyleyin veya yazın, mahallesini öğrenin">
-  <meta name="theme-color" content="#0A0E17">
+  <meta name="theme-color" content="#15100B">
   <title>Sokak Mahalle Bulucu</title>
 
   <link rel="manifest" href="manifest.json">
@@ -17,14 +17,14 @@
 
   <style>
     :root {
-      --bg-deep: #0A0E17;
-      --bg-panel: #0F1523;
-      --bg-panel-2: #131B2C;
+      --bg-deep: #15100B;
+      --bg-panel: #1E1710;
+      --bg-panel-2: #281F15;
       --tint-rgb: 255,255,255;
       --line: rgba(var(--tint-rgb),0.08);
       --line-strong: rgba(var(--tint-rgb),0.14);
-      --text-primary: #E7ECF5;
-      --text-muted: #7C8797;
+      --text-primary: #F4ECDD;
+      --text-muted: #A89A84;
       --accent: #FF6B1A;
       --accent-dim: rgba(255,107,26,0.14);
       --cyan: #00E5C7;
@@ -49,12 +49,12 @@
 
     /* ================= Açık Tema ================= */
     :root[data-theme="light"] {
-      --bg-deep: #F2F4F9;
-      --bg-panel: #FFFFFF;
-      --bg-panel-2: #FAFBFD;
-      --tint-rgb: 15,23,35;
-      --text-primary: #16202E;
-      --text-muted: #5B6577;
+      --bg-deep: #E9D9BD;
+      --bg-panel: #FBF5E9;
+      --bg-panel-2: #F4E8D2;
+      --tint-rgb: 70,45,15;
+      --text-primary: #2A1C0D;
+      --text-muted: #7A6548;
       --accent: #FF6B1A;
       --accent-dim: rgba(255,107,26,0.10);
       --cyan: #0891B2;
@@ -71,7 +71,7 @@
       --gray-dim: rgba(100,116,139,0.10);
       --white-grp: #334155;
       --white-dim: rgba(51,65,85,0.06);
-      --btn-primary-hover: #101826;
+      --btn-primary-hover: #2A1C0D;
     }
 
     /* ================= Tema Değiştirme Butonu ================= */
@@ -107,8 +107,8 @@
     body {
       font-family: var(--body);
       background:
-        radial-gradient(circle at 15% 0%, rgba(255,107,26,0.08) 0%, transparent 45%),
-        radial-gradient(circle at 85% 100%, rgba(0,229,199,0.06) 0%, transparent 45%),
+        radial-gradient(circle at 15% 0%, rgba(255,107,26,0.10) 0%, transparent 45%),
+        radial-gradient(circle at 85% 100%, rgba(212,163,115,0.10) 0%, transparent 45%),
         var(--bg-deep);
       background-attachment: fixed;
       color: var(--text-primary);
@@ -180,8 +180,30 @@
       content: '';
       position: absolute;
       top: 0; left: 0; right: 0;
-      height: 2px;
-      background: linear-gradient(90deg, var(--accent), var(--cyan));
+      height: 8px;
+      background: repeating-linear-gradient(-45deg, #FFC400 0 12px, #1B1B1B 12px 24px);
+    }
+
+    /* Kargo etiketi barkodu */
+    .header::before {
+      content: '';
+      position: absolute;
+      right: 1.5rem;
+      top: 50%;
+      transform: translateY(-40%);
+      width: 96px;
+      height: 30px;
+      opacity: 0.28;
+      background: repeating-linear-gradient(90deg,
+        var(--text-primary) 0 2px, transparent 2px 4px,
+        var(--text-primary) 4px 5px, transparent 5px 8px,
+        var(--text-primary) 8px 11px, transparent 11px 13px,
+        var(--text-primary) 13px 14px, transparent 14px 18px);
+      pointer-events: none;
+    }
+
+    @media (max-width: 560px) {
+      .header::before { display: none; }
     }
 
     h1 {
@@ -198,6 +220,7 @@
     }
 
     .main {
+      border-top: 2px dashed var(--line-strong) !important;
       background: var(--bg-panel);
       border: 1px solid var(--line);
       border-top: none;
@@ -541,30 +564,36 @@
 
     /* ================= Yapay Zeka Avatarı ================= */
     .ai-avatar-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(4,6,12,0.78);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      z-index: 300;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 1.25rem;
+      position: relative;
+      z-index: 1;
+      max-height: 0;
+      opacity: 0;
+      overflow: hidden;
+      transform: translateY(14px);
+      margin: 0;
+      transition: max-height 1.2s ease, opacity 1.2s ease, transform 1.2s ease, margin 1.2s ease;
+    }
+
+    .ai-avatar-overlay.acik {
+      max-height: 900px;
+      opacity: 1;
+      transform: none;
+      margin: 1.25rem 0;
     }
 
     .ai-avatar-overlay.hidden { display: none; }
 
     .ai-avatar-panel {
       width: 100%;
-      max-width: 420px;
+      max-width: 560px;
+      margin: 0 auto;
       background: linear-gradient(180deg, var(--bg-panel-2), var(--bg-panel));
       border: 1px solid var(--line-strong);
-      border-radius: 1.5rem;
-      padding: 2rem 1.5rem 1.5rem;
+      border-radius: 1.25rem;
+      padding: 1.5rem 1.25rem 1.25rem;
       position: relative;
       text-align: center;
-      box-shadow: 0 30px 70px rgba(0,0,0,0.55);
+      box-shadow: 0 14px 34px rgba(0,0,0,0.28);
     }
 
     .ai-avatar-close {
@@ -593,9 +622,28 @@
 
     .ai-face-wrap {
       position: relative;
-      width: 176px;
-      height: 176px;
-      margin: 0.25rem auto 1.1rem;
+      display: block;
+      width: 150px;
+      height: 150px;
+      margin: 0.25rem auto 0.9rem;
+      padding: 0;
+      background: none;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: transform 0.25s;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .ai-face-wrap:hover { transform: scale(1.04); }
+    .ai-face-wrap:active { transform: scale(0.97); }
+    .ai-face-wrap:focus-visible { outline: 2px solid var(--accent); outline-offset: 6px; }
+
+    .ai-orb-ipucu {
+      font-family: var(--body);
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin: -0.3rem 0 0.8rem;
     }
 
     .ai-face-ring {
@@ -620,8 +668,8 @@
     }
 
     .ai-orb {
-      width: 176px;
-      height: 176px;
+      width: 150px;
+      height: 150px;
       border-radius: 50%;
       background:
         radial-gradient(circle at 32% 28%, rgba(255,154,60,0.28), transparent 60%),
@@ -728,6 +776,7 @@
     .ai-result-placeholder {
       color: var(--text-muted);
       font-size: 0.85rem;
+      text-align: center;
     }
 
     .ai-ask-btn {
@@ -1721,12 +1770,270 @@
     @media (max-width: 480px) {
       .logo-container { display: none; }
     }
+
+    /* ================= Kargo Robotu ================= */
+    .ai-bot {
+      width: 100%;
+      height: 100%;
+      display: block;
+      overflow: visible;
+      filter: drop-shadow(0 10px 14px rgba(0,0,0,0.3));
+      animation: bot-float 3.6s ease-in-out infinite;
+    }
+
+    @keyframes bot-float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-4px); }
+    }
+
+    .bot-pin {
+      transform-box: fill-box;
+      transform-origin: 50% 100%;
+      animation: pin-bob 2.4s ease-in-out infinite;
+    }
+
+    @keyframes pin-bob {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-3px); }
+    }
+
+    .bot-eye {
+      fill: var(--cyan);
+      transform-box: fill-box;
+      transform-origin: center;
+      animation: bot-blink 4.2s infinite;
+      filter: drop-shadow(0 0 4px var(--cyan));
+    }
+
+    @keyframes bot-blink {
+      0%, 92%, 100% { transform: scaleY(1); }
+      95% { transform: scaleY(0.1); }
+    }
+
+    @keyframes eye-listen {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.25); }
+    }
+
+    .bot-mouth-bar {
+      fill: var(--accent);
+      transform-box: fill-box;
+      transform-origin: center;
+      transform: scaleY(0.25);
+      animation: wave-idle 2.4s ease-in-out infinite;
+    }
+
+    .bot-mouth-bar:nth-child(2) { animation-delay: 0.1s; }
+    .bot-mouth-bar:nth-child(3) { animation-delay: 0.2s; }
+    .bot-mouth-bar:nth-child(4) { animation-delay: 0.3s; }
+    .bot-mouth-bar:nth-child(5) { animation-delay: 0.4s; }
+
+    .ai-avatar-panel[data-state="listening"] .bot-eye { animation: eye-listen 1s ease-in-out infinite; }
+    .ai-avatar-panel[data-state="listening"] .bot-mouth-bar { animation: wave-listen 0.7s ease-in-out infinite; }
+    .ai-avatar-panel[data-state="speaking"] .bot-eye { animation: none; }
+    .ai-avatar-panel[data-state="speaking"] .bot-mouth-bar { animation: wave-speak 0.42s ease-in-out infinite; }
+    .ai-avatar-panel[data-state="speaking"] .bot-pin { animation-duration: 0.8s; }
+    .ai-avatar-panel[data-state="error"] .bot-eye { fill: var(--error); filter: drop-shadow(0 0 4px var(--error)); animation: none; }
+    .ai-avatar-panel[data-state="error"] .bot-mouth-bar { fill: var(--error); animation: none; transform: scaleY(0.15); }
+
+    /* ================= Kargo Etiketi (arama sonucu) ================= */
+    .kargo-etiket {
+      position: relative;
+      max-width: 520px;
+      margin: 0 auto;
+      background: var(--bg-panel-2);
+      border: 1px solid var(--line-strong);
+      border-radius: 1rem;
+      box-shadow: 0 14px 34px rgba(0,0,0,0.22);
+      text-align: center;
+      animation: etiket-belir 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
+    @keyframes etiket-belir {
+      from { opacity: 0; transform: translateY(14px) scale(0.97); }
+      to { opacity: 1; transform: none; }
+    }
+
+    .ke-serit {
+      height: 7px;
+      border-radius: 1rem 1rem 0 0;
+      background: repeating-linear-gradient(-45deg, #FFC400 0 10px, #1B1B1B 10px 20px);
+    }
+
+    .ke-ust {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      padding: 0.7rem 1.4rem 0;
+      font-family: var(--mono);
+      font-size: 0.68rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    .ke-durum {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .ke-durum b { font-weight: 600; }
+
+    .ke-durum i {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: currentColor;
+      box-shadow: 0 0 8px currentColor;
+      animation: blink 0.8s infinite;
+    }
+
+    .ke-durum.tamam { color: var(--success); }
+    .ke-durum.tamam i { animation: none; }
+
+    .ke-govde { padding: 0.9rem 1.5rem 0.4rem; }
+
+    .ke-alan-ad {
+      font-family: var(--mono);
+      font-size: 0.64rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      opacity: 0.8;
+      margin-bottom: 0.35rem;
+    }
+
+    .ke-sokak {
+      font-family: var(--mono);
+      font-size: 1.2rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      color: var(--text-primary);
+      min-height: 1.6rem;
+      margin-bottom: 0.9rem;
+    }
+
+    .ke-ayrac {
+      position: relative;
+      height: 0;
+      margin: 0 -1.5rem 0.9rem;
+      border-top: 2px dashed var(--line-strong);
+    }
+
+    .ke-delik {
+      position: absolute;
+      top: -11px;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--bg-panel);
+      border: 1px solid var(--line-strong);
+    }
+
+    .ke-delik.l { left: -11px; clip-path: inset(0 0 0 50%); }
+    .ke-delik.r { right: -11px; clip-path: inset(0 50% 0 0); }
+
+    .ke-mahalleler {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.35rem;
+      padding-bottom: 0.4rem;
+    }
+
+    .ke-mahalle-satir {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      max-width: 100%;
+    }
+
+    .ke-pin { color: var(--accent); flex: none; }
+
+    .ke-mahalle {
+      font-family: var(--display);
+      font-size: 1.9rem;
+      font-weight: 700;
+      line-height: 1.2;
+      color: var(--text-primary);
+    }
+
+    /* Daktilo katmanları */
+    .ke-yazi-kutu {
+      display: inline-block;
+      position: relative;
+      max-width: 100%;
+      text-align: left;
+    }
+
+    .ke-hayalet { visibility: hidden; }
+
+    .ke-yazi {
+      position: absolute;
+      inset: 0;
+      white-space: pre-wrap;
+    }
+
+    .ke-imlec {
+      display: inline-block;
+      width: 2px;
+      height: 1em;
+      margin-left: 2px;
+      vertical-align: -0.12em;
+      background: var(--accent);
+      animation: blink 0.7s steps(1) infinite;
+    }
+
+    .ke-alt {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.6rem 1.5rem 1rem;
+    }
+
+    .ke-barkod {
+      width: 150px;
+      height: 26px;
+      opacity: 0.55;
+      background: repeating-linear-gradient(90deg,
+        var(--text-primary) 0 2px, transparent 2px 4px,
+        var(--text-primary) 4px 5px, transparent 5px 8px,
+        var(--text-primary) 8px 11px, transparent 11px 13px,
+        var(--text-primary) 13px 14px, transparent 14px 18px);
+    }
+
+    .ke-ref {
+      font-family: var(--mono);
+      font-size: 0.62rem;
+      letter-spacing: 0.3em;
+      color: var(--text-muted);
+    }
+
+    @media (max-width: 480px) {
+      .ke-mahalle { font-size: 1.5rem; }
+      .ke-sokak { font-size: 1rem; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .ai-bot, .bot-pin, .bot-eye, .bot-mouth-bar, .kargo-etiket, .ke-imlec { animation: none !important; }
+    }
+
+    /* Sonuç bölümü kapalıyken arama kartının alt kenarını kapat */
+    .main:has(+ .result.hidden) {
+      border-bottom: 1px solid var(--line);
+      border-radius: 0 0 1rem 1rem;
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <div class="eyebrow">
-      <span class="dot"></span>Konum sorgu sistemi çevrimiçi
+      <span class="dot"></span>Kargo dağıtım ağı çevrimiçi
       <button type="button" class="theme-toggle" onclick="temaDegistir()">
         <span class="theme-icon" id="themeIcon">☀️</span>
         <span id="themeLabel">Açık Tema</span>
@@ -1735,8 +2042,8 @@
 
     <!-- Başlık -->
     <div class="header">
-      <h1>Sokak - Mahalle Bulucu</h1>
-      <p class="subtitle">Sokak adını girin, mahallesini öğrenin</p>
+      <h1>📦 Sokak - Mahalle Bulucu</h1>
+      <p class="subtitle">Sokak adını girin, kargonun gideceği mahalleyi öğrenin</p>
     </div>
 
     <!-- Ana Bölüm -->
@@ -1778,6 +2085,57 @@
     <!-- Sonuç -->
     <div id="result" class="result hidden"></div>
 
+    <!-- Yapay Zeka Konuşma Kartı (mikrofona basınca yavaşça belirir) -->
+    <div class="ai-avatar-overlay hidden" id="aiAvatarOverlay">
+      <div class="ai-avatar-panel" id="aiAvatarPanel" data-state="idle">
+        <button type="button" class="ai-avatar-close" onclick="avatarKapat()" aria-label="Kapat">✕</button>
+
+        <button type="button" class="ai-face-wrap" id="aiOrbBtn" onclick="orbTikla()" aria-label="Kargo yapay zekasına sesli sor">
+          <span class="ai-face-ring"></span>
+          <span class="ai-face-ring ring-2"></span>
+          <svg class="ai-bot" viewBox="0 0 160 160" aria-hidden="true">
+            <defs>
+              <linearGradient id="botKraft" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#E2B279"/>
+                <stop offset="1" stop-color="#C08A4A"/>
+              </linearGradient>
+            </defs>
+            <ellipse cx="80" cy="152" rx="38" ry="5" fill="rgba(0,0,0,0.28)"/>
+            <g class="bot-pin">
+              <path d="M80 4c-6.1 0-11 4.9-11 11 0 8.2 11 19 11 19s11-10.8 11-19c0-6.1-4.9-11-11-11z" fill="var(--accent)"/>
+              <circle cx="80" cy="15" r="4" fill="#fff"/>
+            </g>
+            <rect x="21" y="78" width="10" height="30" rx="5" fill="#9A6A33"/>
+            <rect x="129" y="78" width="10" height="30" rx="5" fill="#9A6A33"/>
+            <rect x="28" y="36" width="104" height="104" rx="14" fill="url(#botKraft)"/>
+            <path d="M28 56V50a14 14 0 0 1 14-14h76a14 14 0 0 1 14 14v6z" fill="#EBC391"/>
+            <line x1="28" y1="56" x2="132" y2="56" stroke="#A06F38" stroke-width="1.5"/>
+            <rect x="68" y="36" width="24" height="44" fill="#F6E7C8" opacity="0.93"/>
+            <rect x="38" y="64" width="84" height="48" rx="11" fill="#14100B" stroke="#7A5428" stroke-width="2"/>
+            <rect class="bot-eye" x="54" y="76" width="14" height="14" rx="5"/>
+            <rect class="bot-eye" x="92" y="76" width="14" height="14" rx="5"/>
+            <g class="bot-mouth">
+              <rect class="bot-mouth-bar" x="58" y="96" width="5" height="12" rx="2.5"/>
+              <rect class="bot-mouth-bar" x="68" y="96" width="5" height="12" rx="2.5"/>
+              <rect class="bot-mouth-bar" x="78" y="96" width="5" height="12" rx="2.5"/>
+              <rect class="bot-mouth-bar" x="88" y="96" width="5" height="12" rx="2.5"/>
+              <rect class="bot-mouth-bar" x="98" y="96" width="5" height="12" rx="2.5"/>
+            </g>
+            <rect x="46" y="119" width="68" height="14" rx="3" fill="#F6E7C8"/>
+            <path d="M52 122v8M60 122v8M68 122v8M77 122v8M85 122v8M94 122v8M104 122v8" stroke="#3A2A14" stroke-width="1.8"/>
+            <path d="M56 122v8M64 122v8M72 122v8M81 122v8M90 122v8M99 122v8" stroke="#3A2A14" stroke-width="0.9"/>
+          </svg>
+        </button>
+
+        <div class="ai-status" id="aiStatus">Başlatılıyor...</div>
+        <div class="ai-orb-ipucu">Tekrar sormak için kargo robotuna dokunun</div>
+
+        <div class="ai-chat-log" id="aiChatLog">
+          <div class="ai-result-placeholder">Bir sokak adı söyleyin...</div>
+        </div>
+      </div>
+    </div>
+
     <!-- Son Aranananlar -->
     <div id="sonAramalarWrap" class="sonaramalar-wrap hidden">
       <div class="sonaramalar-section">
@@ -1805,53 +2163,6 @@
   </div>
 
   <!-- Modal -->
-  <!-- Yapay Zeka Avatarı Overlay -->
-  <div class="ai-avatar-overlay hidden" id="aiAvatarOverlay">
-    <div class="ai-avatar-panel" id="aiAvatarPanel" data-state="idle">
-      <button type="button" class="ai-avatar-close" onclick="avatarKapat()" aria-label="Kapat">✕</button>
-
-      <div class="ai-face-wrap">
-        <div class="ai-face-ring"></div>
-        <div class="ai-face-ring ring-2"></div>
-        <div class="ai-orb">
-          <span class="wave-bar"></span>
-          <span class="wave-bar"></span>
-          <span class="wave-bar"></span>
-          <span class="wave-bar"></span>
-          <span class="wave-bar"></span>
-          <span class="wave-bar"></span>
-          <span class="wave-bar"></span>
-        </div>
-      </div>
-
-      <div class="ai-status" id="aiStatus">Başlatılıyor...</div>
-
-      <div class="ai-chat-log" id="aiChatLog">
-        <div class="ai-result-placeholder">Bir sokak adı söyleyin veya aşağıya yazın...</div>
-      </div>
-
-      <div class="ai-chat-input-row">
-        <input type="text" class="ai-chat-input" id="aiChatInput" placeholder="Örn: Bağdat Caddesi hangi mahallede?" autocomplete="off" onkeypress="if(event.key==='Enter'){ event.preventDefault(); avatarYaziGonder(); }">
-        <button type="button" class="ai-chat-send-btn" id="aiChatSendBtn" onclick="avatarYaziGonder()" aria-label="Gönder">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="22" y1="2" x2="11" y2="13"></line>
-            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-          </svg>
-        </button>
-      </div>
-
-      <button type="button" class="ai-ask-btn" id="aiAskBtn" onclick="sesliAra()">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
-          <path d="M19 10v1a7 7 0 0 1-14 0v-1"></path>
-          <line x1="12" y1="19" x2="12" y2="23"></line>
-          <line x1="8" y1="23" x2="16" y2="23"></line>
-        </svg>
-        <span>Sesle Sor</span>
-      </button>
-    </div>
-  </div>
-
   <div class="modal-overlay hidden" id="modalOverlay" onclick="modalKapat(event)">
     <div class="modal-box">
       <div class="modal-header">
@@ -3799,19 +4110,13 @@
       'Hoşça kalın!'
     ];
 
-    // Bulundu/bulunamadı için birkaç farklı cümle kalıbı; her seferinde rastgele
-    // biri seçilir ki cevaplar hep aynı kalıptan çıkmasın, gerçek bir sohbet hissi versin.
-    const BULUNDU_KALIPLARI = [
-      (sokak, mahalle) => `${sokak}, ${mahalle} mahallesinde.`,
-      (sokak, mahalle) => `${sokak} dediniz — orası ${mahalle}'de yer alıyor.`,
-      (sokak, mahalle) => `Buldum! ${sokak}, ${mahalle} sınırları içinde.`,
-      (sokak, mahalle) => `${sokak}, ${mahalle} mahallesine bağlı.`
-    ];
-    const BULUNAMADI_KALIPLARI = [
-      (sokak) => `Üzgünüm, "${sokak}" adında bir sokak bulamadım.`,
-      (sokak) => `"${sokak}" diye bir kayıt göremiyorum veritabanında.`,
-      (sokak) => `Maalesef "${sokak}" için bir sonuç bulamadım.`
-    ];
+    // Bulundu/bulunamadı için tek, sabit cümle (hem yazılı hem sesli cevapta aynısı kullanılır)
+    function bulunduCumlesi(sokak, mahalle) {
+      return `${sokak}, ${mahalle} mahallesinde.`;
+    }
+    function bulunamadiCumlesi(sokak) {
+      return `${sokak} adında bir sokak bulunamadı.`;
+    }
 
     function kucukSohbetYaniti(girdiHam) {
       const m = (girdiHam || '').trim();
@@ -3847,7 +4152,8 @@
     let sonOneriler = [];
 
     // Öneri çipine tıklanınca o sokağı doğrudan sonuç olarak göster
-    function oneriSecTikla(idx) {
+    function oneriSecTikla(idx, kaynak) {
+      const sesModu = kaynak === 'ses';
       const key = sonOneriler[idx];
       if (!key) return;
       const gosterimAdi = capitalizeSokak(key);
@@ -3858,15 +4164,18 @@
       const inputEl = document.getElementById('sokakInput');
       if (inputEl) inputEl.value = gosterimAdi;
 
-      gosterSonuc('success', '✅ Bulundu!',
-        `<div class="sokak-name">${escapeHtml(gosterimAdi)}</div>${mahalleHTML}`);
-
-      const avatarAcikMi = !document.getElementById('aiAvatarOverlay').classList.contains('hidden');
-      if (avatarAcikMi) {
+      if (!sesModu) {
+        // Yazılı mod: robot kartı kapanır, teslimat etiketi görünür
+        metinModunaGec();
+        gosterSonuc('success', '✅ Bulundu!',
+          `<div class="sokak-name">${escapeHtml(gosterimAdi)}</div>${mahalleHTML}`);
+      } else {
+        // Sesli mod: teslimat etiketi kapanır, cevap robot kartında kalır
+        sesliModunaGec();
         sohbetMesajEkle('ai', `<div class="ai-result-sokak">${escapeHtml(gosterimAdi)}</div><div class="ai-result-mahalle">${escapeHtml(mahalleListesi.join(' / '))}</div>`);
       }
 
-      sesliSoyle(rastgeleSec(BULUNDU_KALIPLARI)(gosterimAdi, mahalleListesi.join(' ve ')));
+      sesliSoyle(bulunduCumlesi(gosterimAdi, mahalleListesi.join(' ve ')));
       sonAramaEkle(gosterimAdi, mahalleListesi.join(', '));
     }
 
@@ -3885,7 +4194,7 @@
       sonOneriler = enYakinOnerileriBul(girilenAd, 3);
       if (!sonOneriler.length) return '';
       const chips = sonOneriler
-        .map((k, i) => `<button type="button" class="ai-oneri-chip" onclick="oneriSecTikla(${i})">${escapeHtml(capitalizeSokak(k))}</button>`)
+        .map((k, i) => `<button type="button" class="ai-oneri-chip" onclick="oneriSecTikla(${i}, 'ses')">${escapeHtml(capitalizeSokak(k))}</button>`)
         .join('');
       return `<div class="ai-oneri-liste">${chips}</div>`;
     }
@@ -4132,9 +4441,7 @@
 
       const modalOverlay = document.getElementById('modalOverlay');
       const modalAcik = modalOverlay && !modalOverlay.classList.contains('hidden');
-      const avatarOverlay = document.getElementById('aiAvatarOverlay');
-      const avatarAcik = avatarOverlay && !avatarOverlay.classList.contains('hidden');
-      if (modalAcik || avatarAcik) return;
+      if (modalAcik) return;
 
       e.preventDefault();
       sokakInputEl.focus();
@@ -4142,6 +4449,7 @@
 
     // Arama fonksiyonu
     function ara() {
+      metinModunaGec();
       const input = document.getElementById('sokakInput').value;
       const aranan = input.toLowerCase().trim();
       const resultDiv = document.getElementById('result');
@@ -4256,13 +4564,21 @@
 
     // ================= Yapay Zeka Avatarı Kontrolü =================
     function avatarAc() {
-      document.getElementById('aiAvatarOverlay').classList.remove('hidden');
-      document.body.style.overflow = 'hidden';
-      const girdi = document.getElementById('aiChatInput');
-      if (girdi) setTimeout(() => girdi.focus(), 50);
+      const kart = document.getElementById('aiAvatarOverlay');
+      if (!kart) return;
+      if (kart.classList.contains('hidden')) {
+        kart.classList.remove('hidden');
+        // Bir kare bekleyip sınıfı ekle ki geçiş animasyonu (yavaşça belirme) çalışsın
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+          kart.classList.add('acik');
+          setTimeout(() => kart.scrollIntoView({ behavior: 'smooth', block: 'center' }), 250);
+        }));
+      } else {
+        kart.classList.add('acik');
+      }
     }
 
-    // Avatar sadece ✕ tuşuna basılınca kapanır: her şeyi durdurur ve sohbet modunu kapatır
+    // Kart sadece ✕ tuşuna basılınca kapanır: her şeyi durdurur ve sohbet modunu kapatır
     function avatarKapat() {
       window.speechSynthesis.cancel();
       if (aktifRecognition) {
@@ -4275,9 +4591,25 @@
         if (btn) btn.classList.remove('active');
         if (etiket) etiket.textContent = 'Sohbet Modu: Kapalı';
       }
-      document.getElementById('aiAvatarOverlay').classList.add('hidden');
-      document.body.style.overflow = '';
+      const kart = document.getElementById('aiAvatarOverlay');
+      kart.classList.remove('acik');
+      setTimeout(() => {
+        if (!kart.classList.contains('acik')) kart.classList.add('hidden');
+      }, 1200);
       sohbetSifirla();
+    }
+
+    // Küreye (yapay zeka düğmesine) dokununca: dinliyorsa durdur, değilse yeni soru için dinlemeye başla
+    function orbTikla() {
+      if (dinliyor) {
+        if (aktifRecognition) {
+          try { aktifRecognition.abort(); } catch (e) {}
+        }
+        avatarDurumAyarla('idle', '⏸ Bekliyor');
+        return;
+      }
+      window.speechSynthesis.cancel();
+      sesliAra();
     }
 
     function avatarDurumAyarla(durum, mesaj) {
@@ -4299,7 +4631,7 @@
       const log = document.getElementById('aiChatLog');
       if (!log) return;
       if (!sohbetGecmisi.length) {
-        log.innerHTML = '<div class="ai-result-placeholder">Bir sokak adı söyleyin veya aşağıya yazın...</div>';
+        log.innerHTML = '<div class="ai-result-placeholder">Bir sokak adı söyleyin...</div>';
         return;
       }
       log.innerHTML = sohbetGecmisi.map(m =>
@@ -4344,35 +4676,22 @@
       const gosterimAdi = eslesenKey ? capitalizeSokak(eslesenKey) : sokakSorgusu;
 
       avatarDurumAyarla('idle', '💭 Aranıyor...');
+      sesliModunaGec();
       document.getElementById('sokakInput').value = gosterimAdi;
 
       if (mahalle) {
         const mahalleListesi = Array.isArray(mahalle) ? mahalle : [mahalle];
-        const yanitMetni = rastgeleSec(BULUNDU_KALIPLARI)(gosterimAdi, mahalleListesi.join(' ve '));
+        const yanitMetni = bulunduCumlesi(gosterimAdi, mahalleListesi.join(' ve '));
 
         sohbetMesajEkle('ai', `<div class="ai-result-sokak">${escapeHtml(gosterimAdi)}</div><div class="ai-result-mahalle">${escapeHtml(mahalleListesi.join(' / '))}</div>`);
-        gosterSonuc('success', '✅ Bulundu!',
-          `<div class="sokak-name">${escapeHtml(gosterimAdi)}</div>${mahalleListesi.map(m => `<div class="mahalle-name">${escapeHtml(m)}</div>`).join('')}`);
         sonAramaEkle(gosterimAdi, mahalleListesi.join(', '));
         sesliSoyle(yanitMetni, surekliModSonrakiAdim);
       } else {
-        const yanitMetni = rastgeleSec(BULUNAMADI_KALIPLARI)(gosterimAdi);
+        const yanitMetni = bulunamadiCumlesi(gosterimAdi);
 
         sohbetMesajEkle('ai', `${escapeHtml(yanitMetni)}${aiOneriBlokHTML(sokakSorgusu)}`);
-        gosterSonuc('warning', '⚠️ Bulunamadı',
-          `Bu sokak veritabanında bulunamadı.${oneriBlokHTML(sokakSorgusu)}`);
         sesliSoyle(yanitMetni, surekliModSonrakiAdim);
       }
-    }
-
-    // Yazılı sohbet kutusundan gönder butonuna/Enter'a basılınca çalışır
-    function avatarYaziGonder() {
-      const input = document.getElementById('aiChatInput');
-      if (!input) return;
-      const deger = input.value.trim();
-      if (!deger) return;
-      input.value = '';
-      avatarSorguIsle(deger);
     }
 
     // Sesli arama
@@ -4389,7 +4708,7 @@
 
       if (dinliyor) return;
 
-      avatarAc();
+      sesliModunaGec();
       avatarDurumAyarla('idle', 'Başlatılıyor...');
 
       const recognition = new SpeechRecognition();
@@ -4404,7 +4723,6 @@
         dinliyor = true;
         voiceBtn.classList.add('listening');
         avatarDurumAyarla('listening', '🎤 Dinliyorum');
-        gosterSonuc('listening', '🎤 Dinliyorum', surekliMod ? 'Sokak adını söyleyin... (Sohbet modu açık)' : 'Sokak adını söyleyin...');
       };
 
       recognition.onresult = (event) => {
@@ -4422,7 +4740,6 @@
           surekliModSonrakiAdim();
           return;
         }
-        gosterSonuc('error', '❌ Hata', 'Ses tanıma hatası. Lütfen tekrar deneyin.');
         avatarDurumAyarla('error', '❌ Ses tanıma hatası');
         sesliSoyle('Ses tanıma hatası. Lütfen tekrar deneyin.', surekliModSonrakiAdim);
       };
@@ -4435,6 +4752,53 @@
       recognition.start();
     }
 
+    // ================= Karşılıklı Mod Geçişi (yazı <-> ses) =================
+    // Yazılı arama: teslimat etiketi açık, robot kartı kapalı.
+    // Sesli arama: robot kartı açık, teslimat etiketi kapalı.
+    let sonucGizleZamanlayici = null;
+
+    function sonucGizlemeIptal() {
+      clearTimeout(sonucGizleZamanlayici);
+      sonucGizleZamanlayici = null;
+      const r = document.getElementById('result');
+      if (!r) return;
+      ['maxHeight','opacity','overflow','transition','paddingTop','paddingBottom','borderWidth']
+        .forEach(k => { r.style[k] = ''; });
+    }
+
+    // Teslimat etiketi bölümünü yavaşça kapatır
+    function sonucGizleYavas() {
+      const r = document.getElementById('result');
+      if (!r || r.classList.contains('hidden') || sonucGizleZamanlayici) return;
+      yazmaIptal();
+      r.style.overflow = 'hidden';
+      r.style.maxHeight = r.scrollHeight + 'px';
+      r.style.transition = 'max-height 0.9s ease, opacity 0.9s ease, padding 0.9s ease, border-width 0.9s ease';
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        r.style.maxHeight = '0px';
+        r.style.opacity = '0';
+        r.style.paddingTop = '0px';
+        r.style.paddingBottom = '0px';
+        r.style.borderWidth = '0px';
+      }));
+      sonucGizleZamanlayici = setTimeout(() => {
+        r.classList.add('hidden');
+        sonucGizlemeIptal();
+      }, 950);
+    }
+
+    function sesliModunaGec() {
+      avatarAc();
+      sonucGizleYavas();
+    }
+
+    function metinModunaGec() {
+      const kart = document.getElementById('aiAvatarOverlay');
+      if (kart && !kart.classList.contains('hidden') && kart.classList.contains('acik')) {
+        avatarKapat();
+      }
+    }
+
     // Temizle
     function temizle() {
       document.getElementById('sokakInput').value = '';
@@ -4442,9 +4806,133 @@
       autocompleteGizle();
     }
 
+    // ================= Kargo Etiketi + Daktilo Efekti =================
+    let yazmaToken = 0;
+    function yazmaIptal() { yazmaToken++; }
+
+    // Bir öğeyi "hayalet" (görünmez tam metin) + "yazılan" katman olarak kurar:
+    // hayalet yerleşimi sabit tutar, harfler son konumlarında soldan sağa belirir.
+    function yazmaKutusuKur(el, metin) {
+      el.classList.add('ke-yazi-kutu');
+      el.textContent = '';
+      const hayalet = document.createElement('span');
+      hayalet.className = 'ke-hayalet';
+      hayalet.textContent = metin;
+      const yazi = document.createElement('span');
+      yazi.className = 'ke-yazi';
+      const imlec = document.createElement('span');
+      imlec.className = 'ke-imlec';
+      el.appendChild(hayalet);
+      el.appendChild(yazi);
+      return { yazi, imlec, metin };
+    }
+
+    function daktiloYaz(kutular, hiz, bitti) {
+      const token = ++yazmaToken;
+      const azalt = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      let i = 0;
+
+      function sonraki() {
+        if (token !== yazmaToken) return;
+        if (i >= kutular.length) { if (bitti) bitti(); return; }
+        const k = kutular[i++];
+        const sonMu = i === kutular.length;
+        if (azalt) { k.yazi.textContent = k.metin; sonraki(); return; }
+
+        k.yazi.appendChild(k.imlec);
+        let n = 0;
+        (function adim() {
+          if (token !== yazmaToken) return;
+          n++;
+          k.yazi.firstChild && k.yazi.firstChild.nodeType === 3
+            ? (k.yazi.firstChild.nodeValue = k.metin.slice(0, n))
+            : k.yazi.insertBefore(document.createTextNode(k.metin.slice(0, n)), k.imlec);
+          if (n < k.metin.length) {
+            setTimeout(adim, hiz);
+          } else if (sonMu) {
+            setTimeout(() => k.imlec.remove(), 1400);
+            sonraki();
+          } else {
+            k.imlec.remove();
+            setTimeout(sonraki, 140);
+          }
+        })();
+      }
+      sonraki();
+    }
+
+    // Sokak adından sahte-olmayan, sadece süs amaçlı sabit bir referans kodu üretir
+    function etiketRefKodu(metin) {
+      let h = 0;
+      for (let i = 0; i < metin.length; i++) h = (h * 31 + metin.charCodeAt(i)) >>> 0;
+      const d = String(h).padStart(9, '0').slice(-9);
+      return d.slice(0, 3) + ' ' + d.slice(3, 6) + ' ' + d.slice(6, 9);
+    }
+
+    function kargoEtiketiGoster(resultDiv, sokak, mahalleler) {
+      yazmaIptal();
+      resultDiv.innerHTML = `
+        <div class="kargo-etiket" role="status" aria-live="polite">
+          <div class="ke-serit"></div>
+          <div class="ke-ust">
+            <span class="ke-ust-sol">📦 Teslimat Bölgesi</span>
+            <span class="ke-durum" id="keDurum"><i></i><b>Taranıyor</b></span>
+          </div>
+          <div class="ke-govde">
+            <div class="ke-alan-ad">Sokak</div>
+            <div class="ke-sokak" id="keSokak"></div>
+            <div class="ke-ayrac"><span class="ke-delik l"></span><span class="ke-delik r"></span></div>
+            <div class="ke-alan-ad">Mahalle</div>
+            <div class="ke-mahalleler" id="keMahalleler"></div>
+          </div>
+          <div class="ke-alt">
+            <div class="ke-barkod"></div>
+            <div class="ke-ref">REF ${etiketRefKodu(sokak)}</div>
+          </div>
+        </div>`;
+      resultDiv.classList.remove('hidden');
+
+      const kutular = [];
+      kutular.push(yazmaKutusuKur(document.getElementById('keSokak'), sokak.toLocaleUpperCase('tr')));
+
+      const liste = document.getElementById('keMahalleler');
+      mahalleler.forEach(m => {
+        const satir = document.createElement('div');
+        satir.className = 'ke-mahalle-satir';
+        satir.innerHTML = '<svg class="ke-pin" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a7 7 0 0 0-7 7c0 5.2 7 13 7 13s7-7.8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg>';
+        const metinEl = document.createElement('span');
+        metinEl.className = 'ke-mahalle';
+        satir.appendChild(metinEl);
+        liste.appendChild(satir);
+        kutular.push(yazmaKutusuKur(metinEl, m));
+      });
+
+      daktiloYaz(kutular, 26, () => {
+        const durum = document.getElementById('keDurum');
+        if (durum) {
+          durum.classList.add('tamam');
+          durum.querySelector('b').textContent = 'Eşleşti';
+        }
+      });
+    }
+
     // Sonuç göster
     function gosterSonuc(tip, baslik, mesaj) {
       const resultDiv = document.getElementById('result');
+      sonucGizlemeIptal();
+
+      // Başarılı sonuç: daktilo efektiyle yazılan kargo etiketi
+      if (tip === 'success') {
+        const gecici = document.createElement('div');
+        gecici.innerHTML = mesaj;
+        const sokakEl = gecici.querySelector('.sokak-name');
+        const mahalleEls = gecici.querySelectorAll('.mahalle-name');
+        if (sokakEl && mahalleEls.length) {
+          kargoEtiketiGoster(resultDiv, sokakEl.textContent, Array.from(mahalleEls).map(e => e.textContent));
+          return;
+        }
+      }
+      yazmaIptal();
       const tipClass = `result-${tip}`;
       const titleClass = `${tip}-title`;
 
