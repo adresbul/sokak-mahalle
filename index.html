@@ -4212,6 +4212,152 @@
       return key ? sokaklar[key] : null;
     }
 
+    // ================= Numaralı Arama (ör. "Bağdat Caddesi 24") =================
+    // Veride bir cadde, numara aralıklarıyla farklı mahallelere bölünmüş olabilir
+    // (ör. "bağdat cad. 14-168" -> FSM 2, "bağdat cd. (25 numaraya kadar)" -> Köseköy 1).
+    // Kullanıcı bir numara verdiğinde, kayıt adlarındaki numara kuralları okunur ve
+    // o numarayı kapsayan kaydın mahallesi bulunur.
+    //
+    // Okunan kalıplar:
+    //   "14-168", "14 - 168"      aralık. Başı ve sonu aynı cinsse (ikisi de tek ya da
+    //                             ikisi de çift) sadece o taraf; farklı cinsse (1-50) iki taraf da
+    //   "... ts" / "... çs"       açık yazılmış tek sayı / çift sayı
+    //   "(25 numaraya kadar)"     1'den o numaraya kadar (tek ve çift)
+    //   "50 kadar"                1'den o numaraya kadar
+    //   "8 den 24 e", "93 den 68 kadar"   aralık
+    //   "120 ve yukarısı", "94'ten sonrası", "(49'dan yukarısı")   o numara ve sonrası
+    //   "(15'e kadar)", "1-61'e kadar"   o numaraya kadar
+    //   "2-4-6", "no: 55", "4"    tek tek verilmiş numaralar
+    // Birden fazla kayıt aynı numarayı kapsıyorsa en dar aralıklı kayıt kazanır
+    // (ör. 24 hem "1-25" hem "14-168" içinde: dar olan "1-25" seçilir).
+    const TABAN_DOLGU = new Set(['sokağı', 'sokak', 'sok', 'sk', 'caddesi', 'cadde', 'cad', 'cd',
+      'bulvarı', 'bulvari', 'bul', 'meydanı', 'meydani', 'no', 'numara']);
+
+    // Sokak adının numarasız "gövde" kısmını, yazım farklarından arındırarak karşılaştırılabilir hale getirir
+    function tabanAnahtari(str) {
+      const kelimeler = str.toLocaleLowerCase('tr')
+        .replace(/[.,:()]/g, ' ')
+        .split(/\s+/)
+        .filter(k => k && !TABAN_DOLGU.has(k));
+      return turkceSadeleştir(kelimeler.join(''));
+    }
+
+    function aralikKurali(taban, a, b, parite) {
+      const bas = Math.min(a, b), son = Math.max(a, b);
+      let p = parite;
+      if (!p) p = (a % 2 === b % 2) ? (a % 2 ? 'tek' : 'cift') : 'hepsi';
+      return { taban, bas, son, parite: p };
+    }
+
+    // Bir kayıt adından numara kuralını çıkarır; numara içermiyorsa null döner
+    function numaraKuraliCikar(anahtar) {
+      // Kesme işaretli ekleri ("61'e kadar", "49'dan yukarısı") boşluğa çevir: "61 e kadar", "49 dan yukarısı"
+      let m = anahtar.toLocaleLowerCase('tr').replace(/['’]/g, ' ').replace(/\s+/g, ' ').trim();
+      let parite = null;
+      m = m.replace(/\s+(ts|çs)$/, (_, p) => { parite = p === 'ts' ? 'tek' : 'cift'; return ''; });
+
+      const BAS = '(.*?[^\\d\\s/\\-(])';   // gövde: rakam, boşluk, / - ( ile bitmeyen en kısa metin
+      let r;
+      if ((r = m.match(/^(.*?)\s*\(\s*(\d+)\s*numaraya kadar\s*\)$/))) {
+        return { taban: r[1], bas: 1, son: +r[2], parite: parite || 'hepsi' };
+      }
+      if ((r = m.match(new RegExp('^' + BAS + '\\s+(\\d+)\\s+ve yukarısı$')))) {
+        return { taban: r[1], bas: +r[2], son: Infinity, parite: parite || 'hepsi' };
+      }
+      // "(49 dan yukarısı)", "94 ten sonrası", "11 den sonrası": o numara ve sonrası
+      if ((r = m.match(new RegExp('^' + BAS + '\\s*\\(?\\s*(\\d+)\\s*(?:dan|den|tan|ten)\\s+(?:yukarısı|sonrası)\\s*\\)?$')))) {
+        return { taban: r[1], bas: +r[2], son: Infinity, parite: parite || 'hepsi' };
+      }
+      // "(15 e kadar)": 1'den o numaraya kadar
+      if ((r = m.match(new RegExp('^' + BAS + '\\s*\\(\\s*(\\d+)\\s*(?:e|a|ye|ya)\\s+kadar\\s*\\)$')))) {
+        return { taban: r[1], bas: 1, son: +r[2], parite: parite || 'hepsi' };
+      }
+      if ((r = m.match(new RegExp('^' + BAS + '\\s+(\\d+)\\s*den\\s+(\\d+)\\s*(?:e|a|ye|ya)?(?:\\s+kadar)?$')))) {
+        return aralikKurali(r[1], +r[2], +r[3], parite);
+      }
+      if ((r = m.match(new RegExp('^' + BAS + '\\s+(\\d+)\\s+kadar$')))) {
+        return { taban: r[1], bas: 1, son: +r[2], parite: parite || 'hepsi' };
+      }
+      if ((r = m.match(new RegExp('^' + BAS + '\\s*\\(?\\s*(\\d+(?:\\s*-\\s*\\d+)+)\\s*\\)?(?:\\s*(?:e|a|ye|ya)\\s+kadar|\\s+kadar)?$')))) {
+        const sayilar = r[2].split('-').map(x => Number(x.trim()));
+        if (sayilar.length === 2) return aralikKurali(r[1], sayilar[0], sayilar[1], parite);
+        return { taban: r[1], sayilar };
+      }
+      if ((r = m.match(new RegExp('^' + BAS + '\\s*\\(?\\s*(?:no\\s*:?\\s*)?(\\d+)\\s*\\)?$')))) {
+        return { taban: r[1], sayilar: [Number(r[2])] };
+      }
+      return null;
+    }
+
+    function kuralUyuyorMu(k, n) {
+      if (k.sayilar) return k.sayilar.includes(n);
+      if (n < k.bas || n > k.son) return false;
+      if (k.parite === 'tek') return n % 2 === 1;
+      if (k.parite === 'cift') return n % 2 === 0;
+      return true;
+    }
+
+    function kuralGenisligi(k) {
+      return k.sayilar ? 0 : k.son - k.bas;
+    }
+
+    // "bağdat caddesi 24", "bağdat cad. no: 24", "bağdat caddesi 24 numara" -> { taban, numara }
+    function sorgudanNumaraAyir(girdi) {
+      const m = (girdi || '').toLocaleLowerCase('tr').trim()
+        .replace(/\s+(numaralı|numarası|numara|no)$/, '');
+      const r = m.match(/^(.*?[^\d\s/\-(])\s+(?:no\s*[:.]?\s*)?(\d{1,4})$/);
+      if (!r) return null;
+      return { taban: r[1].trim(), numara: Number(r[2]) };
+    }
+
+    // Numaralı bir sorguyu çözer. Dönüş:
+    //   null                              -> numaralı sorgu değil (eski arama akışı devam eder)
+    //   { gosterimAdi, mahalleler }       -> bulundu
+    //   { gosterimAdi, bulunamadi, kayitlar } -> cadde var ama bu numarayı kapsayan kayıt yok
+    function numaraliSokakBul(girdi) {
+      const sorgu = sorgudanNumaraAyir(girdi);
+      if (!sorgu) return null;
+
+      // Kayıt adı birebir yazılmışsa (ör. "kahramanlar cad. no: 55") eski akış zaten bulur
+      const aranan = girdi.toLocaleLowerCase('tr').trim();
+      if (sokaklar[aranan] ||
+          sokaklarNormalize[normalizeSokakAdi(girdi)] ||
+          sokaklarNormalizeBosluksuz[normalizeSokakAdiBosluksuz(girdi)]) return null;
+
+      const hedef = tabanAnahtari(sorgu.taban);
+      if (!hedef) return null;
+
+      const adaylar = [];
+      Object.keys(sokaklar).forEach(key => {
+        const kural = numaraKuraliCikar(key);
+        if (kural && tabanAnahtari(kural.taban) === hedef) adaylar.push({ key, kural });
+      });
+      if (!adaylar.length) return null;
+
+      const gosterimAdi = capitalizeSokak(sorgu.taban + ' ' + sorgu.numara);
+      const uyanlar = adaylar.filter(a => kuralUyuyorMu(a.kural, sorgu.numara));
+
+      if (!uyanlar.length) {
+        return {
+          gosterimAdi,
+          bulunamadi: true,
+          kayitlar: adaylar.map(a => ({
+            ad: capitalizeSokak(a.key),
+            mahalle: [].concat(sokaklar[a.key]).join(', ')
+          }))
+        };
+      }
+
+      const enDar = Math.min(...uyanlar.map(a => kuralGenisligi(a.kural)));
+      const mahalleler = [];
+      uyanlar
+        .filter(a => kuralGenisligi(a.kural) === enDar)
+        .forEach(a => [].concat(sokaklar[a.key]).forEach(m => {
+          if (!mahalleler.includes(m)) mahalleler.push(m);
+        }));
+      return { gosterimAdi, mahalleler };
+    }
+
     // ================= Doğal Cümle Anlama (sunucusuz "sohbet hissi") =================
     // Gerçek bir yapay zeka modeli çağırmadan, kullanıcının doğal cümle içinde
     // sorduğu sokak adını ayıklar ve selamlama/teşekkür gibi küçük sohbetleri
@@ -4671,9 +4817,20 @@
         return;
       }
 
-      const eslesenKey = sokakAnahtarBul(input);
-      const mahalle = eslesenKey ? sokaklar[eslesenKey] : null;
-      const gosterimAdi = eslesenKey ? capitalizeSokak(eslesenKey) : input;
+      // Numaralı sorgu (ör. "Bağdat Caddesi 24"): kayıt adlarındaki numara aralıklarına göre bul
+      const numarali = numaraliSokakBul(input);
+      if (numarali && numarali.bulunamadi) {
+        const satirlar = numarali.kayitlar.slice(0, 8)
+          .map(k => `<div>${escapeHtml(k.ad)} → ${escapeHtml(k.mahalle)}</div>`).join('');
+        const devam = numarali.kayitlar.length > 8 ? '<div>…</div>' : '';
+        gosterSonuc('warning', '⚠️ Bulunamadı',
+          `${escapeHtml(numarali.gosterimAdi)} numarasını kapsayan kayıtlı bir aralık yok.<div class="oneri-baslik">Kayıtlı aralıklar:</div>${satirlar}${devam}`);
+        return;
+      }
+
+      const eslesenKey = numarali ? null : sokakAnahtarBul(input);
+      const mahalle = numarali ? numarali.mahalleler : (eslesenKey ? sokaklar[eslesenKey] : null);
+      const gosterimAdi = numarali ? numarali.gosterimAdi : (eslesenKey ? capitalizeSokak(eslesenKey) : input);
 
       if (mahalle) {
         const mahalleListesi = Array.isArray(mahalle) ? mahalle : [mahalle];
@@ -4906,9 +5063,12 @@
       }
 
       const sokakSorgusu = cumledenSokakCikar(girdi);
-      const eslesenKey = sokakAnahtarBul(sokakSorgusu);
-      const mahalle = eslesenKey ? sokaklar[eslesenKey] : null;
-      const gosterimAdi = eslesenKey ? capitalizeSokak(eslesenKey) : sokakSorgusu;
+      const numarali = numaraliSokakBul(sokakSorgusu);
+      const eslesenKey = numarali ? null : sokakAnahtarBul(sokakSorgusu);
+      const mahalle = numarali
+        ? (numarali.bulunamadi ? null : numarali.mahalleler)
+        : (eslesenKey ? sokaklar[eslesenKey] : null);
+      const gosterimAdi = numarali ? numarali.gosterimAdi : (eslesenKey ? capitalizeSokak(eslesenKey) : sokakSorgusu);
 
       avatarDurumAyarla('idle', '💭 Aranıyor...');
       sesliModunaGec();
@@ -4920,7 +5080,7 @@
         sonAramaEkle(gosterimAdi, mahalleListesi.join(', '));
         sesliSoyle(bulunduCumlesi(gosterimAdi, mahalleListesi.join(' ve ')), surekliModSonrakiAdim);
       } else {
-        robotSonucYaz(gosterimAdi, 'Bulunamadı', { hata: true, oneriHTML: aiOneriBlokHTML(sokakSorgusu) });
+        robotSonucYaz(gosterimAdi, 'Bulunamadı', { hata: true, oneriHTML: numarali ? '' : aiOneriBlokHTML(sokakSorgusu) });
         sesliSoyle(bulunamadiCumlesi(gosterimAdi), surekliModSonrakiAdim);
       }
     }
