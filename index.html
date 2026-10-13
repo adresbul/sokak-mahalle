@@ -1929,6 +1929,35 @@
     .ai-avatar-panel[data-state="error"] .bot-eye { fill: var(--error); filter: drop-shadow(0 0 4px var(--error)); animation: none; }
     .ai-avatar-panel[data-state="error"] .bot-mouth-bar { fill: var(--error); animation: none; transform: scaleY(0.15); }
 
+    /* ===== Ses dalgaları (robotun iki yanından yayılan yaylar) ===== */
+    .ai-dalga {
+      fill: none;
+      stroke: var(--cyan);
+      stroke-width: 3;
+      stroke-linecap: round;
+      opacity: 0;
+    }
+
+    .ai-avatar-panel[data-state="listening"] .ai-dalga { animation: dalga-sag 1.6s ease-out infinite; }
+    .ai-avatar-panel[data-state="listening"] .ai-dalga.sol { animation-name: dalga-sol; }
+    .ai-avatar-panel[data-state="speaking"] .ai-dalga { stroke: var(--accent); animation: dalga-sag 0.9s ease-out infinite; }
+    .ai-avatar-panel[data-state="speaking"] .ai-dalga.sol { animation-name: dalga-sol; }
+
+    @keyframes dalga-sag {
+      0% { opacity: 0; transform: translateX(-8px); }
+      25% { opacity: 0.95; }
+      100% { opacity: 0; transform: translateX(6px); }
+    }
+
+    @keyframes dalga-sol {
+      0% { opacity: 0; transform: translateX(8px); }
+      25% { opacity: 0.95; }
+      100% { opacity: 0; transform: translateX(-6px); }
+    }
+
+    /* Halka efekti yerine artık yay şeklindeki ses dalgaları kullanılıyor */
+    .ai-face-ring { display: none; }
+
     /* ================= Kargo Etiketi (arama sonucu) ================= */
     .kargo-etiket {
       position: relative;
@@ -2113,7 +2142,7 @@
     }
 
     @media (prefers-reduced-motion: reduce) {
-      .ai-bot, .bot-pin, .bot-eye, .bot-mouth-bar, .kargo-etiket, .ke-imlec { animation: none !important; }
+      .ai-bot, .bot-pin, .bot-eye, .bot-mouth-bar, .ai-dalga, .kargo-etiket, .ke-imlec { animation: none !important; }
     }
 
     /* Sonuç bölümü kapalıyken arama kartının alt kenarını kapat */
@@ -2272,6 +2301,14 @@
                 <stop offset="1" stop-color="#C08A4A"/>
               </linearGradient>
             </defs>
+            <g class="ai-dalgalar">
+              <path class="ai-dalga sag" style="animation-delay:0.0s" d="M154.2 48.6A84 84 0 0 1 154.2 127.4"/>
+              <path class="ai-dalga sag" style="animation-delay:0.2s" d="M166.5 42.0A98 98 0 0 1 166.5 134.0"/>
+              <path class="ai-dalga sag" style="animation-delay:0.4s" d="M178.9 35.4A112 112 0 0 1 178.9 140.6"/>
+              <path class="ai-dalga sol" style="animation-delay:0.0s" d="M5.8 127.4A84 84 0 0 1 5.8 48.6"/>
+              <path class="ai-dalga sol" style="animation-delay:0.2s" d="M-6.5 134.0A98 98 0 0 1 -6.5 42.0"/>
+              <path class="ai-dalga sol" style="animation-delay:0.4s" d="M-18.9 140.6A112 112 0 0 1 -18.9 35.4"/>
+            </g>
             <ellipse cx="80" cy="152" rx="38" ry="5" fill="rgba(0,0,0,0.28)"/>
             <g class="bot-pin">
               <path d="M80 4c-6.1 0-11 4.9-11 11 0 8.2 11 19 11 19s11-10.8 11-19c0-6.1-4.9-11-11-11z" fill="var(--accent)"/>
@@ -2326,11 +2363,16 @@
       <div class="mahalle-section-title">
         <span>Mahalleler</span>
         <div class="mahalle-section-actions">
-          <button class="btn-yonetim-ac" onclick="yonetimAc()">🛠️ Sokak Ekle / Kaldır</button>
-          <button class="btn-yonetim-ac" onclick="bolgeYonetimAc()">🗺️ Bölge Ekle / Kaldır</button>
+          <button class="btn-yonetim-ac" onclick="sifreliAc(yonetimAc)">🛠️ Sokak Ekle / Kaldır</button>
+          <button class="btn-yonetim-ac" onclick="sifreliAc(bolgeYonetimAc)">🗺️ Bölge Ekle / Kaldır</button>
         </div>
       </div>
       <div class="mahalle-groups" id="mahalleButtons"></div>
+      <div class="alt-aksiyonlar">
+        <button class="btn-yonetim-ac" onclick="yedekPaneliAc()">💾 Yedekle / Geri Yükle</button>
+        <button class="btn-yonetim-ac" onclick="gunlukPaneliAc()">📜 Değişiklik Günlüğü</button>
+        <button class="btn-yonetim-ac" id="kullaniciBtn" onclick="kullaniciAdiSor(false)">👤 Ad gir</button>
+      </div>
     </div>
   </div>
 
@@ -2399,9 +2441,23 @@
       silinenMahalleler: []
     };
 
+    // Değişiklik günlüğü için: her alanın son bilinen halinin kopyası
+    // (çağıranlar nesneyi yerinde değiştirdiği için eski hali ayrıca saklıyoruz)
+    const paylasimSnapshot = {};
+    function paylasimKopya(x) { return x === undefined ? x : JSON.parse(JSON.stringify(x)); }
+    function paylasimSnapshotAl() {
+      Object.keys(paylasimliVeri).forEach(a => { paylasimSnapshot[a] = paylasimKopya(paylasimliVeri[a]); });
+    }
+    paylasimSnapshotAl();
+
     // Bir alanı hem yerel önbelleğe hem Firebase'e yazar
     function paylasimAlaniniKaydet(alan, deger) {
+      const onceki = paylasimSnapshot[alan];
       paylasimliVeri[alan] = deger;
+      paylasimSnapshot[alan] = paylasimKopya(deger);
+      if (typeof degisiklikGunlugunaIsle === 'function') {
+        try { degisiklikGunlugunaIsle(alan, onceki, deger); } catch (e) { console.warn('Günlük hatası:', e); }
+      }
       if (firebaseAktif) {
         paylasimRef.child(alan).set(deger).catch(e => console.error('Firebase yazma hatası:', e));
       }
@@ -2417,6 +2473,7 @@
       paylasimliVeri.silinenBolgeler = v.silinenBolgeler || [];
       paylasimliVeri.eklenenMahalleler = v.eklenenMahalleler || {};
       paylasimliVeri.silinenMahalleler = v.silinenMahalleler || [];
+      paylasimSnapshotAl();
 
       sokaklariYenidenOlustur();
       mahalleGruplariYenidenOlustur();
@@ -4242,13 +4299,6 @@
       return turkceSadeleştir(kelimeler.join(''));
     }
 
-    // Normalde "360-400" gibi iki ucu çift olan bir aralık sadece çift tarafı kapsar.
-    // Aşağıdaki kayıtlar ise tek ve çift iki tarafı da kapsar (kayıt adı küçük harfle yazılır).
-    // Yeni bir aralığın iki tarafı da dağıtılıyorsa adını buraya eklemek yeterli.
-    const IKI_TARAFLI_KAYITLAR = new Set([
-      'bağdat cad. 360-400'
-    ]);
-
     function aralikKurali(taban, a, b, parite) {
       const bas = Math.min(a, b), son = Math.max(a, b);
       let p = parite;
@@ -4317,49 +4367,11 @@
       return { taban: r[1].trim(), numara: Number(r[2]) };
     }
 
-    // Sesli aramada ses tanıma bazen sayıyı rakamla değil yazıyla verir
-    // ("bağdat caddesi üç yüz doksan sekiz" -> "bağdat caddesi 398").
-    // Sorgunun SONUNDAKİ sayı kelimelerini rakama çevirir; öncesinde en az bir kelime
-    // (sokak adı) yoksa ya da sonda sayı kelimesi yoksa metne dokunmaz.
-    const SAYI_KELIMELERI = {
-      'sıfır': 0, 'bir': 1, 'iki': 2, 'üç': 3, 'dört': 4, 'beş': 5, 'altı': 6, 'yedi': 7,
-      'sekiz': 8, 'dokuz': 9, 'on': 10, 'yirmi': 20, 'otuz': 30, 'kırk': 40, 'elli': 50,
-      'altmış': 60, 'yetmiş': 70, 'seksen': 80, 'doksan': 90
-    };
-    const SAYI_SONEK = new Set(['numaralı', 'numarası', 'numara', 'no']);
-
-    function sayiKelimeleriniRakamaCevir(girdi) {
-      const kelimeler = (girdi || '').toLocaleLowerCase('tr').trim()
-        .replace(/[.,?!]+$/, '').split(/\s+/).filter(Boolean);
-      if (kelimeler.length < 2) return girdi;
-
-      // "numara", "no" gibi sondaki eki geçici olarak ayır
-      let sonek = null;
-      if (SAYI_SONEK.has(kelimeler[kelimeler.length - 1])) sonek = kelimeler.pop();
-
-      // Sondan geriye doğru ardışık sayı kelimelerini topla
-      let i = kelimeler.length;
-      while (i > 0 && (kelimeler[i - 1] in SAYI_KELIMELERI || kelimeler[i - 1] === 'yüz' || kelimeler[i - 1] === 'bin')) i--;
-      if (i === kelimeler.length || i === 0) return girdi;   // sonda sayı yok ya da tamamı sayı
-
-      let toplam = 0, parca = 0;
-      for (const k of kelimeler.slice(i)) {
-        if (k === 'yüz') parca = (parca || 1) * 100;
-        else if (k === 'bin') { toplam += (parca || 1) * 1000; parca = 0; }
-        else parca += SAYI_KELIMELERI[k];
-      }
-      const sayi = toplam + parca;
-      if (!sayi || sayi > 9999) return girdi;
-
-      return kelimeler.slice(0, i).concat(String(sayi), sonek ? [sonek] : []).join(' ');
-    }
-
     // Numaralı bir sorguyu çözer. Dönüş:
     //   null                              -> numaralı sorgu değil (eski arama akışı devam eder)
     //   { gosterimAdi, mahalleler }       -> bulundu
     //   { gosterimAdi, bulunamadi, kayitlar } -> cadde var ama bu numarayı kapsayan kayıt yok
     function numaraliSokakBul(girdi) {
-      girdi = sayiKelimeleriniRakamaCevir(girdi);
       const sorgu = sorgudanNumaraAyir(girdi);
       if (!sorgu) return null;
 
@@ -4375,12 +4387,7 @@
       const adaylar = [];
       Object.keys(sokaklar).forEach(key => {
         const kural = numaraKuraliCikar(key);
-        if (kural && tabanAnahtari(kural.taban) === hedef) {
-          // İki ucu da aynı cinsten (ör. 360-400) yazılan ama aslında iki tarafı da
-          // dağıtılan aralıklar: tek ve çift numaraların hepsi kapsansın
-          if (IKI_TARAFLI_KAYITLAR.has(key.toLocaleLowerCase('tr')) && !kural.sayilar) kural.parite = 'hepsi';
-          adaylar.push({ key, kural });
-        }
+        if (kural && tabanAnahtari(kural.taban) === hedef) adaylar.push({ key, kural });
       });
       if (!adaylar.length) return null;
 
@@ -6293,5 +6300,570 @@
       };
     })();
   </script>
+
+  <style>
+    /* ===== Değişiklik günlüğü / yedek / kullanıcı adı ===== */
+    .alt-aksiyonlar {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.6rem;
+      margin-top: 1.25rem;
+      padding-top: 1rem;
+      border-top: 1px dashed var(--line-strong);
+    }
+    .gunluk-liste { display: flex; flex-direction: column; gap: 0.45rem; max-height: 55vh; overflow-y: auto; }
+    .gunluk-satir {
+      border: 1px solid var(--line);
+      border-radius: 0.5rem;
+      background: rgba(var(--tint-rgb),0.03);
+      padding: 0.5rem 0.75rem;
+      font-size: 0.82rem;
+      line-height: 1.4;
+    }
+    .gunluk-meta { font-family: var(--mono); font-size: 0.68rem; color: var(--text-muted); margin-bottom: 0.15rem; }
+    .gunluk-kisi { color: var(--cyan); font-weight: 600; }
+    .gunluk-bos { color: var(--text-muted); font-size: 0.85rem; padding: 0.5rem 0; }
+    .yedek-blok { border: 1px solid var(--line); border-radius: 0.6rem; padding: 0.9rem 1rem; margin-bottom: 0.9rem; }
+    .yedek-blok h4 { font-family: var(--display); font-size: 0.95rem; margin-bottom: 0.35rem; }
+    .yedek-blok p { color: var(--text-muted); font-size: 0.8rem; line-height: 1.45; margin-bottom: 0.7rem; }
+    .yedek-ozet { font-family: var(--mono); font-size: 0.74rem; line-height: 1.6; margin: 0.6rem 0; }
+    .yedek-hata, .kullanici-hata { color: var(--error); font-size: 0.8rem; margin-top: 0.5rem; }
+    .yedek-aksiyonlar { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.6rem; }
+  </style>
+
+  <script>
+    // ================= Kullanıcı Adı / Değişiklik Günlüğü / Yedekle-Geri Yükle =================
+    const KULLANICI_ANAHTAR = 'sokakMahalleKullaniciAdi';
+    const GUNLUK_YEREL_ANAHTAR = 'sokakMahalleGunlukYerel';
+    const GUNLUK_YOL = 'degisiklikGunlugu';
+    const GUNLUK_GOSTERIM_SAYISI = 200;
+    const GUNLUK_TOPLU_ESIK = 20;
+    const GUNLUK_ALAN_ETIKET = {
+      eklenenSokaklar: 'sokaklar', silinenSokaklar: 'silinen sokaklar',
+      eklenenBolgeler: 'bölgeler', silinenBolgeler: 'silinen bölgeler',
+      eklenenMahalleler: 'mahalleler', silinenMahalleler: 'silinen mahalleler'
+    };
+    const YEDEK_ALANLARI = {
+      eklenenSokaklar: 'nesne', silinenSokaklar: 'dizi',
+      eklenenBolgeler: 'dizi', silinenBolgeler: 'dizi',
+      eklenenMahalleler: 'nesne', silinenMahalleler: 'dizi'
+    };
+    let aktifKullanici = '';
+    let gunlukBastir = false;
+
+    // ---------- Kullanıcı adı ----------
+    function kullaniciAdiniOku() {
+      try { return (localStorage.getItem(KULLANICI_ANAHTAR) || '').trim(); } catch (e) { return ''; }
+    }
+
+    function kullaniciButonunuGuncelle() {
+      const btn = document.getElementById('kullaniciBtn');
+      if (btn) btn.textContent = '👤 ' + (aktifKullanici || 'Ad gir');
+    }
+
+    function kullaniciAdiSor(zorunlu) {
+      let ov = document.getElementById('kullaniciOverlay');
+      if (!ov) {
+        ov = document.createElement('div');
+        ov.id = 'kullaniciOverlay';
+        ov.className = 'modal-overlay hidden';
+        ov.innerHTML =
+          '<div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="kullaniciBaslik">' +
+            '<div class="modal-header"><div class="modal-header-title" id="kullaniciBaslik">👤 Kullanıcı adınız</div></div>' +
+            '<div class="modal-body">' +
+              '<div class="yonetim-not">Yaptığınız değişiklikler bu adla değişiklik günlüğüne kaydedilir.</div>' +
+              '<div class="yonetim-input-row">' +
+                '<input type="text" class="yonetim-input" id="kullaniciInput" maxlength="30" autocomplete="nickname" placeholder="Örn: Ahmet">' +
+                '<button type="button" class="yonetim-ekle-btn" id="kullaniciKaydetBtn">Kaydet</button>' +
+              '</div>' +
+              '<div class="kullanici-hata" id="kullaniciHata" style="display:none"></div>' +
+              '<button type="button" class="btn-yonetim-ac" id="kullaniciVazgecBtn" style="display:none;margin-top:0.75rem">Vazgeç</button>' +
+            '</div>' +
+          '</div>';
+        document.body.appendChild(ov);
+        document.getElementById('kullaniciKaydetBtn').addEventListener('click', kullaniciAdiKaydet);
+        document.getElementById('kullaniciInput').addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') kullaniciAdiKaydet();
+        });
+        document.getElementById('kullaniciVazgecBtn').addEventListener('click', () => {
+          ov.classList.add('hidden');
+        });
+      }
+      document.getElementById('kullaniciHata').style.display = 'none';
+      document.getElementById('kullaniciVazgecBtn').style.display = zorunlu ? 'none' : '';
+      const input = document.getElementById('kullaniciInput');
+      input.value = zorunlu ? '' : aktifKullanici;
+      ov.classList.remove('hidden');
+      setTimeout(() => input.focus(), 50);
+    }
+
+    // Aynı kullanıcı adı yalnızca bir cihaza verilir (büyük/küçük harf fark etmez).
+    // Kayıtlar Firebase'de "kullanicilar" altında tutulur.
+    const CIHAZ_ANAHTAR = 'sokakMahalleCihazId';
+    const KULLANICI_YOL = 'kullanicilar';
+    const KULLANICI_ZAMAN_ASIMI_MS = 6000;
+
+    function cihazIdAl() {
+      try {
+        let id = localStorage.getItem(CIHAZ_ANAHTAR);
+        if (!id) {
+          id = 'c-' + Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
+          localStorage.setItem(CIHAZ_ANAHTAR, id);
+        }
+        return id;
+      } catch (e) {
+        return 'gecici-' + Math.random().toString(36).slice(2, 10);
+      }
+    }
+    const cihazId = cihazIdAl();
+
+    function kullaniciAnahtari(ad) {
+      const katlanmis = ad.toLocaleLowerCase('tr').replace(/ı/g, 'i');
+      return encodeURIComponent(katlanmis).replace(/\./g, '%2E');
+    }
+
+    // 'ok' | 'dolu' | 'hata' (çevrimdışı / bağlantı sorunu: ad geçici olarak kabul edilir)
+    function kullaniciAdiTalepEt(ad) {
+      if (!firebaseAktif) return Promise.resolve('hata');
+      let ref;
+      try { ref = firebase.database().ref(KULLANICI_YOL + '/' + kullaniciAnahtari(ad)); } catch (e) { return Promise.resolve('hata'); }
+      const islem = ref.transaction(cur => {
+        if (cur && cur.cihaz !== cihazId) return; // başkasına ait: iptal
+        return { ad: ad, cihaz: cihazId, t: Date.now() };
+      }, undefined, false).then(r => (r.committed ? 'ok' : 'dolu')).catch(() => 'hata');
+      const zamanAsimi = new Promise(res => setTimeout(() => res('hata'), KULLANICI_ZAMAN_ASIMI_MS));
+      return Promise.race([islem, zamanAsimi]);
+    }
+
+    function kullaniciAdiBirak(ad) {
+      if (!firebaseAktif || !ad) return;
+      try {
+        firebase.database().ref(KULLANICI_YOL + '/' + kullaniciAnahtari(ad))
+          .transaction(cur => (cur && cur.cihaz === cihazId ? null : undefined))
+          .catch(() => {});
+      } catch (e) { /* önemsiz */ }
+    }
+
+    function kullaniciAdiKaydet() {
+      const input = document.getElementById('kullaniciInput');
+      const hata = document.getElementById('kullaniciHata');
+      const btn = document.getElementById('kullaniciKaydetBtn');
+      const ad = input.value.replace(/\s+/g, ' ').trim();
+      if (ad.length < 2) {
+        hata.textContent = 'Lütfen en az 2 karakterlik bir ad yazın.';
+        hata.style.display = 'block';
+        return;
+      }
+      const eski = aktifKullanici;
+      btn.disabled = true;
+      hata.style.color = 'var(--text-muted)';
+      hata.textContent = 'Kontrol ediliyor...';
+      hata.style.display = 'block';
+
+      kullaniciAdiTalepEt(ad).then(sonuc => {
+        btn.disabled = false;
+        hata.style.color = '';
+        if (sonuc === 'dolu') {
+          hata.textContent = 'Bu kullanıcı adı başka biri tarafından alınmış. Lütfen farklı bir ad seçin.';
+          hata.style.display = 'block';
+          return;
+        }
+        if (sonuc === 'ok' && eski && kullaniciAnahtari(eski) !== kullaniciAnahtari(ad)) kullaniciAdiBirak(eski);
+        aktifKullanici = ad;
+        try { localStorage.setItem(KULLANICI_ANAHTAR, ad); } catch (e) { /* kayıt edilemezse bu oturumda geçerli kalır */ }
+        kullaniciButonunuGuncelle();
+        hata.style.display = 'none';
+        document.getElementById('kullaniciOverlay').classList.add('hidden');
+      });
+    }
+
+    // ---------- Yönetim şifresi (cihaz başına bir kez) ----------
+    const YETKI_ANAHTAR = 'sokakMahalleYetki';
+    const YONETIM_SIFRE = 'uzun2026'; // büyük/küçük harf fark etmez
+    let yetkiOturum = false;
+    let sifreBekleyenIslem = null;
+
+    function yetkiVarMi() {
+      if (yetkiOturum) return true;
+      try { return localStorage.getItem(YETKI_ANAHTAR) === '1'; } catch (e) { return false; }
+    }
+
+    function sifreliAc(islem) {
+      if (yetkiVarMi()) { islem(); return; }
+      sifreBekleyenIslem = islem;
+      let ov = document.getElementById('sifreOverlay');
+      if (!ov) {
+        ov = document.createElement('div');
+        ov.id = 'sifreOverlay';
+        ov.className = 'modal-overlay hidden';
+        ov.innerHTML =
+          '<div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="sifreBaslik">' +
+            '<div class="modal-header"><div class="modal-header-title" id="sifreBaslik">🔒 Şifre gerekli</div></div>' +
+            '<div class="modal-body">' +
+              '<div class="yonetim-not">Sokak ve bölge eklemek/kaldırmak için şifre girin. Bu cihazda bir kez sorulur.</div>' +
+              '<div class="yonetim-input-row">' +
+                '<input type="password" class="yonetim-input" id="sifreInput" autocomplete="off" placeholder="Şifre">' +
+                '<button type="button" class="yonetim-ekle-btn" id="sifreTamamBtn">Giriş</button>' +
+              '</div>' +
+              '<div class="kullanici-hata" id="sifreHata" style="display:none"></div>' +
+              '<button type="button" class="btn-yonetim-ac" id="sifreVazgecBtn" style="margin-top:0.75rem">Vazgeç</button>' +
+            '</div>' +
+          '</div>';
+        document.body.appendChild(ov);
+        const dene = () => {
+          const girilen = document.getElementById('sifreInput').value.trim().toLowerCase();
+          if (girilen === YONETIM_SIFRE) {
+            yetkiOturum = true;
+            try { localStorage.setItem(YETKI_ANAHTAR, '1'); } catch (e) { /* bu oturumda geçerli kalır */ }
+            ov.classList.add('hidden');
+            const islem = sifreBekleyenIslem;
+            sifreBekleyenIslem = null;
+            if (islem) islem();
+          } else {
+            const h = document.getElementById('sifreHata');
+            h.textContent = 'Şifre yanlış.';
+            h.style.display = 'block';
+          }
+        };
+        document.getElementById('sifreTamamBtn').addEventListener('click', dene);
+        document.getElementById('sifreInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') dene(); });
+        document.getElementById('sifreVazgecBtn').addEventListener('click', () => {
+          sifreBekleyenIslem = null;
+          ov.classList.add('hidden');
+        });
+      }
+      document.getElementById('sifreHata').style.display = 'none';
+      const input = document.getElementById('sifreInput');
+      input.value = '';
+      ov.classList.remove('hidden');
+      setTimeout(() => input.focus(), 50);
+    }
+
+    // ---------- Değişiklik günlüğü ----------
+    function gunlukKaydet(mesaj) {
+      const kisi = aktifKullanici || 'Bilinmeyen';
+      if (firebaseAktif) {
+        try {
+          firebase.database().ref(GUNLUK_YOL).push({
+            k: kisi, m: mesaj, t: firebase.database.ServerValue.TIMESTAMP
+          }).catch(e => console.error('Günlük yazma hatası:', e));
+        } catch (e) { console.error('Günlük yazma hatası:', e); }
+      } else {
+        try {
+          const liste = JSON.parse(localStorage.getItem(GUNLUK_YEREL_ANAHTAR) || '[]');
+          liste.push({ k: kisi, m: mesaj, t: Date.now() });
+          localStorage.setItem(GUNLUK_YEREL_ANAHTAR, JSON.stringify(liste.slice(-GUNLUK_GOSTERIM_SAYISI)));
+        } catch (e) { /* yerel günlük tutulamadı */ }
+      }
+    }
+
+    function gDizi(x) {
+      if (Array.isArray(x)) return x;
+      if (x && typeof x === 'object') return Object.values(x);
+      return [];
+    }
+
+    function gListe(x) {
+      if (x === undefined || x === null) return [];
+      return Array.isArray(x) ? x : [x];
+    }
+
+    function gSokakAdi(k) {
+      try { return typeof capitalizeSokak === 'function' ? capitalizeSokak(k) : k; } catch (e) { return k; }
+    }
+
+    function gBolgeAdi(id) {
+      const g = mahalleGruplari.find(x => x.id === id);
+      return (g && g.ad) || id;
+    }
+
+    function degisiklikMesajlariUret(alan, onceki, deger) {
+      const m = [];
+
+      if (alan === 'eklenenSokaklar') {
+        const eskiO = onceki || {};
+        const yeniO = deger || {};
+        new Set([...Object.keys(eskiO), ...Object.keys(yeniO)]).forEach(k => {
+          const eski = k in eskiO ? gListe(eskiO[k]) : gListe(sokaklarTemel[k]);
+          const yeni = k in yeniO ? gListe(yeniO[k]) : gListe(sokaklarTemel[k]);
+          yeni.filter(x => !eski.includes(x)).forEach(x => m.push('"' + gSokakAdi(k) + '" sokağı ' + x + ' mahallesine eklendi'));
+          eski.filter(x => !yeni.includes(x)).forEach(x => m.push('"' + gSokakAdi(k) + '" sokağı ' + x + ' mahallesinden kaldırıldı'));
+        });
+      } else if (alan === 'silinenSokaklar') {
+        const eski = gDizi(onceki), yeni = gDizi(deger);
+        yeni.filter(x => !eski.includes(x)).forEach(x => m.push('"' + gSokakAdi(x) + '" sokağı kaldırıldı'));
+        eski.filter(x => !yeni.includes(x)).forEach(x => m.push('"' + gSokakAdi(x) + '" sokağı geri getirildi'));
+      } else if (alan === 'eklenenBolgeler') {
+        const eski = gDizi(onceki), yeni = gDizi(deger);
+        yeni.filter(b => !eski.some(e => e.id === b.id)).forEach(b => m.push('"' + b.ad + '" bölgesi eklendi'));
+        eski.filter(b => !yeni.some(e => e.id === b.id)).forEach(b => m.push('"' + b.ad + '" bölgesi kaldırıldı'));
+      } else if (alan === 'silinenBolgeler') {
+        const eski = gDizi(onceki), yeni = gDizi(deger);
+        yeni.filter(x => !eski.includes(x)).forEach(x => m.push('"' + gBolgeAdi(x) + '" bölgesi kaldırıldı'));
+        eski.filter(x => !yeni.includes(x)).forEach(x => m.push('"' + gBolgeAdi(x) + '" bölgesi geri getirildi'));
+      } else if (alan === 'eklenenMahalleler') {
+        const eskiO = onceki || {};
+        const yeniO = deger || {};
+        new Set([...Object.keys(eskiO), ...Object.keys(yeniO)]).forEach(id => {
+          const eski = gDizi(eskiO[id]), yeni = gDizi(yeniO[id]);
+          const bolge = gBolgeAdi(id);
+          yeni.filter(a => !eski.some(b => b.key === a.key)).forEach(a => m.push('"' + a.label + '" mahallesi eklendi (' + bolge + ')'));
+          eski.filter(a => !yeni.some(b => b.key === a.key)).forEach(a => m.push('"' + a.label + '" mahallesi kaldırıldı (' + bolge + ')'));
+        });
+      } else if (alan === 'silinenMahalleler') {
+        const eski = gDizi(onceki), yeni = gDizi(deger);
+        yeni.filter(x => !eski.includes(x)).forEach(x => m.push('"' + x + '" mahallesi kaldırıldı'));
+        eski.filter(x => !yeni.includes(x)).forEach(x => m.push('"' + x + '" mahallesi geri getirildi'));
+      }
+      return m;
+    }
+
+    // paylasimAlaniniKaydet her yazımda burayı çağırır
+    function degisiklikGunlugunaIsle(alan, onceki, deger) {
+      if (gunlukBastir) return;
+      const mesajlar = degisiklikMesajlariUret(alan, onceki, deger);
+      if (!mesajlar.length) return;
+      if (mesajlar.length > GUNLUK_TOPLU_ESIK) {
+        gunlukKaydet(mesajlar.length + ' değişiklik yapıldı (' + (GUNLUK_ALAN_ETIKET[alan] || alan) + ')');
+        return;
+      }
+      mesajlar.forEach(x => gunlukKaydet(x));
+    }
+
+    function modalAcGenel(baslik) {
+      document.getElementById('modalBaslik').textContent = baslik;
+      const body = document.getElementById('modalBody');
+      body.innerHTML = '';
+      document.getElementById('modalOverlay').classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+      return body;
+    }
+
+    function gunlukPaneliAc() {
+      const body = modalAcGenel('📜 Değişiklik Günlüğü');
+      const yukleniyor = document.createElement('div');
+      yukleniyor.className = 'gunluk-bos';
+      yukleniyor.textContent = 'Yükleniyor...';
+      body.appendChild(yukleniyor);
+
+      const ciz = (kayitlar) => {
+        body.innerHTML = '';
+        if (!kayitlar.length) {
+          const bos = document.createElement('div');
+          bos.className = 'gunluk-bos';
+          bos.textContent = 'Henüz kayıtlı bir değişiklik yok.';
+          body.appendChild(bos);
+          return;
+        }
+        const not = document.createElement('div');
+        not.className = 'yonetim-not';
+        not.textContent = 'Son ' + GUNLUK_GOSTERIM_SAYISI + ' kayıt, en yeniden eskiye.';
+        body.appendChild(not);
+        const liste = document.createElement('div');
+        liste.className = 'gunluk-liste';
+        kayitlar.forEach(k => {
+          const satir = document.createElement('div');
+          satir.className = 'gunluk-satir';
+          const meta = document.createElement('div');
+          meta.className = 'gunluk-meta';
+          const zaman = k.t ? new Date(k.t).toLocaleString('tr-TR', {
+            day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit'
+          }) : '';
+          meta.appendChild(document.createTextNode(zaman + ' · '));
+          const kisi = document.createElement('span');
+          kisi.className = 'gunluk-kisi';
+          kisi.textContent = k.k || 'Bilinmeyen';
+          meta.appendChild(kisi);
+          const metin = document.createElement('div');
+          metin.textContent = k.m || '';
+          satir.appendChild(meta);
+          satir.appendChild(metin);
+          liste.appendChild(satir);
+        });
+        body.appendChild(liste);
+      };
+
+      if (firebaseAktif) {
+        firebase.database().ref(GUNLUK_YOL).limitToLast(GUNLUK_GOSTERIM_SAYISI).once('value').then(snap => {
+          const kayitlar = [];
+          snap.forEach(c => { kayitlar.push(c.val()); });
+          ciz(kayitlar.reverse());
+        }).catch(e => {
+          console.error('Günlük okuma hatası:', e);
+          body.innerHTML = '';
+          const h = document.createElement('div');
+          h.className = 'yedek-hata';
+          h.textContent = 'Günlük okunamadı. İnternet bağlantınızı ve Firebase izinlerini kontrol edin.';
+          body.appendChild(h);
+        });
+      } else {
+        let kayitlar = [];
+        try { kayitlar = JSON.parse(localStorage.getItem(GUNLUK_YEREL_ANAHTAR) || '[]'); } catch (e) { /* boş */ }
+        ciz(kayitlar.reverse());
+      }
+    }
+
+    // ---------- Yedekle / Geri yükle ----------
+    function yedekAl() {
+      const paket = {
+        uygulama: 'sokak-mahalle-bulucu',
+        surum: 1,
+        tarih: new Date().toISOString(),
+        kullanici: aktifKullanici,
+        veri: JSON.parse(JSON.stringify(paylasimliVeri))
+      };
+      const blob = new Blob([JSON.stringify(paket, null, 2)], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'sokak-mahalle-yedek-' + new Date().toISOString().slice(0, 10) + '.json';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(a.href), 1500);
+    }
+
+    // Yedek dosyasını doğrular; { veri } ya da { hata } döner
+    function yedekDogrula(paket) {
+      if (!paket || typeof paket !== 'object' || Array.isArray(paket)) return { hata: 'Geçerli bir yedek dosyası değil.' };
+      const kaynak = (paket.veri && typeof paket.veri === 'object') ? paket.veri : paket;
+      const veri = {};
+      let bulunan = 0;
+      for (const alan of Object.keys(YEDEK_ALANLARI)) {
+        const tur = YEDEK_ALANLARI[alan];
+        const v = kaynak[alan];
+        if (v === undefined || v === null) { veri[alan] = tur === 'dizi' ? [] : {}; continue; }
+        bulunan++;
+        const tipUygun = tur === 'dizi' ? Array.isArray(v) : (typeof v === 'object' && !Array.isArray(v));
+        if (!tipUygun) return { hata: 'Yedek dosyasındaki "' + alan + '" alanı beklenen biçimde değil.' };
+        veri[alan] = v;
+      }
+      if (!bulunan) return { hata: 'Bu dosyada sokak/bölge/mahalle verisi bulunamadı.' };
+      return { veri };
+    }
+
+    function yedekPaneliAc() {
+      const body = modalAcGenel('💾 Yedekle / Geri Yükle');
+
+      const b1 = document.createElement('div');
+      b1.className = 'yedek-blok';
+      b1.innerHTML = '<h4>Yedek indir</h4><p>Eklenen/kaldırılan tüm sokak, bölge ve mahalle verisini bir .json dosyası olarak bilgisayarınıza indirir.</p>';
+      const indirBtn = document.createElement('button');
+      indirBtn.type = 'button';
+      indirBtn.className = 'btn-yonetim-ac';
+      indirBtn.textContent = '⬇️ Yedeği indir';
+      indirBtn.onclick = yedekAl;
+      b1.appendChild(indirBtn);
+      body.appendChild(b1);
+
+      const b2 = document.createElement('div');
+      b2.className = 'yedek-blok';
+      b2.innerHTML = '<h4>Yedekten geri yükle</h4><p>Daha önce indirdiğiniz yedek dosyasını seçin. Geri yükleme mevcut ortak verinin yerine geçer ve herkes için geçerli olur.</p>';
+      const dosya = document.createElement('input');
+      dosya.type = 'file';
+      dosya.accept = '.json,application/json';
+      dosya.style.display = 'none';
+      const secBtn = document.createElement('button');
+      secBtn.type = 'button';
+      secBtn.className = 'btn-yonetim-ac';
+      secBtn.textContent = '📂 Yedek dosyası seç';
+      secBtn.onclick = () => dosya.click();
+      const sonuc = document.createElement('div');
+      b2.appendChild(secBtn);
+      b2.appendChild(dosya);
+      b2.appendChild(sonuc);
+      body.appendChild(b2);
+
+      dosya.onchange = () => {
+        const f = dosya.files && dosya.files[0];
+        sonuc.innerHTML = '';
+        if (!f) return;
+        const okuyucu = new FileReader();
+        okuyucu.onload = () => {
+          let paket;
+          try { paket = JSON.parse(okuyucu.result); } catch (e) { paket = null; }
+          const d = yedekDogrula(paket);
+          if (d.hata) {
+            const h = document.createElement('div');
+            h.className = 'yedek-hata';
+            h.textContent = d.hata;
+            sonuc.appendChild(h);
+            return;
+          }
+          const v = d.veri;
+          const mahalleSayisi = Object.values(v.eklenenMahalleler).reduce((t, x) => t + gDizi(x).length, 0);
+          const ozet = document.createElement('div');
+          ozet.className = 'yedek-ozet';
+          const tarih = paket.tarih ? new Date(paket.tarih).toLocaleString('tr-TR') : 'bilinmiyor';
+          ozet.textContent =
+            'Dosya: ' + f.name + '\n' +
+            'Yedek tarihi: ' + tarih + (paket.kullanici ? ' (' + paket.kullanici + ')' : '') + '\n' +
+            'Eklenen sokak: ' + Object.keys(v.eklenenSokaklar).length + ' · Kaldırılan sokak: ' + v.silinenSokaklar.length + '\n' +
+            'Eklenen bölge: ' + v.eklenenBolgeler.length + ' · Kaldırılan bölge: ' + v.silinenBolgeler.length + '\n' +
+            'Eklenen mahalle: ' + mahalleSayisi + ' · Kaldırılan mahalle: ' + v.silinenMahalleler.length;
+          ozet.style.whiteSpace = 'pre-line';
+          const aks = document.createElement('div');
+          aks.className = 'yedek-aksiyonlar';
+          const onay = document.createElement('button');
+          onay.type = 'button';
+          onay.className = 'yonetim-ekle-btn';
+          onay.style.padding = '0.55rem 1.1rem';
+          onay.textContent = 'Geri yükle';
+          onay.onclick = () => yedegiUygula(v, f.name);
+          const vazgec = document.createElement('button');
+          vazgec.type = 'button';
+          vazgec.className = 'btn-yonetim-ac';
+          vazgec.textContent = 'Vazgeç';
+          vazgec.onclick = () => { sonuc.innerHTML = ''; dosya.value = ''; };
+          aks.appendChild(onay);
+          aks.appendChild(vazgec);
+          sonuc.appendChild(ozet);
+          sonuc.appendChild(aks);
+        };
+        okuyucu.onerror = () => {
+          const h = document.createElement('div');
+          h.className = 'yedek-hata';
+          h.textContent = 'Dosya okunamadı.';
+          sonuc.appendChild(h);
+        };
+        okuyucu.readAsText(f);
+      };
+    }
+
+    function yedegiUygula(veri, dosyaAdi) {
+      geriDon();
+      gunlukBastir = true;
+      try {
+        // Ekranın altında kısa süreli "Geri al" şeridi çıkar
+        silmeyiGeriAlinabilirYap(() => {
+          Object.keys(YEDEK_ALANLARI).forEach(alan => paylasimAlaniniKaydet(alan, veri[alan]));
+          paylasimVeriGuncellendi(paylasimliVeri);
+        }, 'Yedek geri yüklendi');
+      } finally {
+        gunlukBastir = false;
+      }
+      gunlukKaydet('Yedekten geri yüklendi (' + dosyaAdi + ')');
+    }
+
+    // ---------- Başlangıç ----------
+    aktifKullanici = kullaniciAdiniOku();
+    kullaniciButonunuGuncelle();
+    if (!aktifKullanici) {
+      kullaniciAdiSor(true);
+    } else if (firebaseAktif) {
+      // Daha önce kaydedilmiş ad varsa, adın hâlâ bu cihaza ait olduğunu doğrula / talep et
+      kullaniciAdiTalepEt(aktifKullanici).then(sonuc => {
+        if (sonuc !== 'dolu') return;
+        aktifKullanici = '';
+        try { localStorage.removeItem(KULLANICI_ANAHTAR); } catch (e) { /* önemsiz */ }
+        kullaniciButonunuGuncelle();
+        kullaniciAdiSor(true);
+        const h = document.getElementById('kullaniciHata');
+        h.textContent = 'Önceki adınız başka biri tarafından alınmış. Lütfen yeni bir ad seçin.';
+        h.style.display = 'block';
+      });
+    }
+  </script>
+
 </body>
 </html>
